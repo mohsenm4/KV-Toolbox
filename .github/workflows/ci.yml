@@ -67,7 +67,7 @@ jobs:
               ls
 
   send-release:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     needs: test-and-build
     steps:
       - name: Checkout code
