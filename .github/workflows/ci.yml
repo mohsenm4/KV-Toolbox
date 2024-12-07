@@ -26,6 +26,9 @@ jobs:
 
       - name : install pckage fyne
         run: go get fyne.io/fyne/v2
+        
+      - name : install pckage fyne2
+        run: go install fyne.io/fyne/v2/cmd/fyne@latest
 
       - name : set address in system
         run: export GOPATH=$HOME/go
