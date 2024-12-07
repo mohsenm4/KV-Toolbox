@@ -88,9 +88,9 @@ jobs:
 
       - name: Create Release
         env:
-          GH_TOKEN: ${{ secrets.PIPELINE_TOKEN_MS }}
+          token: ${{ secrets.PIPELINE_TOKEN_MS }}
         run: |
-          gh release create v1.3.0 ManageDB.app --title "نسخه 1.3.0" --notes ""
+          gh release create v1.3.0 ManageDB.app --title " 1.3.0" --notes ""
 
 
 
