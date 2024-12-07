@@ -80,7 +80,7 @@ jobs:
 
 
       - name : clone github
-        run : git clone https://Mohsen20031203:PIPELINE_TOKEN_MS@github.com/Mohsen20031203/KV-Toolbox.git
+        run : git clone https://Mohsen20031203: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@github.com/Mohsen20031203/KV-Toolbox.git
 
       - name : install CLI
         run : sudo apt-get install gh
