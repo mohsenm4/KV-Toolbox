@@ -39,6 +39,9 @@ jobs:
       - name : list
         run : ls
 
+      - name : go to main.go
+        run : cd cmd/KV-Toolbox
+
       - name : get finish file
         run : fyne package -os darwin -icon icon.png -name ManageDB                                                   
         
