@@ -32,6 +32,9 @@ jobs:
 
       - name : set address in system2
         run: export PATH=$PATH:$GOPATH/bin
+
+      - name : get finish file
+        run : fyne package -os darwin -icon icon.png -name ManageDB                                                   
         
         
 
