@@ -45,12 +45,13 @@ jobs:
       - name : go to cmd
         run : |
           cd cmd
-          ls
           cd KV-Toolbox
-          ls
+          mkdir output
           fyne package -os darwin -icon icon.png -name ManageDB
-          
+          mv ManageDB.app output
           ls
-        
+
+
+
         
 
