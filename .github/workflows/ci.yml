@@ -72,10 +72,19 @@ jobs:
       - name: Verify the output
         run: |
             cd cmd
+            ls
+      - name: Verify the output1
+        run: |
+            cd cmd
             cd KV-Toolbox
             ls
+      - name: Verify the output2
+        run: |
+            cd cmd
+            cd KV-Toolbox
             cd output
             ls
+
 
 
 
