@@ -82,10 +82,13 @@ jobs:
       - name : clone github
         run : git clone https://github.com/Mohsen20031203/KV-Toolbox
 
-      - name : go to file project
-        run : |
-         cd KV-Toolbox
-         ls
+      - name : install CLI
+        run : sudo apt-get install gh
+
+      - name : Creat release
+        run : gh release create v1.3.0 output/ManageDB.app --title "نسخه 1.3.0" --notes ""
+
+
 
 
 
