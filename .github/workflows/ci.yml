@@ -38,6 +38,9 @@ jobs:
 
       - name : list
         run : ls
+
+      - name : type system
+        run : uname -a
         
       - name : go to cmd
         run : |
@@ -45,5 +48,6 @@ jobs:
           ls
           cd KV-Toolbox
           ls
+          fyne package -os darwin -icon icon.png -name ManageDB
         
 
