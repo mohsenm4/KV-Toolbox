@@ -49,5 +49,8 @@ jobs:
           cd KV-Toolbox
           ls
           fyne package -os darwin -icon icon.png -name ManageDB
+          
+          ls
+        
         
 
