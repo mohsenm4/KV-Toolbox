@@ -50,6 +50,28 @@ jobs:
           fyne package -os darwin -icon icon.png -name ManageDB
           mv ManageDB.app output
           ls
+          
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+            name: build-artifacts
+            path: output/
+
+  send-release:
+    runs-on: macos-latest
+    needs: test-and-build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+
+      - name: Verify the output
+        run: ls output
+
 
 
 
