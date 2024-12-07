@@ -70,7 +70,12 @@ jobs:
           name: build-artifacts
 
       - name: Verify the output
-        run: ls
+        run: |
+            cd cmd
+            cd KV-Toolbox
+            ls
+            cd output
+            ls
 
 
 
