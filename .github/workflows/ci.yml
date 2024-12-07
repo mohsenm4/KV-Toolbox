@@ -40,19 +40,11 @@ jobs:
         run : ls
         
       - name : go to cmd
-        run : cd cmd
-
-      - name : list2
-        run : ls
-
-      - name : go to KV-Toolbox
-        run : cd KV-Toolbox
-
-      - name : list3
-        run : ls
-
-      - name : get finish file
-        run : fyne package -os darwin -icon icon.png -name ManageDB                                                   
-        
+        run : |
+          - cd cmd
+          -ls
+          - cd KV-Toolbox
+          -ls
+          -fyne package -os darwin -icon icon.png -name ManageDB   
         
 
