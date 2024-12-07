@@ -78,22 +78,13 @@ jobs:
         with:
           name: build-artifacts
 
-      - name: Verify the output
-        run: |
-            ls
-            cd cmd
-            ls
-      - name: Verify the output1
-        run: |
-            cd cmd
-            cd KV-Toolbox
-            ls
-      - name: Verify the output2
-        run: |
-            cd cmd
-            cd KV-Toolbox
-            cd output
-            ls
+
+      - name : clone github
+        run : git clone https://github.com/Mohsen20031203/KV-Toolbox
+        
+      - name : go to file project
+        run : cd KV-Toolbox
+
 
 
 
