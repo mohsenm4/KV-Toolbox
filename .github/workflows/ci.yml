@@ -24,6 +24,14 @@ jobs:
       - name: Install dependencies
         run: go mod tidy
 
-      - name : pckage fyne
-        run: fyne package -os darwin -icon icon.png -name ManageDB 
+      - name : install pckage fyne
+        run: go get fyne.io/fyne/v2
+
+      - name : set address in system
+        run: export GOPATH=$HOME/go
+
+      - name : set address in system2
+        run: export PATH=$PATH:$GOPATH/bin
+        
+        
 
