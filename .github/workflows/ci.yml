@@ -41,10 +41,10 @@ jobs:
         
       - name : go to cmd
         run : |
-          - cd cmd
-          -ls
-          - cd KV-Toolbox
-          -ls
-          -fyne package -os darwin -icon icon.png -name ManageDB   
+          cd cmd
+          ls
+          cd KV-Toolbox
+          ls
+          fyne package -os darwin -icon icon.png -name ManageDB   
         
 
