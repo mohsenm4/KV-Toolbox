@@ -50,12 +50,21 @@ jobs:
           fyne package -os darwin -icon icon.png -name ManageDB
           mv ManageDB.app output
           ls
+
           
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
             name: build-artifacts
             path: cmd/KV-Toolbox/output/
+
+      - name : go to cmd
+        run : |
+              cd cmd
+              cd KV-Toolbox
+              ls
+              cd output
+              ls
 
   send-release:
     runs-on: macos-latest
