@@ -39,10 +39,16 @@ jobs:
       - name : list
         run : ls
         
-      - name : go to main.go
-        run : cd cmd/KV-Toolbox
+      - name : go to cmd
+        run : cd cmd
 
       - name : list2
+        run : ls
+
+      - name : go to KV-Toolbox
+        run : cd KV-Toolbox
+
+      - name : list3
         run : ls
 
       - name : get finish file
