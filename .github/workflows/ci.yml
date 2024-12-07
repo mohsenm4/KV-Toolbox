@@ -10,7 +10,7 @@ on:
 
 jobs:
   test-and-build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
@@ -35,16 +35,6 @@ jobs:
 
       - name : set address in system2
         run: export PATH=$PATH:$GOPATH/bin
-
-      - name : install xcode
-        run: xcode-select --install
-
-
-      - name : set export
-        run : |
-          export CGO_ENABLED=1
-          export CC=clang
-          export CXX=clang++
 
       - name : list
         run : ls
