@@ -82,6 +82,25 @@ jobs:
         run: |
           zip -r output/macos/ManageDB.zip output/macos/ManageDB.app
 
+      - name: ls
+        run: |
+          cd ls
+      - name: ls
+        run: |
+          cd ls
+      - name: ls
+        run: |
+          cd ls
+      - name: ls
+        run: |
+          cd ls
+      - name: ls
+        run: |
+          cd ls
+      - name: ls
+        run: |
+          cd ls
+
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         with:
