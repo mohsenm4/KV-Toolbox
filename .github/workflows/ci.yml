@@ -28,9 +28,10 @@ jobs:
           cd cmd/KV-Toolbox
           ls
 
-  build-linux:
-    
-    runs-on: ubuntu-22.04
+
+  build-macos:
+
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -40,62 +41,61 @@ jobs:
         with:
           go-version: 1.23.2
 
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-dev xorg-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
-
       - name: Install Fyne CLI
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
 
       - name: Create output directory
         run: mkdir -p cmd/KV-Toolbox/output
 
-      - name: Build for Linux
+      - name: Build for macOS
         run: |
           cd cmd/KV-Toolbox
-          fyne package -os linux -icon icon.png -name ManageDB
-          mv ManageDB.tar.xz output
+          fyne package -os darwin -icon icon.png -name ManageDB
+          mv ManageDB.app output
 
       - name: List output directory
         run: ls cmd/KV-Toolbox/output
 
-      - name: Upload Linux Artifact
+      - name: Upload macOS Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: output-linux
+          name: output-macos
           path: cmd/KV-Toolbox/output
 
   upload-release-asset:
-    needs: build-linux
+    needs: build-macos
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Download Linux Artifact
+      - name: Download macOS Artifact
         uses: actions/download-artifact@v3
         with:
-          name: output-linux
-          path: output/linux
+          name: output-macos
+          path: output/macos
 
       - name: List all outputs
         run: |
 
-          echo "Linux Output:"
-          ls -lh output/linux
+          echo "macOS Output:"
+          ls -lh output/macos
 
       - name : ls
         run : |
-         ls
+         ls 
 
-      - name: Upload Linux Asset
+      - name : ls
+        run : |
+          cd output
+          ls
+          
+      - name: Upload macOS Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: output/linux/ManageDB.tar.xz
-          asset_name: ManageDB.tar.xz
-          asset_content_type: application/x-xz
-
+          asset_path: output/macos/ManageDB.app
+          asset_name: ManageDB.app
+          asset_content_type: application/zip
