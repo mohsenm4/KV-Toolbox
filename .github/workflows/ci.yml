@@ -33,6 +33,16 @@ jobs:
         run: mkdir -p cmd/KV-Toolbox/output
       - name: list
         run: ls
+      - name: list cmd
+        run: |
+         cd cmd
+         ls
+      - name: list KV-Toolbox
+        run: |
+          cd cmd/KV-Toolbox
+          ls
+
+      
 
 
       - name: Build for Linux
@@ -44,17 +54,18 @@ jobs:
 
       - name: Check file size
         run: |
-          ls -lh output/ManageDB.tar.xz
+          ls
+          ls -lh cmd/KV-Toolbox/output/ManageDB.tar.xz
           
 
       - name: List output directory
-        run: ls output
+        run: ls cmd/KV-Toolbox/output
 
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v3
         with:
           name: output-linux
-          path: output
+          path: cmd/KV-Toolbox/output
 
   build-windows:
     needs: build-linux
@@ -75,10 +86,11 @@ jobs:
           fyne version
 
       - name: Create output directory
-        run: mkdir output cmd/KV-Toolbox/output
+        run: mkdir output cmd/KV-Toolbox
 
       - name: Build for Windows
         run: |
+          cd cmd/KV-Toolbox
           fyne package -os windows -icon icon.png -name ManageDB
           mv ManageDB.exe output
 
@@ -147,6 +159,7 @@ jobs:
           
       - name: List all outputs
         run: |
+          cd cmd/KV-Toolbox
                   echo "Linux Output:"
                   ls -lh output/linux
                   echo ""
