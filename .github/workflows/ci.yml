@@ -51,7 +51,8 @@ jobs:
         run: |
           cd cmd/KV-Toolbox
           fyne package -os darwin -icon icon.png -name ManageDB
-          mv ManageDB.app output
+          zip -r ManageDB.zip ManageDB.app
+          mv ManageDB.zip output
 
       - name: List output directory
         run: ls cmd/KV-Toolbox/output
@@ -89,13 +90,13 @@ jobs:
         run : |
           cd output
           ls
-          
+
       - name: Upload macOS Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: output/macos/ManageDB.app
-          asset_name: ManageDB.app
-          asset_content_type: application/zip
+          asset_path: output/macos/ManageDB.zip
+          asset_name: ManageDB.zip
+          asset_content_type: zip
