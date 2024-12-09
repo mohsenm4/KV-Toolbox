@@ -5,10 +5,9 @@ on:
     types:
       - created  
       - edited    
-      - deleted    
-      - prereleased
+
 permissions:
-  contents: read 
+  contents: write 
   actions: write 
   packages: write
   issues: write       
