@@ -28,8 +28,9 @@ jobs:
           cd cmd/KV-Toolbox
           ls
 
-  build-windows:
-    runs-on: windows-latest
+
+  build-macos:
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -40,53 +41,51 @@ jobs:
           go-version: 1.23.2
 
       - name: Install Fyne CLI
-        run: |
-          go install fyne.io/fyne/v2/cmd/fyne@latest
-          echo "C:\Users\runneradmin\go\bin" >> $env:GITHUB_PATH
-          fyne version
+        run: go install fyne.io/fyne/v2/cmd/fyne@latest
 
       - name: Create output directory
         run: mkdir -p cmd/KV-Toolbox/output
 
-      - name: Build for Windows
+      - name: Build for macOS
         run: |
           cd cmd/KV-Toolbox
-          fyne package -os windows -icon icon.png -name ManageDB
-          mv ManageDB.exe output
+          fyne package -os darwin -icon icon.png -name ManageDB
+          mv ManageDB.app output
 
       - name: List output directory
-        run: dir cmd\KV-Toolbox\output
+        run: ls cmd/KV-Toolbox/output
 
-      - name: Upload Windows Artifact
+      - name: Upload macOS Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: output-windows
+          name: output-macos
           path: cmd/KV-Toolbox/output
 
   upload-release-asset:
-    needs: build-windows
+    needs: build-macos
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Download Windows Artifact
+      - name: Download macOS Artifact
         uses: actions/download-artifact@v3
         with:
-          name: output-windows
-          path: output/windows
+          name: output-macos
+          path: output/macos
 
       - name: List all outputs
         run: |
-          echo "Windows Output:"
-          ls -lh output/windows
 
-      - name: Upload Windows Asset
+          echo "macOS Output:"
+          ls -lh output/macos
+
+      - name: Upload macOS Asset
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.EDIT_RELEASE_KV_T }}
+          EDIT_RELEASE_KV_T: ${{ secrets.EDIT_RELEASE_KV_T }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: output/windows/ManageDB.exe
-          asset_name: ManageDB.exe
-          asset_content_type: application/octet-stream
+          asset_path: output/macos/ManageDB.app
+          asset_name: ManageDB.app
+          asset_content_type: application/zip
