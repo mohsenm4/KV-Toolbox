@@ -30,13 +30,15 @@ jobs:
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
 
       - name: Create output directory
-        run: mkdir -p output
+        run: mkdir -p cmd/KV-Toolbox/output
       - name: list
         run: ls
 
 
       - name: Build for Linux
         run: |
+          cd cmd/KV-Toolbox
+          ls
           fyne package -os linux -icon icon.png -name ManageDB
           mv ManageDB.tar.xz output
 
