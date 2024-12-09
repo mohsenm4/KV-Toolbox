@@ -5,8 +5,6 @@ on:
     types:
       - created  
       - edited    
-      - deleted    
-      - prereleased
 
 jobs:
   address-files:
@@ -80,12 +78,16 @@ jobs:
           echo "macOS Output:"
           ls -lh output/macos
 
-      - name: Upload macOS Asset
+      - name: Zip ManageDB.app for macOS
+        run: |
+          zip -r output/macos/ManageDB.zip output/macos/ManageDB.app
+
+      - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
-        env:
-          EDIT_RELEASE_KV_T: ${{ secrets.EDIT_RELEASE_KV_T }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: output/macos/ManageDB.app
-          asset_name: ManageDB.app
+          asset_path: output/macos/ManageDB.zip
+          asset_name: ManageDB.zip
           asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
