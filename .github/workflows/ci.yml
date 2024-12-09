@@ -7,7 +7,13 @@ on:
       - edited    
       - deleted    
       - prereleased
-
+permissions:
+  contents: read 
+  actions: write 
+  packages: write
+  issues: write       
+  pull-requests: write 
+      
 jobs:
   address-files:
     runs-on: ubuntu-22.04
