@@ -9,9 +9,8 @@ on:
       - main
 
 jobs:
-  test-and-build:
-    runs-on: macos-latest
-
+  build-linux:
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -21,82 +20,168 @@ jobs:
         with:
           go-version: 1.23.2
 
-      - name: Install dependencies
-        run: go mod tidy
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev xorg-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
 
-      - name : install pckage fyne
-        run: go get fyne.io/fyne/v2
 
-      - name : install pckage fyne2
+      - name: Install Fyne CLI
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
 
-      - name : set address in system
-        run: export GOPATH=$HOME/go
+      - name: Create output directory
+        run: mkdir -p output
+      - name: list
+        run: ls
 
-      - name : set address in system2
-        run: export PATH=$PATH:$GOPATH/bin
 
-      - name : list
-        run : ls
+      - name: Build for Linux
+        run: |
+          fyne package -os linux -icon icon.png -name ManageDB
+          mv ManageDB.tar.xz output
 
-      - name : type system
-        run : uname -a
-        
-      - name : go to cmd
-        run : |
-          cd cmd
-          cd KV-Toolbox
-          mkdir output
-          fyne package -os darwin -icon icon.png -name ManageDB
-          mv ManageDB.app output
-          ls
-
+      - name: Check file size
+        run: |
+          ls -lh output/ManageDB.tar.xz
           
-      - name: Upload build artifacts
+
+      - name: List output directory
+        run: ls output
+
+      - name: Upload Linux Artifact
         uses: actions/upload-artifact@v3
         with:
-            name: build-artifacts
-            path: cmd/KV-Toolbox/output/
+          name: output-linux
+          path: output
 
-      - name : go to cmd
-        run : |
-              cd cmd
-              cd KV-Toolbox
-              ls
-              cd output
-              ls
-
-  send-release:
-    runs-on: ubuntu-latest
-    needs: test-and-build
+  build-windows:
+    needs: build-linux
+    runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Download build artifacts
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.23.2
+
+      - name: Install Fyne CLI
+        run: |
+          go install fyne.io/fyne/v2/cmd/fyne@latest
+          echo "C:\Users\runneradmin\go\bin" >> $env:GITHUB_PATH
+          fyne version
+
+      - name: Create output directory
+        run: mkdir output
+
+      - name: Build for Windows
+        run: |
+          fyne package -os windows -icon icon.png -name ManageDB
+          mv ManageDB.exe output
+
+      - name: List output directory
+        run: dir output
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: output-windows
+          path: output
+
+  build-macos:
+    needs: build-windows
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.23.2
+
+      - name: Install Fyne CLI
+        run: go install fyne.io/fyne/v2/cmd/fyne@latest
+
+      - name: Create output directory
+        run: mkdir -p output
+
+      - name: Build for macOS
+        run: |
+          fyne package -os darwin -icon icon.png -name ManageDB
+          mv ManageDB.app output
+
+      - name: List output directory
+        run: ls output
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: output-macos
+          path: output
+
+  create-report:
+    needs: build-macos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Linux Artifact
         uses: actions/download-artifact@v3
         with:
-          name: build-artifacts
-
-
-      - name : clone github
-        run : git clone https://Mohsen20031203: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@github.com/Mohsen20031203/KV-Toolbox.git
-
-      - name : install CLI
-        run : sudo apt-get install gh
-
-
-      - name: Create Release
-        env:
-          token: ${{ secrets.PIPELINE_TOKEN_MS }}
+            name: output-linux
+            path: output/linux
+          
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v3
+        with:
+            name: output-windows
+            path: output/windows
+          
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@v3
+        with:
+                  name: output-macos
+                  path: output/macos
+          
+      - name: List all outputs
         run: |
-          gh release create v1.3.0 ManageDB.app --title " 1.3.0" --notes ""
+                  echo "Linux Output:"
+                  ls -lh output/linux
+                  echo ""
+                  echo "Windows Output:"
+                  ls -lh output/windows
+                  echo ""
+                  echo "macOS Output:"
+                  ls -lh output/macos
+          
+      - name: Log Linux Build Info
+        run: |
+          echo "Linux Build:"
+          if [ -f output/linux/ManageDB.tar.xz ]; then
+            ls -lh output/linux/ManageDB.tar.xz
+            tar -tf output/linux/ManageDB.tar.xz
+          else
+            echo "Error: Linux build file not found!"
+            exit 1
+          fi
 
+      - name: Log Windows Build Info
+        run: |
+          echo "Windows Build:"
+          if [ -f output/windows/ManageDB.exe ]; then
+            ls -lh output/windows/ManageDB.exe
+          else
+            echo "Error: Windows build file not found!"
+            exit 1
+          fi
 
-
-
-
-
-
-        
+      - name: Log macOS Build Info
+        run: |
+          echo "macOS Build:"
+          if [ -d output/macos/ManageDB.app ]; then
+            ls -lh output/macos/ManageDB.app
+          else
+            echo "Error: macOS build file not found!"
+            exit 1
+          fi
 
