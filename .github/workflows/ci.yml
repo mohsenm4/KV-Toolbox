@@ -1,12 +1,9 @@
 name: Go CI
 
 on:
-  push:
-    branches:
-      - Create-pipeline
-  pull_request:
-    branches:
-      - main
+  release:
+    types:
+      - published
 
 jobs:
   address-files:
@@ -134,10 +131,13 @@ jobs:
           name: output-linux
           path: cmd/KV-Toolbox/output
 
-  create-report:
+  upload-release-asset:
     needs: build-linux
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Download Windows Artifact
         uses: actions/download-artifact@v3
         with:
@@ -166,3 +166,34 @@ jobs:
           echo ""
           echo "Linux Output:"
           ls -lh output/linux
+
+      - name: Upload macOS Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.EDIT_RELEASE_KV_T }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: output/macos/ManageDB.app
+          asset_name: ManageDB.app
+          asset_content_type: application/zip
+
+      - name: Upload Windows Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.EDIT_RELEASE_KV_T }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: output/windows/ManageDB.exe
+          asset_name: ManageDB.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.EDIT_RELEASE_KV_T }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: output/linux/ManageDB.tar.xz
+          asset_name: ManageDB.tar.xz
+          asset_content_type: application/x-xz
+
