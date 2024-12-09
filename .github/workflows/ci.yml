@@ -68,6 +68,82 @@ jobs:
           name: output-macos
           path: cmd/KV-Toolbox/output
 
+  build-windows:
+    runs-on: windows-latest
+    needs: build-macos
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.23.2
+
+      - name: Install Fyne CLI
+        run: |
+          go install fyne.io/fyne/v2/cmd/fyne@latest
+          echo "C:\Users\runneradmin\go\bin" >> $env:GITHUB_PATH
+          fyne version
+
+      - name: Create output directory
+        run: mkdir -p cmd/KV-Toolbox/output
+
+      - name: Build for Windows
+        run: |
+          cd cmd/KV-Toolbox
+          fyne package -os windows -icon icon.png -name ManageDB
+          mv ManageDB.exe output
+
+      - name: List output directory
+        run: dir cmd\KV-Toolbox\output
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: output-windows
+          path: cmd/KV-Toolbox/output
+
+  build-linux:
+    needs: [build-windows, build-macos]
+    
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.23.2
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev xorg-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev
+
+      - name: Install Fyne CLI
+        run: go install fyne.io/fyne/v2/cmd/fyne@latest
+
+      - name: Create output directory
+        run: mkdir -p cmd/KV-Toolbox/output
+
+      - name: Build for Linux
+        run: |
+          cd cmd/KV-Toolbox
+          fyne package -os linux -icon icon.png -name ManageDB
+          mv ManageDB.tar.xz output
+
+      - name: List output directory
+        run: ls cmd/KV-Toolbox/output
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: output-linux
+          path: cmd/KV-Toolbox/output
+
+
   upload-release-asset:
     needs: build-macos
     runs-on: ubuntu-latest
@@ -81,20 +157,28 @@ jobs:
           name: output-macos
           path: output/macos
 
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: output-windows
+          path: output/windows
+
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: output-linux
+          path: output/linux
+
       - name: List all outputs
         run: |
-
-          echo "macOS Output:"
-          ls -lh output/macos
-
-      - name : ls
-        run : |
-         ls 
-
-      - name : ls
-        run : |
-          cd output
-          ls
+         echo "macOS Output:"
+         ls -lh output/macos
+         echo ""
+         echo "Windows Output:"
+         ls -lh output/windows
+         echo ""
+         echo "Linux Output:"
+         ls -lh output/linux
 
       - name: Upload macOS Asset
         uses: actions/upload-release-asset@v1
@@ -105,3 +189,25 @@ jobs:
           asset_path: output/macos/ManageDB.zip
           asset_name: ManageDB.zip
           asset_content_type: zip
+
+
+      - name : Upload windows Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: output/windows/ManageDB.exe
+          asset_name: ManageDB.exe
+          asset_content_type: application/octet-stream
+  
+
+      - name: Upload Linux Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: output/linux/ManageDB.tar.xz
+          asset_name: ManageDB.tar.xz
+          asset_content_type: application/x-xz  
