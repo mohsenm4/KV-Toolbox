@@ -90,4 +90,5 @@ jobs:
           asset_name: ManageDB.zip
           asset_content_type: application/zip
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.EDIT_RELEASE_KV_T }}
+
