@@ -144,9 +144,9 @@ jobs:
           path: cmd/KV-Toolbox/output
 
 
-  upload-release-asset:
-    needs: build-linux
-    runs-on: ubuntu-latest
+  upload-release-macos:
+    needs: build-macos
+    runs-on : macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -157,28 +157,10 @@ jobs:
           name: output-macos
           path: output/macos
 
-      - name: Download Windows Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: output-windows
-          path: output/windows
-
-      - name: Download Linux Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: output-linux
-          path: output/linux
-
       - name: List all outputs
         run: |
          echo "macOS Output:"
          ls -lh output/macos
-         echo ""
-         echo "Windows Output:"
-         ls -lh output/windows
-         echo ""
-         echo "Linux Output:"
-         ls -lh output/linux
 
       - name: Upload macOS Asset
         uses: actions/upload-release-asset@v1
@@ -190,6 +172,23 @@ jobs:
           asset_name: ManageDB.zip
           asset_content_type: zip
 
+  upload-release-windows:
+    needs: build-windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: output-windows
+          path: output/windows
+
+      - name: List all outputs
+        run: |
+         echo "Windows Output:"
+         ls -lh output/windows
 
       - name : Upload windows Asset
         uses: actions/upload-release-asset@v1
@@ -201,6 +200,21 @@ jobs:
           asset_name: ManageDB.exe
           asset_content_type: application/octet-stream
   
+
+  upload-release-linux:
+    needs: build-linux
+    runs-on: build-linux
+    steps:
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: output-linux
+          path: output/linux
+
+      - name: List all outputs
+        run: |
+         echo "Linux Output:"
+         ls -lh output/linux
 
       - name: Upload Linux Asset
         uses: actions/upload-release-asset@v1
