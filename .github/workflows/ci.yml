@@ -185,11 +185,6 @@ jobs:
           name: output-windows
           path: output/windows
 
-      - name: List all outputs
-        run: |
-         echo "Windows Output:"
-         ls -lh output/windows
-
       - name : Upload windows Asset
         uses: actions/upload-release-asset@v1
         env:
@@ -199,29 +194,39 @@ jobs:
           asset_path: output/windows/ManageDB.exe
           asset_name: ManageDB.exe
           asset_content_type: application/octet-stream
-  
+          
+      - name: List all outputs
+        run: |
+          echo "Windows Output:"
+          Get-ChildItem output/windows | Format-Table -Property Name,Length
+
+
 
   upload-release-linux:
     needs: build-linux
-    runs-on: build-linux
+    runs-on: ubuntu-latest
     steps:
-      - name: Download Linux Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: output-linux
-          path: output/linux
+    - name: Download Linux Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: output-linux
+        path: output/linux
 
-      - name: List all outputs
-        run: |
-         echo "Linux Output:"
-         ls -lh output/linux
+    - name: List all outputs
+      run: |
+        echo "Linux Output:"
+        ls -lh output/linux
 
-      - name: Upload Linux Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: output/linux/ManageDB.tar.xz
-          asset_name: ManageDB.tar.xz
-          asset_content_type: application/x-xz  
+    - name: Install GitHub CLI
+      run: sudo apt-get install -y gh
+
+    - name: Authenticate GitHub CLI
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
+
+    - name: Upload Linux Asset
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release upload ${{ github.event.release.tag_name }} output/linux/ManageDB.tar.xz --clobber
