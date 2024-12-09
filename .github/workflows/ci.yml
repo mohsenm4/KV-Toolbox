@@ -75,7 +75,7 @@ jobs:
           fyne version
 
       - name: Create output directory
-        run: mkdir output
+        run: mkdir output cmd/KV-Toolbox/output
 
       - name: Build for Windows
         run: |
@@ -107,7 +107,7 @@ jobs:
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
 
       - name: Create output directory
-        run: mkdir -p output
+        run: mkdir -p output cmd/KV-Toolbox/output
 
       - name: Build for macOS
         run: |
