@@ -93,7 +93,7 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: output/macos/ManageDB.zip
-          asset_name: ManageDB.zip
+          asset_name: ManageDB-mac.zip
           asset_content_type: zip
 
   build-windows:
@@ -152,7 +152,7 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: output/windows/ManageDB.exe
-          asset_name: ManageDB.exe
+          asset_name: ManageDB-windows.exe
           asset_content_type: application/octet-stream
   
       - name: List all outputs
@@ -201,7 +201,7 @@ jobs:
 
   upload-release-linux:
     needs: build-linux
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latestک
     steps:
       - name: Download Linux Artifact
         uses: actions/download-artifact@v3
@@ -221,5 +221,5 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: output/linux/ManageDB.tar.xz
-          asset_name: ManageDB.tar.xz
+          asset_name: ManageDB-linux.tar.xz
           asset_content_type: application/x-xz  
