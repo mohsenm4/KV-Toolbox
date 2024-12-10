@@ -201,7 +201,7 @@ jobs:
 
   upload-release-linux:
     needs: build-linux
-    runs-on: ubuntu-latestک
+    runs-on: ubuntu-latest
     steps:
       - name: Download Linux Artifact
         uses: actions/download-artifact@v3
