@@ -29,25 +29,37 @@ func HandleButtonClick(test string, nameDatabace string) error {
 	return nil
 }
 
-func SearchDatabase(valueEntry string) ([][]byte, error) {
+func SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
 
+	var values [][]byte
 	err := variable.CurrentDBClient.Open()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer variable.CurrentDBClient.Close()
 
 	key := utils.CleanInput(valueEntry)
-	err, data := variable.CurrentDBClient.Search([]byte(key))
+	err, keys := variable.CurrentDBClient.Search([]byte(key))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	if len(data) == 0 {
-		return nil, err
+	if len(keys) == 0 {
+		return nil, nil, err
 	}
 
-	return data, nil
+	for _, item := range keys {
+		value, err := variable.CurrentDBClient.Get(item)
+		if err != nil {
+			return nil, nil, err
+		}
+		value1 := make([]byte, len(value))
+		copy(value1, value)
+
+		values = append(values, value1)
+	}
+
+	return keys, values, nil
 }
 
 func DeleteKeyLogic(valueEntry string) error {

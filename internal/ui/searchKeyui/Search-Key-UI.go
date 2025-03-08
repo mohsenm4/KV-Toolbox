@@ -24,48 +24,30 @@ func SearchKeyUi(rightColumnContent *fyne.Container, columnEditKey *fyne.Contain
 
 	buttomSearch := widget.NewButton("Search", func() {
 
-		data, err := logic.SearchDatabase(valueEntry.Text)
+		keys, values, err := logic.SearchDatabase(valueEntry.Text)
 		if err != nil {
 			dialog.ShowInformation("Error", "Such a key is not available in the database", editWindow)
 		}
 
-		err = variable.CurrentDBClient.Open()
-		if err != nil {
-			dialog.ShowInformation("Error", err.Error(), editWindow)
-
-		}
-		defer variable.CurrentDBClient.Close()
-
 		utils.CheckCondition(columnEditKey)
 		utils.CheckCondition(rightColumnContent)
 		var truncatedValue string
-		var count int
 
-		for _, item := range data {
-
-			if count > 40 {
+		for i := 0; i < len(values); i++ {
+			if i > 40 {
 				dialog.ShowInformation("Error", "The result of your keys is more than 60 and I will only show the first 60.If your key is not among these, please search more precisely.", mainWindow)
-				count = 0
 				break
 			}
-			count++
+			truncatedKey := utils.TruncateString(string(keys[i]), 20)
 
-			value, err := variable.CurrentDBClient.Get(item)
-			if err != nil {
-				return
-			}
-			truncatedKey := utils.TruncateString(string(item), 20)
-
-			typeValue := mimetype.Detect([]byte(value))
+			typeValue := mimetype.Detect(values[i])
 			if typeValue.Extension() != ".txt" {
 				truncatedValue = fmt.Sprintf("* %s . . .", typeValue.Extension())
 			} else {
-				truncatedValue = utils.TruncateString(string(value), 20)
-
+				truncatedValue = utils.TruncateString(string(values[i]), 20)
 			}
-
-			valueLabel := logic.BuidLableKeyAndValue("value", item, value, truncatedValue, rightColumnContent, columnEditKey, saveKey, mainWindow)
-			keyLabel := logic.BuidLableKeyAndValue("key", item, value, truncatedKey, rightColumnContent, columnEditKey, saveKey, mainWindow)
+			valueLabel := logic.BuidLableKeyAndValue("value", keys[i], values[i], truncatedValue, rightColumnContent, columnEditKey, saveKey, mainWindow)
+			keyLabel := logic.BuidLableKeyAndValue("key", keys[i], values[i], truncatedKey, rightColumnContent, columnEditKey, saveKey, mainWindow)
 
 			rightColumnContent.Refresh()
 			buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)

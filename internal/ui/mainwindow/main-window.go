@@ -101,12 +101,12 @@ func MainWindow(myApp fyne.App) {
 	leftColumnAll := logic.SetupLastColumn(rightColumnAll, nameButtonProject, buttonAdd, rightColumEdit, saveEditKey, mainWindow)
 	spacer.Resize(fyne.NewSize(0, 30))
 
-	for _, m := range variable.NameDatabase {
+	for _, name := range variable.NameDatabase {
 
-		leveldbButton = widget.NewButton(m, func() {
+		leveldbButton = widget.NewButton(name, func() {
 			toggleButtonsContainer.Objects = nil
 			buttonsVisible = false
-			switch m {
+			switch name {
 			case "levelDB":
 				variable.NameData = FilterLeveldb.NewFileterLeveldb()
 			case "Pebble":
@@ -117,7 +117,7 @@ func MainWindow(myApp fyne.App) {
 				//	variable.NameData = Filterredis.NewFileterRedis()
 
 			}
-			variable.NameData.FormCreate(myApp, m, leftColumnAll, rightColumnAll, nameButtonProject, buttonAdd, rightColumEdit, saveEditKey, mainWindow)
+			variable.NameData.FormCreate(myApp, name, leftColumnAll, rightColumnAll, nameButtonProject, buttonAdd, rightColumEdit, saveEditKey, mainWindow)
 		})
 		BottomDatabase = append(BottomDatabase, leveldbButton)
 	}
