@@ -95,7 +95,8 @@ func OpenWindowAddButton(myApp fyne.App, rightColumnContent *fyne.Container) {
 		err := logic.AddKeyLogic(iputKey.Text, valueFinish)
 		if err != nil {
 			dialog.ShowInformation("Error", err.Error(), windowAdd)
-
+		} else {
+			windowAdd.Close()
 		}
 	})
 	ButtonAddAdd.Importance = widget.HighImportance

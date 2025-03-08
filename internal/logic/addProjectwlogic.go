@@ -4,14 +4,7 @@ import (
 	variable "DatabaseDB"
 	"DatabaseDB/internal/utils"
 	"fmt"
-
 	// "DatabaseDB/internal/logic/mainwindowlagic"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/widget"
-	"github.com/gabriel-vasile/mimetype"
 )
 
 func HandleButtonClick(test string, nameDatabace string) error {
@@ -36,59 +29,25 @@ func HandleButtonClick(test string, nameDatabace string) error {
 	return nil
 }
 
-func SearchDatabase(valueEntry *widget.Entry, editWindow fyne.Window, rightColumnContent *fyne.Container, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) (bool, error) {
+func SearchDatabase(valueEntry string) ([][]byte, error) {
 
 	err := variable.CurrentDBClient.Open()
 	if err != nil {
-		return false, err
-	}
-
-	key := utils.CleanInput(valueEntry.Text)
-	err, data := variable.CurrentDBClient.Search([]byte(key))
-	if err != nil {
-		return false, err
+		return nil, err
 	}
 	defer variable.CurrentDBClient.Close()
 
+	key := utils.CleanInput(valueEntry)
+	err, data := variable.CurrentDBClient.Search([]byte(key))
+	if err != nil {
+		return nil, err
+	}
+
 	if len(data) == 0 {
-		return false, err
+		return nil, err
 	}
-	utils.CheckCondition(columnEditKey)
-	utils.CheckCondition(rightColumnContent)
-	var truncatedValue string
-	var count int
-	for _, item := range data {
 
-		if count > 40 {
-			dialog.ShowInformation("Error", "The result of your keys is more than 60 and I will only show the first 60.If your key is not among these, please search more precisely.", mainWindow)
-			count = 0
-			break
-		}
-		count++
-
-		value, err := variable.CurrentDBClient.Get(item)
-		if err != nil {
-			return false, err
-		}
-		truncatedKey := utils.TruncateString(string(item), 20)
-
-		typeValue := mimetype.Detect([]byte(value))
-		if typeValue.Extension() != ".txt" {
-			truncatedValue = fmt.Sprintf("* %s . . .", typeValue.Extension())
-		} else {
-			truncatedValue = utils.TruncateString(string(value), 20)
-
-		}
-
-		valueLabel := BuidLableKeyAndValue("value", item, value, truncatedValue, rightColumnContent, columnEditKey, saveKey, mainWindow)
-		keyLabel := BuidLableKeyAndValue("key", item, value, truncatedKey, rightColumnContent, columnEditKey, saveKey, mainWindow)
-
-		rightColumnContent.Refresh()
-		buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
-		rightColumnContent.Add(buttonRow)
-	}
-	editWindow.Close()
-	return true, nil
+	return data, nil
 }
 
 func DeleteKeyLogic(valueEntry string) error {
@@ -101,16 +60,17 @@ func DeleteKeyLogic(valueEntry string) error {
 
 	key := utils.CleanInput(valueEntry)
 
-	err = QueryKey(valueEntry)
-	if err != nil {
-		return fmt.Errorf("This key does not exist in the database")
-		//dialog.ShowInformation("Error", "This key does not exist in the database", editWindow)
-	} else {
+	value := QueryKey(valueEntry)
+	if value != nil {
+
 		err = variable.CurrentDBClient.Delete([]byte(key))
 		if err != nil {
 			return err
 		}
 		return nil
+	} else {
+		return fmt.Errorf("This key does not exist in the database")
+		//dialog.ShowInformation("Error", "This key does not exist in the database", editWindow)
 	}
 }
 
@@ -124,8 +84,8 @@ func AddKeyLogic(iputKey string, valueFinish []byte) error {
 	}
 	defer variable.CurrentDBClient.Close()
 
-	err = QueryKey(iputKey)
-	if err == nil {
+	value := QueryKey(iputKey)
+	if value != nil {
 		//dialog.ShowInformation("Error", "This key has already been added to your database", windowAdd)
 		return fmt.Errorf("This key has already been added to your database")
 	} else {
@@ -139,13 +99,13 @@ func AddKeyLogic(iputKey string, valueFinish []byte) error {
 
 }
 
-func QueryKey(iputKey string) error {
+func QueryKey(iputKey string) []byte {
 
 	key := utils.CleanInput(iputKey)
 
-	_, err := variable.CurrentDBClient.Get([]byte(key))
+	value, err := variable.CurrentDBClient.Get([]byte(key))
 	if err != nil {
 		fmt.Println("error : delete func logic for get key in databace")
 	}
-	return err
+	return value
 }
