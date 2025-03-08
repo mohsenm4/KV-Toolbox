@@ -2,9 +2,11 @@ package logic
 
 import (
 	variable "DatabaseDB"
+	dbpak "DatabaseDB/internal/Databaces"
 	"DatabaseDB/internal/utils"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/gabriel-vasile/mimetype"
@@ -171,4 +173,72 @@ func UpdateKey(oldKey, newKey []byte) error {
 
 	newKey = []byte(utils.CleanInput(string(newKey)))
 	return variable.CurrentDBClient.Add(newKey, valueBefore)
+}
+
+func FetchPageData(lastStart *[]byte, lastEnd *[]byte, lastPage int, Orgdata []dbpak.KVData) ([]dbpak.KVData, error) {
+
+	var data = make([]dbpak.KVData, 0)
+
+	err := variable.CurrentDBClient.Open()
+	if err != nil {
+		return data, err
+	}
+	defer variable.CurrentDBClient.Close()
+
+	if lastEnd == nil && lastStart == nil {
+		Orgdata = Orgdata[:0]
+	}
+	if lastPage < variable.CurrentPage {
+
+		//next page
+
+		//The reason why "variable.ItemsPerPage" is added by one is that we want to see if the next pages have a value to enable or disable the next or prev key.
+		err, data = variable.CurrentDBClient.Read(lastEnd, nil, variable.ItemsPerPage+1)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		if len(data) == variable.ItemsPerPage+1 {
+			data = data[:variable.ItemsPerPage]
+			variable.ItemsAdded = true
+
+		} else {
+			variable.ItemsAdded = false
+
+		}
+		if len(data) == 0 {
+			return data, err
+		}
+	} else {
+
+		//The reason why "variable.ItemsPerPage" is added by one is that we want to see if the next pages have a value to enable or disable the next or prev key.
+		err, data = variable.CurrentDBClient.Read(nil, lastStart, variable.ItemsPerPage+1)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		if len(data) == variable.ItemsPerPage+1 {
+			data = data[1:]
+			variable.ItemsAdded = true
+		}
+		if len(data) == 0 {
+			return data, err
+		}
+
+	}
+	return data, nil
+}
+
+func FormatKeyValue(item dbpak.KVData) (string, string) {
+	truncatedKey := utils.TruncateString(string(item.Key), 20)
+
+	typeValue := mimetype.Detect(item.Value)
+	var truncatedValue string
+	if typeValue.Extension() != ".txt" {
+		truncatedValue = fmt.Sprintf("* %s . . .", typeValue.Extension())
+	} else {
+		truncatedValue = utils.TruncateString(string(item.Value), 30)
+	}
+
+	return truncatedKey, truncatedValue
 }

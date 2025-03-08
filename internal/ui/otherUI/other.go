@@ -22,8 +22,8 @@ import (
 var (
 	lastStart             *[]byte
 	lastEnd               *[]byte
-	Orgdata               []dbpak.KVData
 	lastPage              int
+	Orgdata               []dbpak.KVData
 	previousClose         *widget.Button
 	previousProject       *widget.Button
 	previousRefreshButton *widget.Button
@@ -80,37 +80,13 @@ func SetupThemeButtons(app fyne.App) *fyne.Container {
 
 func UpdatePage(rightColumnContent *fyne.Container, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) {
 
-	var data = make([]dbpak.KVData, 0)
-	var err error
-	err = variable.CurrentDBClient.Open()
+	data, err := logic.FetchPageData(lastStart, lastEnd, lastPage, Orgdata)
 	if err != nil {
 		return
 	}
-	defer variable.CurrentDBClient.Close()
 
-	if lastEnd == nil && lastStart == nil {
-		Orgdata = Orgdata[:0]
-	}
 	if lastPage < variable.CurrentPage {
-		//next page
 
-		//The reason why "variable.ItemsPerPage" is added by one is that we want to see if the next pages have a value to enable or disable the next or prev key.
-		err, data = variable.CurrentDBClient.Read(lastEnd, nil, variable.ItemsPerPage+1)
-		if err != nil {
-			log.Println(err.Error())
-		}
-
-		if len(data) == variable.ItemsPerPage+1 {
-			data = data[:variable.ItemsPerPage]
-			variable.ItemsAdded = true
-
-		} else {
-			variable.ItemsAdded = false
-
-		}
-		if len(data) == 0 {
-			return
-		}
 		if len(rightColumnContent.Objects) >= variable.ItemsPerPage*3 {
 			Orgdata = Orgdata[len(data):]
 		}
@@ -118,19 +94,6 @@ func UpdatePage(rightColumnContent *fyne.Container, columnEditKey *fyne.Containe
 		Orgdata = append(Orgdata, data...)
 	} else {
 
-		//The reason why "variable.ItemsPerPage" is added by one is that we want to see if the next pages have a value to enable or disable the next or prev key.
-		err, data = variable.CurrentDBClient.Read(nil, lastStart, variable.ItemsPerPage+1)
-		if err != nil {
-			log.Println(err.Error())
-		}
-
-		if len(data) == variable.ItemsPerPage+1 {
-			data = data[1:]
-			variable.ItemsAdded = true
-		}
-		if len(data) == 0 {
-			return
-		}
 		Orgdata = Orgdata[:len(Orgdata)-len(data)]
 		Orgdata = append(data, Orgdata...)
 
