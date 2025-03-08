@@ -2,8 +2,10 @@ package otherUI
 
 import (
 	variable "DatabaseDB"
+	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	// "DatabaseDB/internal/logic/addProjectwindowlogic"
 
@@ -103,19 +105,12 @@ func UpdatePage(rightColumnContent *fyne.Container, columnEditKey *fyne.Containe
 	lastEnd = &Orgdata[len(Orgdata)-1].Key
 
 	var truncatedValue string
+	var truncatedKey string
+
 	var arrayContainer []fyne.CanvasObject
 	for _, item := range data {
 
-		truncatedKey := utils.TruncateString(string(item.Key), 20)
-
-		typeValue := mimetype.Detect(item.Value)
-		if typeValue.Extension() != ".txt" {
-
-			truncatedValue = fmt.Sprintf("* %s . . .", typeValue.Extension())
-		} else {
-			truncatedValue = utils.TruncateString(string(item.Value), 30)
-
-		}
+		truncatedKey, truncatedValue = logic.FormatKeyValue(item)
 
 		valueLabel := BuidLableKeyAndValue("value", item.Key, item.Value, truncatedValue, rightColumnContent, columnEditKey, saveKey, mainWindow)
 		keyLabel := BuidLableKeyAndValue("key", item.Key, item.Value, truncatedKey, rightColumnContent, columnEditKey, saveKey, mainWindow)
@@ -238,6 +233,8 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 	var label *utils.TappableLabel
 	var valueEntry *widget.Entry
 	var truncatedText string
+	var err error
+	var truncatedKey2 string
 
 	label = utils.NewTappableLabel(nameLabel, func() {
 		if lastLableKeyAndValue != nil {
@@ -249,33 +246,56 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 		lastLableKeyAndValue = label
 
 		utils.CheckCondition(columnEditKey)
+		typeValue := mimetype.Detect([]byte(value))
+
 		columnEditKey.Add(widget.NewLabel(fmt.Sprintf("Edit %s - %s", editType, nameLabel)))
 
 		if editType == "value" {
-			processedValue, err := logic.ProcessValue(value)
-			if err == nil {
-				value = processedValue
+
+			switch {
+			case strings.HasPrefix(typeValue.String(), "image/"):
+				go utils.ImageShow([]byte(key), []byte(value), columnEditKey, mainWindow)
+				truncatedKey2 = fmt.Sprintf("* %s . . .", typeValue.Extension())
+
+			case strings.HasPrefix(typeValue.String(), "text/") || strings.HasPrefix(typeValue.String(), "application/"):
+				if strings.HasPrefix(typeValue.String(), "application/json") {
+					var result json.RawMessage
+
+					err := json.Unmarshal([]byte(value), &result)
+					if err != nil {
+						return
+					}
+					prettyJSON, err := json.MarshalIndent(result, "", "  ")
+					if err != nil {
+						return
+					}
+					value = prettyJSON
+
+				}
+				valueEntry = configureEntry(columnEditKey, string(value))
+				value = []byte(valueEntry.Text)
+
 			}
 
-			valueEntry = configureEntry(columnEditKey, string(value))
 		} else {
+
 			valueEntry = configureEntry(columnEditKey, string(key))
 		}
 
 		saveKey.OnTapped = func() {
 			if editType == "value" {
-				err := logic.SaveValue(key, []byte(valueEntry.Text), true)
+				truncatedKey2, err = logic.SaveValue(key, []byte(valueEntry.Text))
 				if err != nil {
 					fmt.Println(err.Error())
 				}
 			} else {
-				err := logic.UpdateKey(key, []byte(valueEntry.Text))
+				truncatedKey2, err = logic.UpdateKey(key, []byte(valueEntry.Text))
 				if err != nil {
 					fmt.Println(err.Error())
 				}
 			}
 
-			truncatedText = utils.TruncateString(valueEntry.Text, 20)
+			truncatedText = utils.TruncateString(truncatedKey2, 20)
 			label.SetText(truncatedText)
 			label.Refresh()
 		}

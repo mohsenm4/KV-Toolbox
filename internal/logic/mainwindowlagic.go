@@ -4,10 +4,8 @@ import (
 	variable "DatabaseDB"
 	dbpak "DatabaseDB/internal/Databaces"
 	"DatabaseDB/internal/utils"
-	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/gabriel-vasile/mimetype"
 	// "DatabaseDB/internal/logic/mainwindowlagic"
@@ -128,51 +126,38 @@ func QueryKey(iputKey string) []byte {
 	return value
 }
 
-func ProcessValue(value []byte) ([]byte, error) {
-	typeValue := mimetype.Detect(value)
-	if strings.HasPrefix(typeValue.String(), "application/json") {
-		var result json.RawMessage
-		err := json.Unmarshal(value, &result)
-		if err != nil {
-			return nil, err
-		}
-		return json.MarshalIndent(result, "", "  ")
-	}
-	return value, nil
-}
-
-func SaveValue(key, value []byte, isText bool) error {
+func SaveValue(key, value []byte) (string, error) {
 	err := variable.CurrentDBClient.Open()
 	if err != nil {
-		return fmt.Errorf("error opening database: %w", err)
+		return "", fmt.Errorf("error opening database: %w", err)
 	}
 	defer variable.CurrentDBClient.Close()
 
-	if isText {
-		value = []byte(utils.TruncateString(string(value), 30))
-	}
-
-	return variable.CurrentDBClient.Add(key, value)
+	return string(value), variable.CurrentDBClient.Add(key, value)
 }
 
-func UpdateKey(oldKey, newKey []byte) error {
+func UpdateKey(oldKey, newKey []byte) (string, error) {
 	err := variable.CurrentDBClient.Open()
 	if err != nil {
-		return fmt.Errorf("error opening database: %w", err)
+		return "", fmt.Errorf("error opening database: %w", err)
 	}
 	defer variable.CurrentDBClient.Close()
 
 	valueBefore, err := variable.CurrentDBClient.Get(oldKey)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if err := variable.CurrentDBClient.Delete(oldKey); err != nil {
-		return err
+		return "", err
 	}
 
 	newKey = []byte(utils.CleanInput(string(newKey)))
-	return variable.CurrentDBClient.Add(newKey, valueBefore)
+	if err := variable.CurrentDBClient.Add(newKey, valueBefore); err != nil {
+		return "", err
+	}
+
+	return string(newKey), nil
 }
 
 func FetchPageData(lastStart *[]byte, lastEnd *[]byte, lastPage int, Orgdata []dbpak.KVData) ([]dbpak.KVData, error) {
