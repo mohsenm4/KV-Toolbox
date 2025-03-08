@@ -132,7 +132,6 @@ func UpdatePage(rightColumnContent *fyne.Container, columnEditKey *fyne.Containe
 
 	}
 
-	data = data[:0]
 	rightColumnContent.Refresh()
 	lastPage = variable.CurrentPage
 }
