@@ -148,7 +148,11 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 		err = logic.HandleButtonClick(pathEntry2.Text, title)
 		if err == nil {
 
-			err, addButton = variable.CurrentJson.Add(data, newWindow, title)
+			err, addButton = variable.CurrentJson.Add(data)
+			if err != nil {
+				dialog.ShowInformation("error", err.Error(), newWindow)
+
+			}
 		}
 
 		if err != nil {
