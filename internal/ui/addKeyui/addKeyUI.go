@@ -92,7 +92,11 @@ func OpenWindowAddButton(myApp fyne.App, rightColumnContent *fyne.Container) {
 		if uploadFile.Disabled() {
 			valueFinish = []byte(iputvalue.Text)
 		}
-		logic.AddKeyLogic(iputKey.Text, valueFinish, windowAdd)
+		err := logic.AddKeyLogic(iputKey.Text, valueFinish)
+		if err != nil {
+			dialog.ShowInformation("Error", err.Error(), windowAdd)
+
+		}
 	})
 	ButtonAddAdd.Importance = widget.HighImportance
 	cont := container.NewVBox(

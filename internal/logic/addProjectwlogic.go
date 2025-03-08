@@ -92,12 +92,17 @@ func SearchDatabase(valueEntry *widget.Entry, editWindow fyne.Window, rightColum
 }
 
 func DeleteKeyLogic(valueEntry string) error {
+
+	err := variable.CurrentDBClient.Open()
+	if err != nil {
+		return err
+	}
 	defer variable.CurrentDBClient.Close()
 
 	key := utils.CleanInput(valueEntry)
 
-	valueSearch, err := QueryKey(valueEntry)
-	if valueSearch == "" && err != nil {
+	err = QueryKey(valueEntry)
+	if err != nil {
 		return fmt.Errorf("This key does not exist in the database")
 		//dialog.ShowInformation("Error", "This key does not exist in the database", editWindow)
 	} else {
@@ -109,38 +114,38 @@ func DeleteKeyLogic(valueEntry string) error {
 	}
 }
 
-func AddKeyLogic(iputKey string, valueFinish []byte, windowAdd fyne.Window) {
+func AddKeyLogic(iputKey string, valueFinish []byte) error {
 
 	key := utils.CleanInput(iputKey)
 
+	err := variable.CurrentDBClient.Open()
+	if err != nil {
+		return err
+	}
 	defer variable.CurrentDBClient.Close()
 
-	checkNow, err := QueryKey(iputKey)
-	if checkNow != "" || err == nil {
-		dialog.ShowInformation("Error", "This key has already been added to your database", windowAdd)
-
+	err = QueryKey(iputKey)
+	if err == nil {
+		//dialog.ShowInformation("Error", "This key has already been added to your database", windowAdd)
+		return fmt.Errorf("This key has already been added to your database")
 	} else {
 		err = variable.CurrentDBClient.Add([]byte(key), valueFinish)
 		if err != nil {
 			fmt.Print(err.Error())
 		}
 
-		windowAdd.Close()
+		return nil
 	}
+
 }
 
-func QueryKey(iputKey string) (string, error) {
-	var err error
+func QueryKey(iputKey string) error {
 
 	key := utils.CleanInput(iputKey)
 
-	err = variable.CurrentDBClient.Open()
-	if err != nil {
-		return "", err
-	}
-	checkNow, err := variable.CurrentDBClient.Get([]byte(key))
+	_, err := variable.CurrentDBClient.Get([]byte(key))
 	if err != nil {
 		fmt.Println("error : delete func logic for get key in databace")
 	}
-	return string(checkNow), err
+	return err
 }
