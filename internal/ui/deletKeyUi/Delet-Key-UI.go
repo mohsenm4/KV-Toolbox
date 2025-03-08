@@ -26,9 +26,12 @@ func DeleteKeyUi(rightColumnContent *fyne.Container) {
 		dialog.ShowConfirm("Confirm Delete", message,
 			func(response bool) {
 				if response {
-					logic.DeleteKeyLogic(valueEntry, editWindow, rightColumnContent)
-				} else {
-
+					err := logic.DeleteKeyLogic(valueEntry.Text)
+					if err != nil {
+						dialog.ShowInformation("Error", err.Error(), editWindow)
+					} else {
+						editWindow.Close()
+					}
 				}
 			}, editWindow)
 

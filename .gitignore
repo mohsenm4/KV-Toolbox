@@ -14,3 +14,4 @@ __debug_bin*
 cmd/.DS_Store
 services
 *.exe
+.codegpt

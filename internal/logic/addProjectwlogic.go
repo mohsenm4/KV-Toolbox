@@ -91,21 +91,21 @@ func SearchDatabase(valueEntry *widget.Entry, editWindow fyne.Window, rightColum
 	return true, nil
 }
 
-func DeleteKeyLogic(valueEntry *widget.Entry, editWindow fyne.Window, rightColumnContent *fyne.Container) {
+func DeleteKeyLogic(valueEntry string) error {
 	defer variable.CurrentDBClient.Close()
 
-	key := utils.CleanInput(valueEntry.Text)
+	key := utils.CleanInput(valueEntry)
 
-	valueSearch, err := QueryKey(valueEntry.Text)
+	valueSearch, err := QueryKey(valueEntry)
 	if valueSearch == "" && err != nil {
-		dialog.ShowInformation("Error", "This key does not exist in the database", editWindow)
+		return fmt.Errorf("This key does not exist in the database")
+		//dialog.ShowInformation("Error", "This key does not exist in the database", editWindow)
 	} else {
 		err = variable.CurrentDBClient.Delete([]byte(key))
 		if err != nil {
-			fmt.Print(err.Error())
-			return
+			return err
 		}
-		editWindow.Close()
+		return nil
 	}
 }
 
