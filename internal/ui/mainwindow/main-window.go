@@ -7,9 +7,9 @@ import (
 	Filterbadger "DatabaseDB/internal/filterdatabase/badger"
 	FilterLeveldb "DatabaseDB/internal/filterdatabase/leveldb"
 	Filterpebbledb "DatabaseDB/internal/filterdatabase/pebble"
-	"DatabaseDB/internal/logic"
 	addkeyui "DatabaseDB/internal/ui/addKeyui"
 	deletkeyui "DatabaseDB/internal/ui/deletKeyUi"
+	"DatabaseDB/internal/ui/otherUI"
 	searchkeyui "DatabaseDB/internal/ui/searchKeyui"
 	"DatabaseDB/internal/utils"
 
@@ -98,7 +98,7 @@ func MainWindow(myApp fyne.App) {
 	buttonsVisible := false
 
 	// left column
-	leftColumnAll := logic.SetupLastColumn(rightColumnAll, nameButtonProject, buttonAdd, rightColumEdit, saveEditKey, mainWindow)
+	leftColumnAll := otherUI.SetupLastColumn(rightColumnAll, nameButtonProject, buttonAdd, rightColumEdit, saveEditKey, mainWindow)
 	spacer.Resize(fyne.NewSize(0, 30))
 
 	for _, name := range variable.NameDatabase {
@@ -143,7 +143,7 @@ func MainWindow(myApp fyne.App) {
 		spacer,
 	)
 
-	darkLight := logic.SetupThemeButtons(myApp)
+	darkLight := otherUI.SetupThemeButtons(myApp)
 
 	// all window
 	containerAll := ColumnContent(rightColumnAll, columnEdit, leftColumnAll, topLeftColumn, darkLight, topRightColumn, rightColumEdit, saveEditKey, mainWindow)
@@ -176,7 +176,7 @@ func RightColumn(rightColumnAll *fyne.Container, topRightColumn *fyne.Container,
 				return
 			}
 			numberLast := len(rightColumnAll.Objects)
-			logic.UpdatePage(rightColumnAll, columnEditKey, saveKey, mainWindow)
+			otherUI.UpdatePage(rightColumnAll, columnEditKey, saveKey, mainWindow)
 
 			rightColumnAll.Objects = rightColumnAll.Objects[:numberLast]
 
@@ -189,7 +189,7 @@ func RightColumn(rightColumnAll *fyne.Container, topRightColumn *fyne.Container,
 
 			variable.CurrentPage++
 			numberLast := len(rightColumnAll.Objects)
-			logic.UpdatePage(rightColumnAll, columnEditKey, saveKey, mainWindow)
+			otherUI.UpdatePage(rightColumnAll, columnEditKey, saveKey, mainWindow)
 			rightColumnScrollable.Offset.Y = maxScroll / 2
 
 			if len(rightColumnAll.Objects) > (variable.ItemsPerPage)*3 {

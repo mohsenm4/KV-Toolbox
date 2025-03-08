@@ -3,6 +3,7 @@ package searchkeyui
 import (
 	variable "DatabaseDB"
 	"DatabaseDB/internal/logic"
+	"DatabaseDB/internal/ui/otherUI"
 	"DatabaseDB/internal/utils"
 	"fmt"
 
@@ -46,8 +47,8 @@ func SearchKeyUi(rightColumnContent *fyne.Container, columnEditKey *fyne.Contain
 			} else {
 				truncatedValue = utils.TruncateString(string(values[i]), 20)
 			}
-			valueLabel := logic.BuidLableKeyAndValue("value", keys[i], values[i], truncatedValue, rightColumnContent, columnEditKey, saveKey, mainWindow)
-			keyLabel := logic.BuidLableKeyAndValue("key", keys[i], values[i], truncatedKey, rightColumnContent, columnEditKey, saveKey, mainWindow)
+			valueLabel := otherUI.BuidLableKeyAndValue("value", keys[i], values[i], truncatedValue, rightColumnContent, columnEditKey, saveKey, mainWindow)
+			keyLabel := otherUI.BuidLableKeyAndValue("key", keys[i], values[i], truncatedKey, rightColumnContent, columnEditKey, saveKey, mainWindow)
 
 			rightColumnContent.Refresh()
 			buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)

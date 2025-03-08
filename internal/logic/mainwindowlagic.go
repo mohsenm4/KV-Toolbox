@@ -2,390 +2,173 @@ package logic
 
 import (
 	variable "DatabaseDB"
+	"DatabaseDB/internal/utils"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
-	// "DatabaseDB/internal/logic/addProjectwindowlogic"
-
-	dbpak "DatabaseDB/internal/Databaces"
-	"DatabaseDB/internal/utils"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 	"github.com/gabriel-vasile/mimetype"
+	// "DatabaseDB/internal/logic/mainwindowlagic"
 )
 
-func SetupLastColumn(rightColumnContentORG *fyne.Container, nameButtonProject *widget.Label, buttonAdd *widget.Button, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) *fyne.Container {
-	lastColumnContent := container.NewVBox()
-
-	jsonDataa, err := variable.CurrentJson.Load()
+func HandleButtonClick(path string, nameDatabace string) error {
+	err := utils.Checkdatabace(path, nameDatabace)
 	if err != nil {
-		log.Fatal("Error loading JSON data:", err)
-	} else {
-		for _, project := range jsonDataa.RecentProjects {
-
-			buttonContainer := ProjectButton(project.Name, lastColumnContent, project.FileAddress, rightColumnContentORG, nameButtonProject, buttonAdd, project.Databace, columnEditKey, saveKey, mainWindow)
-			lastColumnContent.Add(buttonContainer)
-		}
+		return err
 	}
 
-	return lastColumnContent
-}
+	if !variable.CreatDatabase {
 
-func SetupThemeButtons(app fyne.App) *fyne.Container {
-	var darkButton *widget.Button
-	var lightButton *widget.Button
-
-	darkButton = widget.NewButton("Dark", func() {
-		app.Settings().SetTheme(theme.DarkTheme())
-
-		darkButton.Importance = widget.HighImportance
-		lightButton.Importance = widget.MediumImportance
-		darkButton.Refresh()
-		lightButton.Refresh()
-	})
-	lightButton = widget.NewButton("Light", func() {
-		app.Settings().SetTheme(theme.LightTheme())
-
-		lightButton.Importance = widget.HighImportance
-		darkButton.Importance = widget.MediumImportance
-
-		darkButton.Refresh()
-		lightButton.Refresh()
-	})
-
-	lightButton.Importance = widget.HighImportance
-
-	darkLight := container.NewVBox(
-		layout.NewSpacer(),
-		container.NewGridWithColumns(2, lightButton, darkButton),
-	)
-	return darkLight
-}
-
-var (
-	lastStart *[]byte
-	lastEnd   *[]byte
-	Orgdata   []dbpak.KVData
-	lastPage  int
-)
-
-func UpdatePage(rightColumnContent *fyne.Container, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) {
-
-	var data = make([]dbpak.KVData, 0)
-	var err error
+		nun := variable.NameData.FilterFile(path)
+		if !nun {
+			return fmt.Errorf("error for no found files database")
+		}
+	}
 	err = variable.CurrentDBClient.Open()
 	if err != nil {
-		return
+		return err
 	}
 	defer variable.CurrentDBClient.Close()
 
-	if lastEnd == nil && lastStart == nil {
-		Orgdata = Orgdata[:0]
+	return nil
+}
+
+func SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
+
+	var values [][]byte
+	err := variable.CurrentDBClient.Open()
+	if err != nil {
+		return nil, nil, err
 	}
-	if lastPage < variable.CurrentPage {
-		//next page
+	defer variable.CurrentDBClient.Close()
 
-		//The reason why "variable.ItemsPerPage" is added by one is that we want to see if the next pages have a value to enable or disable the next or prev key.
-		err, data = variable.CurrentDBClient.Read(lastEnd, nil, variable.ItemsPerPage+1)
+	key := utils.CleanInput(valueEntry)
+	err, keys := variable.CurrentDBClient.Search([]byte(key))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if len(keys) == 0 {
+		return nil, nil, err
+	}
+
+	for _, item := range keys {
+		value, err := variable.CurrentDBClient.Get(item)
 		if err != nil {
-			log.Println(err.Error())
+			return nil, nil, err
 		}
+		value1 := make([]byte, len(value))
+		copy(value1, value)
 
-		if len(data) == variable.ItemsPerPage+1 {
-			data = data[:variable.ItemsPerPage]
-			variable.ItemsAdded = true
+		values = append(values, value1)
+	}
 
-		} else {
-			variable.ItemsAdded = false
+	return keys, values, nil
+}
 
+func DeleteKeyLogic(valueEntry string) error {
+
+	err := variable.CurrentDBClient.Open()
+	if err != nil {
+		return err
+	}
+	defer variable.CurrentDBClient.Close()
+
+	key := utils.CleanInput(valueEntry)
+
+	value := QueryKey(valueEntry)
+	if value != nil {
+
+		err = variable.CurrentDBClient.Delete([]byte(key))
+		if err != nil {
+			return err
 		}
-		if len(data) == 0 {
-			return
-		}
-		if len(rightColumnContent.Objects) >= variable.ItemsPerPage*3 {
-			Orgdata = Orgdata[len(data):]
-		}
-
-		Orgdata = append(Orgdata, data...)
+		return nil
 	} else {
-
-		//The reason why "variable.ItemsPerPage" is added by one is that we want to see if the next pages have a value to enable or disable the next or prev key.
-		err, data = variable.CurrentDBClient.Read(nil, lastStart, variable.ItemsPerPage+1)
-		if err != nil {
-			log.Println(err.Error())
-		}
-
-		if len(data) == variable.ItemsPerPage+1 {
-			data = data[1:]
-			variable.ItemsAdded = true
-		}
-		if len(data) == 0 {
-			return
-		}
-		Orgdata = Orgdata[:len(Orgdata)-len(data)]
-		Orgdata = append(data, Orgdata...)
-
+		return fmt.Errorf("This key does not exist in the database")
+		//dialog.ShowInformation("Error", "This key does not exist in the database", editWindow)
 	}
+}
 
-	lastStart = &Orgdata[0].Key
-	lastEnd = &Orgdata[len(Orgdata)-1].Key
+func AddKeyLogic(iputKey string, valueFinish []byte) error {
 
-	var truncatedValue string
-	var arrayContainer []fyne.CanvasObject
-	for _, item := range data {
+	key := utils.CleanInput(iputKey)
 
-		truncatedKey := utils.TruncateString(string(item.Key), 20)
-
-		typeValue := mimetype.Detect(item.Value)
-		if typeValue.Extension() != ".txt" {
-
-			truncatedValue = fmt.Sprintf("* %s . . .", typeValue.Extension())
-		} else {
-			truncatedValue = utils.TruncateString(string(item.Value), 30)
-
-		}
-
-		valueLabel := BuidLableKeyAndValue("value", item.Key, item.Value, truncatedValue, rightColumnContent, columnEditKey, saveKey, mainWindow)
-		keyLabel := BuidLableKeyAndValue("key", item.Key, item.Value, truncatedKey, rightColumnContent, columnEditKey, saveKey, mainWindow)
-
-		buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
-		arrayContainer = append(arrayContainer, buttonRow)
+	err := variable.CurrentDBClient.Open()
+	if err != nil {
+		return err
 	}
-	if lastPage > variable.CurrentPage {
+	defer variable.CurrentDBClient.Close()
 
-		rightColumnContent.Objects = append(arrayContainer, rightColumnContent.Objects...)
+	value := QueryKey(iputKey)
+	if value != nil {
+		//dialog.ShowInformation("Error", "This key has already been added to your database", windowAdd)
+		return fmt.Errorf("This key has already been added to your database")
 	} else {
+		err = variable.CurrentDBClient.Add([]byte(key), valueFinish)
+		if err != nil {
+			fmt.Print(err.Error())
+		}
 
-		rightColumnContent.Objects = append(rightColumnContent.Objects, arrayContainer...)
-
+		return nil
 	}
 
-	data = data[:0]
-	rightColumnContent.Refresh()
-	lastPage = variable.CurrentPage
 }
 
-var previousClose *widget.Button
-var previousProject *widget.Button
-var previousRefreshButton *widget.Button
+func QueryKey(iputKey string) []byte {
 
-func ProjectButton(inputText string, lastColumnContent *fyne.Container, path string, rightColumnContentORG *fyne.Container, nameButtonProject *widget.Label, buttonAdd *widget.Button, nameDatabace string, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) *fyne.Container {
-	var refreshButton *widget.Button
-	var projectButton *widget.Button
-	var closeButton *widget.Button
+	key := utils.CleanInput(iputKey)
 
-	projectButton = widget.NewButton(inputText+" - "+nameDatabace, func() {
-		if previousProject != nil {
-			previousProject.Importance = widget.MediumImportance
-			previousClose.Importance = widget.MediumImportance
-			previousRefreshButton.Importance = widget.MediumImportance
+	value, err := variable.CurrentDBClient.Get([]byte(key))
+	if err != nil {
+		fmt.Println("error : delete func logic for get key in databace")
+	}
+	return value
+}
 
-			previousProject.Refresh()
-			previousClose.Refresh()
-			previousRefreshButton.Refresh()
-		}
-		projectButton.Importance = widget.HighImportance
-		closeButton.Importance = widget.HighImportance
-		refreshButton.Importance = widget.HighImportance
-
-		projectButton.Refresh()
-		closeButton.Refresh()
-		refreshButton.Refresh()
-
-		previousProject = projectButton
-		previousClose = closeButton
-		previousRefreshButton = refreshButton
-
-		variable.ItemsAdded = true
-		utils.Checkdatabace(path, nameDatabace)
-		buttonAdd.Enable()
-		variable.FolderPath = path
-		lastEnd = nil
-		variable.ResultSearch = false
-		variable.CurrentPage = 1
-		lastPage = 0
-		variable.PreviousOffsetY = 0
-		lastStart = nil
-		utils.CheckCondition(rightColumnContentORG)
-		utils.CheckCondition(columnEditKey)
-		UpdatePage(rightColumnContentORG, columnEditKey, saveKey, mainWindow)
-		nameButtonProject.Text = ""
-		nameButtonProject.Text = inputText + " - " + nameDatabace
-
-		nameButtonProject.Refresh()
-
-	})
-	buttonContainer := container.NewHBox()
-
-	closeButton = widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
-
-		if nameButtonProject.Text == inputText+" - "+nameDatabace {
-			utils.CheckCondition(rightColumnContentORG)
-			utils.CheckCondition(columnEditKey)
-
-			buttonAdd.Disable()
-
-			nameButtonProject.Text = ""
-			nameButtonProject.Refresh()
-		}
-
-		err := variable.CurrentJson.Remove(inputText)
+func ProcessValue(value []byte) ([]byte, error) {
+	typeValue := mimetype.Detect(value)
+	if strings.HasPrefix(typeValue.String(), "application/json") {
+		var result json.RawMessage
+		err := json.Unmarshal(value, &result)
 		if err != nil {
-			fmt.Print(err)
-		} else {
-
-			lastColumnContent.Remove(buttonContainer)
-			lastColumnContent.Refresh()
+			return nil, err
 		}
-	})
-
-	refreshButton = widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
-
-		if nameButtonProject.Text == inputText+" - "+nameDatabace {
-
-			variable.ItemsAdded = true
-			utils.Checkdatabace(path, nameDatabace)
-			buttonAdd.Enable()
-			variable.FolderPath = path
-			lastEnd = nil
-			variable.ResultSearch = false
-			variable.CurrentPage = 1
-			lastPage = 0
-			variable.PreviousOffsetY = 0
-			lastStart = nil
-			utils.CheckCondition(rightColumnContentORG)
-			utils.CheckCondition(columnEditKey)
-			UpdatePage(rightColumnContentORG, columnEditKey, saveKey, mainWindow)
-
-			nameButtonProject.Refresh()
-		}
-
-	})
-	refreshClose := container.NewGridWithColumns(2, refreshButton, closeButton)
-
-	buttonContainer = container.NewBorder(nil, nil, nil, refreshClose, projectButton)
-	return buttonContainer
+		return json.MarshalIndent(result, "", "  ")
+	}
+	return value, nil
 }
 
-var lastLableKeyAndValue *utils.TappableLabel
+func SaveValue(key, value []byte, isText bool) error {
+	err := variable.CurrentDBClient.Open()
+	if err != nil {
+		return fmt.Errorf("error opening database: %w", err)
+	}
+	defer variable.CurrentDBClient.Close()
 
-func BuidLableKeyAndValue(eidtKeyAbdValue string, key []byte, value []byte, nameLable string, rightColumn *fyne.Container, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) *utils.TappableLabel {
-	var lableKeyAndValue *utils.TappableLabel
-	var valueEntry *widget.Entry
-	var truncatedKey2 string
+	if isText {
+		value = []byte(utils.TruncateString(string(value), 30))
+	}
 
-	lableKeyAndValue = utils.NewTappableLabel(nameLable, func() {
-		if lastLableKeyAndValue != nil {
-
-			lastLableKeyAndValue.Importance = widget.MediumImportance
-			lastLableKeyAndValue.Refresh()
-
-		}
-		lableKeyAndValue.Importance = widget.HighImportance
-		lableKeyAndValue.Refresh()
-		lastLableKeyAndValue = lableKeyAndValue
-
-		utils.CheckCondition(columnEditKey)
-
-		typeValue := mimetype.Detect([]byte(value))
-		columnEditKey.Add(widget.NewLabel(fmt.Sprintf("Edit %s - %s", eidtKeyAbdValue, nameLable)))
-
-		if eidtKeyAbdValue == "value" {
-
-			switch {
-			case strings.HasPrefix(typeValue.String(), "image/"):
-				go utils.ImageShow([]byte(key), []byte(value), columnEditKey, mainWindow)
-				truncatedKey2 = fmt.Sprintf("* %s . . .", typeValue.Extension())
-
-			case strings.HasPrefix(typeValue.String(), "text/") || strings.HasPrefix(typeValue.String(), "application/"):
-				if strings.HasPrefix(typeValue.String(), "application/json") {
-					var result json.RawMessage
-
-					err := json.Unmarshal([]byte(value), &result)
-					if err != nil {
-						return
-					}
-					prettyJSON, err := json.MarshalIndent(result, "", "  ")
-					if err != nil {
-						return
-					}
-					value = prettyJSON
-
-				}
-				valueEntry = configureEntry(columnEditKey, string(value))
-				value = []byte(valueEntry.Text)
-
-			}
-
-		} else {
-
-			valueEntry = configureEntry(columnEditKey, string(key))
-		}
-		saveKey.OnTapped = func() {
-			err := variable.CurrentDBClient.Open()
-			if err != nil {
-				fmt.Print("error Open")
-				return
-			}
-			defer variable.CurrentDBClient.Close()
-
-			saveValue := func() {
-				if strings.HasPrefix(typeValue.String(), "text/") {
-					value = []byte(valueEntry.Text)
-					truncatedKey2 = utils.TruncateString(valueEntry.Text, 30)
-				} else if utils.ValueImage != nil {
-					value = utils.ValueImage
-					utils.ValueImage = nil
-				}
-				rightColumn.Refresh()
-				if err := variable.CurrentDBClient.Add(key, value); err != nil {
-					fmt.Print(err.Error())
-				}
-			}
-
-			updateKey := func() {
-				valueBefor, err := variable.CurrentDBClient.Get(key)
-				if err != nil {
-					return
-				}
-				if err := variable.CurrentDBClient.Delete(key); err != nil {
-					return
-				}
-
-				key = []byte(utils.CleanInput(valueEntry.Text))
-				if err := variable.CurrentDBClient.Add(key, valueBefor); err != nil {
-					fmt.Print(err.Error())
-				}
-				truncatedKey2 = utils.TruncateString(string(key), 20)
-			}
-
-			if eidtKeyAbdValue == "value" {
-				saveValue()
-			} else {
-				updateKey()
-			}
-
-			lableKeyAndValue.SetText(truncatedKey2)
-			lableKeyAndValue.Refresh()
-		}
-
-		columnEditKey.Refresh()
-	})
-	return lableKeyAndValue
+	return variable.CurrentDBClient.Add(key, value)
 }
 
-func configureEntry(columnEditKey *fyne.Container, content string) *widget.Entry {
-	entry := widget.NewMultiLineEntry()
-	entry.Resize(fyne.NewSize(400, 500))
-	entry.SetText(content)
-	scrollableEntry := container.NewScroll(entry)
-	scrollableEntry.SetMinSize(fyne.NewSize(200, 300))
-	columnEditKey.Add(scrollableEntry)
-	return entry
+func UpdateKey(oldKey, newKey []byte) error {
+	err := variable.CurrentDBClient.Open()
+	if err != nil {
+		return fmt.Errorf("error opening database: %w", err)
+	}
+	defer variable.CurrentDBClient.Close()
+
+	valueBefore, err := variable.CurrentDBClient.Get(oldKey)
+	if err != nil {
+		return err
+	}
+
+	if err := variable.CurrentDBClient.Delete(oldKey); err != nil {
+		return err
+	}
+
+	newKey = []byte(utils.CleanInput(string(newKey)))
+	return variable.CurrentDBClient.Add(newKey, valueBefore)
 }

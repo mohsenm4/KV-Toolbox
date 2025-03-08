@@ -3,6 +3,7 @@ package sharedfunc
 import (
 	variable "DatabaseDB"
 	"DatabaseDB/internal/logic"
+	"DatabaseDB/internal/ui/otherUI"
 	"DatabaseDB/internal/utils"
 	"fmt"
 	"image/color"
@@ -29,21 +30,21 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 	line1 := createSeparator()
 
 	lableName := widget.NewLabel("Name :")
-	pathEntry := widget.NewEntry()
-	pathEntry.PlaceHolder = "Name"
-	nameContent := container.NewBorder(nil, nil, lableName, nil, pathEntry)
+	nameEntry := widget.NewEntry()
+	nameEntry.PlaceHolder = "Name"
+	nameContent := container.NewBorder(nil, nil, lableName, nil, nameEntry)
 
 	lableComment := widget.NewLabel("Comment :")
-	pathEntryComment := widget.NewEntry()
-	pathEntryComment.PlaceHolder = "Comment"
-	commentContent := container.NewBorder(nil, nil, lableComment, nil, pathEntryComment)
+	commentEntry := widget.NewEntry()
+	commentEntry.PlaceHolder = "Comment"
+	commentContent := container.NewBorder(nil, nil, lableComment, nil, commentEntry)
 
-	pathEntry2 := widget.NewEntry()
-	pathEntry2.SetPlaceHolder("No folder selected")
+	pathEntry := widget.NewEntry()
+	pathEntry.SetPlaceHolder("No folder selected")
 
 	testConnectionButton := widget.NewButton("Test Connection", func() {
 
-		err := logic.HandleButtonClick(pathEntry2.Text, title)
+		err := logic.HandleButtonClick(pathEntry.Text, title)
 		if err != nil {
 			dialog.ShowError(err, newWindow)
 		} else {
@@ -52,7 +53,7 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 	})
 	testConnectionButton.Disable()
 
-	pathEntry2.OnChanged = func(text string) {
+	pathEntry.OnChanged = func(text string) {
 		if text != "" && !variable.CreatDatabase {
 			testConnectionButton.Enable()
 		} else if variable.CreatDatabase {
@@ -78,7 +79,7 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 				variable.FolderPath = filepath.Dir(filePath)
 
 				if variable.NameData.FilterFile(variable.FolderPath) {
-					pathEntry2.SetText(variable.FolderPath)
+					pathEntry.SetText(variable.FolderPath)
 					testConnectionButton.Enable()
 				} else {
 					dialog.ShowInformation("Invalid Folder", "The selected folder does not contain a valid LevelDB manifest file.", newWindow)
@@ -97,9 +98,9 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 				}
 				filePath := lu.Path()
 
-				variable.FolderPath = filePath + "/" + title + "-" + pathEntry.Text
+				variable.FolderPath = filePath + "/" + title + "-" + nameEntry.Text
 
-				pathEntry2.SetText(variable.FolderPath)
+				pathEntry.SetText(variable.FolderPath)
 
 			}, newWindow)
 		}
@@ -124,12 +125,12 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 
 	buttonOk := widget.NewButton("Add", func() {
 		data := map[string]string{
-			"Name":     pathEntry.Text,
-			"Comment":  pathEntryComment.Text,
-			"Addres":   pathEntry2.Text,
+			"Name":     nameEntry.Text,
+			"Comment":  commentEntry.Text,
+			"Addres":   pathEntry.Text,
 			"Database": title,
 		}
-		if pathEntry.Text == "" {
+		if nameEntry.Text == "" {
 			dialog.ShowInformation("Error ", "Please fill in the name field", newWindow)
 			return
 		}
@@ -138,14 +139,14 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 			fmt.Println("Error opening folder:", err)
 		}
 		for _, m := range datajson.RecentProjects {
-			if pathEntry.Text == m.Name {
+			if nameEntry.Text == m.Name {
 				dialog.ShowInformation("Error ", "Your database name is duplicate", newWindow)
 				return
 			}
 		}
 
 		var addButton bool
-		err = logic.HandleButtonClick(pathEntry2.Text, title)
+		err = logic.HandleButtonClick(pathEntry.Text, title)
 		if err == nil {
 
 			err, addButton = variable.CurrentJson.Add(data)
@@ -163,7 +164,7 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 				utils.CheckCondition(rightColumnContentORG)
 				utils.CheckCondition(columnEditKey)
 
-				buttonContainer := logic.ProjectButton(pathEntry.Text, lastColumnContent, pathEntry2.Text, rightColumnContentORG, nameButtonProject, buttonAdd, title, columnEditKey, saveKey, mainWindow)
+				buttonContainer := otherUI.ProjectButton(nameEntry.Text, lastColumnContent, pathEntry.Text, rightColumnContentORG, nameButtonProject, buttonAdd, title, columnEditKey, saveKey, mainWindow)
 				lastColumnContent.Add(buttonContainer)
 				lastColumnContent.Refresh()
 
@@ -189,7 +190,7 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 		layout.NewSpacer(),
 		BoxCreateDatabase,
 		layout.NewSpacer(),
-		pathEntry2,
+		pathEntry,
 		layout.NewSpacer(),
 		testOpenButton,
 		layout.NewSpacer(),
