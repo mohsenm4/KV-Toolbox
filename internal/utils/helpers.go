@@ -6,7 +6,6 @@ import (
 	"DatabaseDB/internal/Databaces/PebbleDB"
 	badgerDB "DatabaseDB/internal/Databaces/badger"
 	leveldbb "DatabaseDB/internal/Databaces/leveldb"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -53,11 +52,6 @@ func TruncateString(input string, length int) string {
 	}
 
 	return nameData
-}
-func IsValidJSON(data string) bool {
-	var js json.RawMessage
-	m := json.Unmarshal([]byte(data), &js) == nil
-	return m
 }
 
 func CheckCondition(rightColumnContent *fyne.Container) {
