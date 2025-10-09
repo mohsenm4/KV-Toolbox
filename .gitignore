@@ -1,0 +1,17 @@
+# Ignore build script
+cmd/KV-Toolbox/ManageDB.app/Contents
+*.ldb
+*.log
+LOG
+LOG.old
+CURRENT
+MANIFEST-*
+*.json
+test
+__debug_bin*
+*.txt
+.DS_Store
+cmd/.DS_Store
+services
+*.exe
+.codegpt
