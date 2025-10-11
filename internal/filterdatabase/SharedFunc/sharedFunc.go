@@ -152,7 +152,7 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 			err, addButton = variable.CurrentJson.Add(data)
 			if err != nil {
 				dialog.ShowInformation("error", err.Error(), newWindow)
-
+				return
 			}
 		}
 
