@@ -81,6 +81,7 @@ func MainWindow(myApp fyne.App) {
 		addkeyui.OpenWindowAddButton(myApp, rightColumnAll)
 	})
 	buttonAdd.Disable()
+	searchButton.Disable()
 
 	buttonDelete := widget.NewButton("Delete", func() {
 		deletkeyui.DeleteKeyUi(rightColumnAll)
@@ -97,8 +98,9 @@ func MainWindow(myApp fyne.App) {
 	toggleButtonsContainer := container.NewVBox()
 	buttonsVisible := false
 
+	buttonDelete.Disable()
 	// left column
-	leftColumnAll := otherUI.SetupLastColumn(rightColumnAll, nameButtonProject, buttonAdd, rightColumEdit, saveEditKey, mainWindow)
+	leftColumnAll := otherUI.SetupLastColumn(rightColumnAll, nameButtonProject, buttonAdd, searchButton, buttonDelete, rightColumEdit, saveEditKey, mainWindow)
 	spacer.Resize(fyne.NewSize(0, 30))
 
 	for _, name := range variable.NameDatabase {
@@ -117,7 +119,7 @@ func MainWindow(myApp fyne.App) {
 				//	variable.NameData = Filterredis.NewFileterRedis()
 
 			}
-			variable.NameData.FormCreate(myApp, name, leftColumnAll, rightColumnAll, nameButtonProject, buttonAdd, rightColumEdit, saveEditKey, mainWindow)
+			variable.NameData.FormCreate(myApp, name, leftColumnAll, rightColumnAll, nameButtonProject, buttonAdd, searchButton, buttonDelete, rightColumEdit, saveEditKey, mainWindow)
 		})
 		BottomDatabase = append(BottomDatabase, leveldbButton)
 	}

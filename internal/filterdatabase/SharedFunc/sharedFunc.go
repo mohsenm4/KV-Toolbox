@@ -19,7 +19,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Container, rightColumnContentORG *fyne.Container, nameButtonProject *widget.Label, buttonAdd *widget.Button, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) {
+func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Container, rightColumnContentORG *fyne.Container, nameButtonProject *widget.Label, buttonAdd *widget.Button, buttonSearch *widget.Button, buttonDelete *widget.Button, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) {
 	newWindow := a.NewWindow(title)
 
 	createSeparator := func() *canvas.Line {
@@ -164,7 +164,7 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 				utils.CheckCondition(rightColumnContentORG)
 				utils.CheckCondition(columnEditKey)
 
-				buttonContainer := otherUI.ProjectButton(nameEntry.Text, lastColumnContent, pathEntry.Text, rightColumnContentORG, nameButtonProject, buttonAdd, title, columnEditKey, saveKey, mainWindow)
+				buttonContainer := otherUI.ProjectButton(nameEntry.Text, lastColumnContent, pathEntry.Text, rightColumnContentORG, nameButtonProject, buttonAdd, buttonSearch, buttonDelete, title, columnEditKey, saveKey, mainWindow)
 				lastColumnContent.Add(buttonContainer)
 				lastColumnContent.Refresh()
 

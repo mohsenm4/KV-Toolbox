@@ -32,7 +32,7 @@ var (
 	lastLableKeyAndValue  *utils.TappableLabel
 )
 
-func SetupLastColumn(rightColumnContentORG *fyne.Container, nameButtonProject *widget.Label, buttonAdd *widget.Button, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) *fyne.Container {
+func SetupLastColumn(rightColumnContentORG *fyne.Container, nameButtonProject *widget.Label, buttonAdd *widget.Button, buttonSearch *widget.Button, buttonDelete *widget.Button, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) *fyne.Container {
 	lastColumnContent := container.NewVBox()
 
 	jsonDataa, err := variable.CurrentJson.Load()
@@ -41,7 +41,7 @@ func SetupLastColumn(rightColumnContentORG *fyne.Container, nameButtonProject *w
 	} else {
 		for _, project := range jsonDataa.RecentProjects {
 
-			buttonContainer := ProjectButton(project.Name, lastColumnContent, project.FileAddress, rightColumnContentORG, nameButtonProject, buttonAdd, project.Databace, columnEditKey, saveKey, mainWindow)
+			buttonContainer := ProjectButton(project.Name, lastColumnContent, project.FileAddress, rightColumnContentORG, nameButtonProject, buttonAdd, buttonSearch, buttonDelete, project.Databace, columnEditKey, saveKey, mainWindow)
 			lastColumnContent.Add(buttonContainer)
 		}
 	}
@@ -101,8 +101,10 @@ func UpdatePage(rightColumnContent *fyne.Container, columnEditKey *fyne.Containe
 
 	}
 
-	lastStart = &Orgdata[0].Key
-	lastEnd = &Orgdata[len(Orgdata)-1].Key
+	if len(data) != 0 {
+		lastStart = &Orgdata[0].Key
+		lastEnd = &Orgdata[len(Orgdata)-1].Key
+	}
 
 	var truncatedValue string
 	var truncatedKey string
@@ -131,7 +133,7 @@ func UpdatePage(rightColumnContent *fyne.Container, columnEditKey *fyne.Containe
 	lastPage = variable.CurrentPage
 }
 
-func ProjectButton(inputText string, lastColumnContent *fyne.Container, path string, rightColumnContentORG *fyne.Container, nameButtonProject *widget.Label, buttonAdd *widget.Button, nameDatabace string, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) *fyne.Container {
+func ProjectButton(inputText string, lastColumnContent *fyne.Container, path string, rightColumnContentORG *fyne.Container, nameButtonProject *widget.Label, buttonAdd *widget.Button, buttonSearch *widget.Button, buttonDelete *widget.Button, nameDatabace string, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) *fyne.Container {
 	var refreshButton *widget.Button
 	var projectButton *widget.Button
 	var closeButton *widget.Button
@@ -161,6 +163,8 @@ func ProjectButton(inputText string, lastColumnContent *fyne.Container, path str
 		variable.ItemsAdded = true
 		utils.Checkdatabace(path, nameDatabace)
 		buttonAdd.Enable()
+		buttonSearch.Enable()
+		buttonDelete.Enable()
 		variable.FolderPath = path
 		lastEnd = nil
 		variable.ResultSearch = false
@@ -186,6 +190,8 @@ func ProjectButton(inputText string, lastColumnContent *fyne.Container, path str
 			utils.CheckCondition(columnEditKey)
 
 			buttonAdd.Disable()
+			buttonSearch.Disable()
+			buttonDelete.Disable()
 
 			nameButtonProject.Text = ""
 			nameButtonProject.Refresh()
@@ -208,6 +214,8 @@ func ProjectButton(inputText string, lastColumnContent *fyne.Container, path str
 			variable.ItemsAdded = true
 			utils.Checkdatabace(path, nameDatabace)
 			buttonAdd.Enable()
+			buttonSearch.Enable()
+			buttonDelete.Enable()
 			variable.FolderPath = path
 			lastEnd = nil
 			variable.ResultSearch = false
