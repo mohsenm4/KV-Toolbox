@@ -1,7 +1,10 @@
 package configApp
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/viper"
 )
@@ -23,10 +26,28 @@ type Config struct {
 
 func NewConfig() *Config {
 	v := viper.New()
-	v.SetConfigName("data")
 	v.SetConfigType("json")
-	v.AddConfigPath(".")
-	v.ReadInConfig()
+
+	// Determine executable directory
+	execPath, _ := os.Executable()
+	execDir := filepath.Dir(execPath)
+	configFile := filepath.Join(execDir, "data.json")
+
+	v.SetConfigFile(configFile)
+
+	// Try to read existing config
+	if err := v.ReadInConfig(); err != nil {
+		var pathErr *os.PathError
+		if errors.As(err, &pathErr) && os.IsNotExist(pathErr.Err) {
+
+			fmt.Println("data.json not found, creating new one...")
+			v.SafeWriteConfigAs(configFile)
+			fmt.Println("data.json created at:", configFile)
+		} else {
+			fmt.Println("Error reading config file:", err)
+		}
+	}
+
 	return &Config{v: v}
 }
 
@@ -51,7 +72,7 @@ func (c *Config) Add(data map[string]string) (error, bool) {
 
 	for _, proj := range state.RecentProjects {
 		if data["Addres"] == proj.FileAddress {
-			return fmt.Errorf("This database has already been added to your projects under the name '%s'", proj.Name), true
+			return fmt.Errorf("this database has already been added to your projects under the name '%s'", proj.Name), true
 		}
 	}
 
