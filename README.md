@@ -31,10 +31,7 @@ ManageDB is a simple and user-friendly application for managing key-value databa
 
    #### Step 1: Grant executable permissions
    1. Open the **Terminal**.
-   2. Go to your **Desktop** screen:
-      ```bash
-      cd ~/Desktop
-      ```
+   2. Go to the folder where the downloaded file is located
    3. Run the following command to grant executable permissions:
       ```bash
       chmod +x ManageDB.app/Contents/MacOS/'KV-Toolbox'
