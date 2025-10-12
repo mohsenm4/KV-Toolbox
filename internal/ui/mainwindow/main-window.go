@@ -61,6 +61,7 @@ func MainWindow(myApp fyne.App) {
 	)
 
 	saveEditKey := widget.NewButton("Save", nil)
+	saveEditKey.Disable()
 
 	cancelEditKey := widget.NewButton("Cancle", func() {
 		utils.CheckCondition(rightColumEdit)

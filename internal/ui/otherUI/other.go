@@ -246,6 +246,7 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 	var truncatedKey2 string
 
 	label = utils.NewTappableLabel(nameLabel, func() {
+		saveKey.Disable()
 		if lastLableKeyAndValue != nil {
 			lastLableKeyAndValue.Importance = widget.MediumImportance
 			lastLableKeyAndValue.Refresh()
@@ -257,8 +258,8 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 		utils.CheckCondition(columnEditKey)
 		typeValue := mimetype.Detect([]byte(value))
 
-		l := widget.NewLabel(fmt.Sprintf("Edit %s - %s", editType, value))
-		columnEditKey.Add(l)
+		labelEdit := widget.NewLabel(fmt.Sprintf("Edit %s - %s", editType, value))
+		columnEditKey.Add(labelEdit)
 
 		if editType == "value" {
 
@@ -284,15 +285,13 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 				}
 				valueEntry = configureEntry(columnEditKey, string(value))
 				value = []byte(valueEntry.Text)
-
 			}
-
 		} else {
-
 			valueEntry = configureEntry(columnEditKey, string(key))
 		}
 
 		saveKey.OnTapped = func() {
+			saveKey.Disable()
 			if editType == "value" {
 				if bytes.Equal(value, []byte(valueEntry.Text)) {
 					return
@@ -302,7 +301,9 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 					fmt.Println(err.Error())
 				}
 				value = []byte(truncatedKey2)
+
 			} else {
+
 				if bytes.Equal(key, []byte(valueEntry.Text)) {
 					return
 				}
@@ -311,16 +312,26 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 					fmt.Println(err.Error())
 				}
 				key = []byte(truncatedKey2)
+
 			}
 
 			truncatedText = utils.TruncateString(truncatedKey2, 20)
 			label.SetText(truncatedText)
 			label.Refresh()
-			l.Text = fmt.Sprintf("Edit %s - %s", editType, truncatedKey2)
+			labelEdit.Text = fmt.Sprintf("Edit %s - %s", editType, truncatedKey2)
 			columnEditKey.Refresh()
 
 		}
 		columnEditKey.Refresh()
+
+		valueEntry.OnChanged = func(s string) {
+
+			if s == label.Text {
+				saveKey.Disable()
+			} else {
+				saveKey.Enable()
+			}
+		}
 	})
 	return label
 }
