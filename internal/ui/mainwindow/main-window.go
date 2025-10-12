@@ -85,7 +85,7 @@ func MainWindow(myApp fyne.App) {
 	searchButton.Disable()
 
 	buttonDelete := widget.NewButton("Delete", func() {
-		deletkeyui.DeleteKeyUi(rightColumnAll)
+		deletkeyui.DeleteKeyUi(rightColumnAll, mainWindow)
 	})
 
 	topRightColumn := container.NewVBox(

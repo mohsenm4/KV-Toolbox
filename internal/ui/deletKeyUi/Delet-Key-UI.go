@@ -11,15 +11,27 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func DeleteKeyUi(rightColumnContent *fyne.Container) {
-	editWindow := fyne.CurrentApp().NewWindow("Delete in the database")
-	editWindow.Resize(fyne.NewSize(600, 300))
+func DeleteKeyUi(rightColumnContent *fyne.Container, mainWindow fyne.Window) {
 
 	valueEntry := widget.NewMultiLineEntry()
 	valueEntry.Resize(fyne.NewSize(500, 500))
 	valueEntry.SetPlaceHolder("Key for Delete")
 
-	buttomDelete := widget.NewButton("Delete", func() {
+	buttomDelete := widget.NewButton("Delete", nil)
+	buttomDelete.Importance = widget.HighImportance
+
+	editContent := container.NewVBox(
+		widget.NewLabel("Enter the desired key"),
+		valueEntry,
+		layout.NewSpacer(),
+		buttomDelete,
+		layout.NewSpacer(),
+	)
+
+	ded := dialog.NewCustom("Delete in the database", "Close", editContent, mainWindow)
+	ded.Resize(fyne.NewSize(600, 300))
+
+	buttomDelete.OnTapped = func() {
 
 		message := fmt.Sprintf("Are you sure you want to delete the key: _ %s _?", valueEntry.Text)
 
@@ -28,21 +40,12 @@ func DeleteKeyUi(rightColumnContent *fyne.Container) {
 				if response {
 					err := logic.DeleteKeyLogic(valueEntry.Text)
 					if err != nil {
-						dialog.ShowInformation("Error", err.Error(), editWindow)
+						dialog.ShowInformation("Error", err.Error(), mainWindow)
 					} else {
-						editWindow.Close()
+						mainWindow.Close()
 					}
 				}
-			}, editWindow)
-
-	})
-	buttomDelete.Importance = widget.HighImportance
-	editContent := container.NewVBox(
-		widget.NewLabel("Enter the desired key"),
-		valueEntry,
-		layout.NewSpacer(),
-		buttomDelete,
-	)
-	editWindow.SetContent(editContent)
-	editWindow.Show()
+			}, mainWindow)
+	}
+	ded.Show()
 }
