@@ -28,11 +28,13 @@ func NewConfig() *Config {
 	v := viper.New()
 	v.SetConfigType("json")
 
-	// Determine executable directory
-
-	execPath, _ := os.Executable()
-	execDir := filepath.Dir(execPath)
-	configFile := filepath.Join(execDir, "data.json")
+	// Determine configuration file path using standard locations
+	configFile, err := getConfigFilePath()
+	fmt.Println("ConfigPath :", configFile)
+	if err != nil {
+		fmt.Printf("Warning: Could not determine config file path: %v. Using fallback.\n", err)
+		configFile = "data.json" // fallback to current directory
+	}
 
 	v.SetConfigFile(configFile)
 
@@ -103,4 +105,52 @@ func (c *Config) Remove(projectName string) error {
 	}
 
 	return c.Write(state)
+}
+
+// getConfigFilePath determines the best location for the config file
+func getConfigFilePath() (string, error) {
+	// Priority 1: User config directory (most appropriate for user data)
+	if userConfigDir, err := os.UserConfigDir(); err == nil {
+		appConfigDir := filepath.Join(userConfigDir, "KV-Toolbox")
+		if err := os.MkdirAll(appConfigDir, 0755); err == nil {
+			configFile := filepath.Join(appConfigDir, "data.json")
+			// Check if we can write to this directory
+			if checkWritePermission(appConfigDir) == nil {
+				return configFile, nil
+			}
+		}
+	}
+
+	// Priority 2: Home directory fallback
+	if homeDir, err := os.UserHomeDir(); err == nil {
+		configFile := filepath.Join(homeDir, ".kv-toolbox", "data.json")
+		configDir := filepath.Dir(configFile)
+		if err := os.MkdirAll(configDir, 0755); err == nil {
+			if checkWritePermission(configDir) == nil {
+				return configFile, nil
+			}
+		}
+	}
+
+	// Priority 3: Current working directory (last resort)
+	if wd, err := os.Getwd(); err == nil {
+		configFile := filepath.Join(wd, "data.json")
+		if checkWritePermission(wd) == nil {
+			return configFile, nil
+		}
+	}
+
+	// Final fallback: current directory (even if we can't verify write permission)
+	return "data.json", fmt.Errorf("unable to find suitable config directory, using current directory")
+}
+
+// checkWritePermission checks if we can write to a directory
+func checkWritePermission(dir string) error {
+	testFile := filepath.Join(dir, ".write_test")
+	file, err := os.Create(testFile)
+	if err != nil {
+		return err
+	}
+	file.Close()
+	return os.Remove(testFile)
 }
