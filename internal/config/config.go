@@ -29,9 +29,8 @@ func NewConfig() *Config {
 	v.SetConfigType("json")
 
 	// Determine executable directory
-	execPath, _ := os.Executable()
-	execDir := filepath.Dir(execPath)
-	configFile := filepath.Join(execDir, "data.json")
+	execDir, _ := os.Getwd()
+	configFile := filepath.Join(execDir, "data22.json")
 
 	v.SetConfigFile(configFile)
 
