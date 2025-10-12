@@ -303,7 +303,6 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 				value = []byte(truncatedKey2)
 
 			} else {
-
 				if bytes.Equal(key, []byte(valueEntry.Text)) {
 					return
 				}
