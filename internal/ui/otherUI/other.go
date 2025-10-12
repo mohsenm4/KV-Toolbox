@@ -259,7 +259,7 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 		utils.CheckCondition(columnEditKey)
 		typeValue := mimetype.Detect([]byte(value))
 
-		labelEdit := widget.NewLabel(fmt.Sprintf("Edit %s - %s", editType, value))
+		labelEdit := widget.NewLabel("")
 		columnEditKey.Add(labelEdit)
 
 		if editType == "value" {
