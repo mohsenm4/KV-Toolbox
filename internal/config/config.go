@@ -29,10 +29,14 @@ func NewConfig() *Config {
 	v.SetConfigType("json")
 
 	// Determine executable directory
-	execDir, _ := os.Getwd()
-	configFile := filepath.Join(execDir, "data22.json")
+
+	execPath, _ := os.Executable()
+	execDir := filepath.Dir(execPath)
+	configFile := filepath.Join(execDir, "data.json")
 
 	v.SetConfigFile(configFile)
+
+	fmt.Println("Using configuration file:", v.ConfigFileUsed())
 
 	// Try to read existing config
 	if err := v.ReadInConfig(); err != nil {

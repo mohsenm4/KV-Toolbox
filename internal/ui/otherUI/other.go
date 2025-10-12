@@ -244,6 +244,7 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 	var truncatedText string
 	var err error
 	var truncatedKey2 string
+	var nameLable string
 
 	label = utils.NewTappableLabel(nameLabel, func() {
 		saveKey.Disable()
@@ -262,6 +263,7 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 		columnEditKey.Add(labelEdit)
 
 		if editType == "value" {
+			nameLable = fmt.Sprintf("Edit %s - %s", editType, utils.TruncateString(string(value), 20))
 
 			switch {
 			case strings.HasPrefix(typeValue.String(), "image/"):
@@ -287,8 +289,11 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 				value = []byte(valueEntry.Text)
 			}
 		} else {
+			nameLable = fmt.Sprintf("Edit %s - %s", editType, utils.TruncateString(string(key), 20))
+
 			valueEntry = configureEntry(columnEditKey, string(key))
 		}
+		labelEdit.SetText(nameLable)
 
 		saveKey.OnTapped = func() {
 			saveKey.Disable()

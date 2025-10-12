@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 )
@@ -106,10 +107,12 @@ func OpenWindowAddButton(myApp fyne.App, rightColumnContent *fyne.Container, mai
 		rowRedio,
 		iputvalue,
 		columns,
+		layout.NewSpacer(),
+		ButtonAddAdd,
+		layout.NewSpacer(),
 	)
-	container := container.NewBorder(cont, ButtonAddAdd, nil, nil, nil)
 
-	ded = dialog.NewCustom("Add Key and Value", "Close", container, mainWindow)
+	ded = dialog.NewCustom("Add Key and Value", "Close", cont, mainWindow)
 	ded.Resize(fyne.NewSize(600, 400))
 	ded.Show()
 
