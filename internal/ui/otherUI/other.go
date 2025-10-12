@@ -303,7 +303,7 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 				if err != nil {
 					fmt.Println(err.Error())
 				}
-				value = []byte(valueEntry.Text)
+				value = []byte(truncatedKey2)
 			} else {
 				if bytes.Equal(key, []byte(valueEntry.Text)) {
 					dialog.ShowInformation("Error", "The new key is the same as the previous key", mainWindow)
@@ -313,20 +313,17 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 				if err != nil {
 					fmt.Println(err.Error())
 				}
-				key = []byte(valueEntry.Text)
+				key = []byte(truncatedKey2)
 			}
 
 			truncatedText = utils.TruncateString(truncatedKey2, 20)
 			label.SetText(truncatedText)
 			label.Refresh()
-			nameLabel = truncatedKey2
-			l.Text = fmt.Sprintf("Edit %s - %s", editType, nameLabel)
-			l.Refresh()
+			l.Text = fmt.Sprintf("Edit %s - %s", editType, truncatedKey2)
 			columnEditKey.Refresh()
 
 		}
 		columnEditKey.Refresh()
-		truncatedKey2 = ""
 	})
 	return label
 }
