@@ -27,6 +27,7 @@ func SearchKeyUi(rightColumnContent *fyne.Container, columnEditKey *fyne.Contain
 		valueEntry,
 		layout.NewSpacer(),
 		buttomSearch,
+		layout.NewSpacer(),
 	)
 
 	d := dialog.NewCustom("Search in the database", "Close", modalContent, mainWindow)
@@ -35,7 +36,18 @@ func SearchKeyUi(rightColumnContent *fyne.Container, columnEditKey *fyne.Contain
 	buttomSearch.OnTapped = func() {
 		keys, values, err := logic.SearchDatabase(valueEntry.Text)
 		if err != nil {
-			dialog.ShowInformation("Error", "Such a key is not available in the database", mainWindow)
+			dialog.ShowInformation(
+				"Database Error",
+				"An error occurred while searching the database.\nPlease check your input or try again.",
+				mainWindow,
+			)
+			return
+		} else if len(keys) == 0 && len(values) == 0 {
+			dialog.ShowInformation(
+				"No Results Found",
+				"No data was found for the entered key.\nPlease make sure the key exists in the database.",
+				mainWindow,
+			)
 			return
 		}
 
