@@ -72,7 +72,7 @@ func SetupThemeButtons(app fyne.App) *fyne.Container {
 		lightButton.Refresh()
 	})
 
-	lightButton.Importance = widget.HighImportance
+	darkButton.Importance = widget.HighImportance
 
 	darkLight := container.NewVBox(
 		layout.NewSpacer(),
