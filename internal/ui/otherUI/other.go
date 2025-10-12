@@ -16,7 +16,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -258,7 +257,7 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 		utils.CheckCondition(columnEditKey)
 		typeValue := mimetype.Detect([]byte(value))
 
-		l := widget.NewLabel(fmt.Sprintf("Edit %s - %s", editType, nameLabel))
+		l := widget.NewLabel(fmt.Sprintf("Edit %s - %s", editType, value))
 		columnEditKey.Add(l)
 
 		if editType == "value" {
@@ -296,7 +295,6 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 		saveKey.OnTapped = func() {
 			if editType == "value" {
 				if bytes.Equal(value, []byte(valueEntry.Text)) {
-					dialog.ShowInformation("Error", "The new value is the same as the previous value", mainWindow)
 					return
 				}
 				truncatedKey2, err = logic.SaveValue(key, []byte(valueEntry.Text))
@@ -306,7 +304,6 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 				value = []byte(truncatedKey2)
 			} else {
 				if bytes.Equal(key, []byte(valueEntry.Text)) {
-					dialog.ShowInformation("Error", "The new key is the same as the previous key", mainWindow)
 					return
 				}
 				truncatedKey2, err = logic.UpdateKey(key, []byte(valueEntry.Text))
