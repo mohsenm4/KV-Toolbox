@@ -42,7 +42,7 @@ func DeleteKeyUi(rightColumnContent *fyne.Container, mainWindow fyne.Window) {
 					if err != nil {
 						dialog.ShowInformation("Error", err.Error(), mainWindow)
 					} else {
-						mainWindow.Close()
+						ded.Hide()
 					}
 				}
 			}, mainWindow)

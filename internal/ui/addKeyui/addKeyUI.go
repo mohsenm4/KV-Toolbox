@@ -12,8 +12,9 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func OpenWindowAddButton(myApp fyne.App, rightColumnContent *fyne.Container) {
-	windowAdd := myApp.NewWindow("add Key and Value")
+func OpenWindowAddButton(myApp fyne.App, rightColumnContent *fyne.Container, mainWindow fyne.Window) {
+	var ded *dialog.CustomDialog
+
 	iputKey := widget.NewEntry()
 	iputKey.SetPlaceHolder("Key")
 
@@ -44,7 +45,7 @@ func OpenWindowAddButton(myApp fyne.App, rightColumnContent *fyne.Container) {
 
 			nameFile.SetText(filename)
 			nameFile.Refresh()
-		}, windowAdd)
+		}, mainWindow)
 		folderPath.SetFilter(storage.NewExtensionFileFilter([]string{
 			".ico", ".svg",
 			".jpeg", ".jpg", ".png", ".txt", ".json", ".go",
@@ -94,9 +95,9 @@ func OpenWindowAddButton(myApp fyne.App, rightColumnContent *fyne.Container) {
 		}
 		err := logic.AddKeyLogic(iputKey.Text, valueFinish)
 		if err != nil {
-			dialog.ShowInformation("Error", err.Error(), windowAdd)
+			dialog.ShowInformation("Error", err.Error(), mainWindow)
 		} else {
-			windowAdd.Close()
+			ded.Hide()
 		}
 	})
 	ButtonAddAdd.Importance = widget.HighImportance
@@ -106,9 +107,10 @@ func OpenWindowAddButton(myApp fyne.App, rightColumnContent *fyne.Container) {
 		iputvalue,
 		columns,
 	)
-	m := container.NewBorder(cont, ButtonAddAdd, nil, nil, nil)
+	container := container.NewBorder(cont, ButtonAddAdd, nil, nil, nil)
 
-	windowAdd.SetContent(m)
-	windowAdd.Resize(fyne.NewSize(600, 400))
-	windowAdd.Show()
+	ded = dialog.NewCustom("Add Key and Value", "Close", container, mainWindow)
+	ded.Resize(fyne.NewSize(600, 400))
+	ded.Show()
+
 }
