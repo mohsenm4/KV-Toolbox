@@ -321,8 +321,7 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 
 			truncatedText = utils.TruncateString(truncatedKey2, 20)
 			label.SetText(truncatedText)
-			label.Refresh()
-			labelEdit.Text = fmt.Sprintf("Edit %s - %s", editType, truncatedKey2)
+			labelEdit.SetText(fmt.Sprintf("Edit %s - %s", editType, truncatedText))
 			columnEditKey.Refresh()
 
 		}
