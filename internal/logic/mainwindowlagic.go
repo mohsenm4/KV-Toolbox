@@ -103,7 +103,7 @@ func AddKeyLogic(iputKey string, valueFinish []byte) error {
 	value := QueryKey(iputKey)
 	if value != nil {
 		//dialog.ShowInformation("Error", "This key has already been added to your database", windowAdd)
-		return fmt.Errorf("This key has already been added to your database")
+		return fmt.Errorf("this key has already been added to your database")
 	} else {
 		err = variable.CurrentDBClient.Add([]byte(key), valueFinish)
 		if err != nil {
@@ -116,13 +116,19 @@ func AddKeyLogic(iputKey string, valueFinish []byte) error {
 }
 
 func QueryKey(iputKey string) []byte {
-
+	err := variable.CurrentDBClient.Open()
+	if err != nil {
+		fmt.Println("error : delete func logic for get key in databace")
+		return nil
+	}
 	key := utils.CleanInput(iputKey)
 
 	value, err := variable.CurrentDBClient.Get([]byte(key))
 	if err != nil {
 		fmt.Println("error : delete func logic for get key in databace")
 	}
+	defer variable.CurrentDBClient.Close()
+
 	return value
 }
 

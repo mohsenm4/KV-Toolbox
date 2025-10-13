@@ -16,6 +16,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -296,7 +297,6 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 		labelEdit.SetText(nameLable)
 
 		saveKey.OnTapped = func() {
-			saveKey.Disable()
 			if editType == "value" {
 				if bytes.Equal(value, []byte(valueEntry.Text)) {
 					return
@@ -311,6 +311,11 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 				if bytes.Equal(key, []byte(valueEntry.Text)) {
 					return
 				}
+				va := logic.QueryKey(valueEntry.Text)
+				if va != nil {
+					dialog.ShowInformation("Error", "This key has already been added to your database", mainWindow)
+					return
+				}
 				truncatedKey2, err = logic.UpdateKey(key, []byte(valueEntry.Text))
 				if err != nil {
 					fmt.Println(err.Error())
@@ -318,7 +323,7 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 				key = []byte(truncatedKey2)
 
 			}
-
+			saveKey.Disable()
 			truncatedText = utils.TruncateString(truncatedKey2, 20)
 			label.SetText(truncatedText)
 			labelEdit.SetText(fmt.Sprintf("Edit %s - %s", editType, truncatedText))
