@@ -318,6 +318,7 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 						"This key already exists.\nIf you continue, it might be merged and you could lose one of the values.\nDo you still want to continue?",
 						func(confirmed bool) {
 							if confirmed {
+								saveKey.Disable()
 								truncatedKey2, err = logic.UpdateKey(key, []byte(valueEntry.Text))
 								if err != nil {
 									fmt.Println(err.Error())
