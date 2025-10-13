@@ -313,15 +313,27 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 				}
 				va := logic.QueryKey(valueEntry.Text)
 				if va != nil {
-					dialog.ShowInformation("Error", "This key has already been added to your database", mainWindow)
+					dialog.NewConfirm(
+						"⚠️ Duplicate Key",
+						"This key already exists.\nIf you continue, it might be merged and you could lose one of the values.\nDo you still want to continue?",
+						func(confirmed bool) {
+							if confirmed {
+								truncatedKey2, err = logic.UpdateKey(key, []byte(valueEntry.Text))
+								if err != nil {
+									fmt.Println(err.Error())
+								}
+								key = []byte(truncatedKey2)
+								dialog.ShowInformation("Success", "The key was added successfully.", mainWindow)
+								return
+							} else {
+								dialog.ShowInformation("Cancelled", "Operation cancelled.", mainWindow)
+								return
+							}
+						},
+						mainWindow,
+					).Show()
 					return
 				}
-				truncatedKey2, err = logic.UpdateKey(key, []byte(valueEntry.Text))
-				if err != nil {
-					fmt.Println(err.Error())
-				}
-				key = []byte(truncatedKey2)
-
 			}
 			saveKey.Disable()
 			truncatedText = utils.TruncateString(truncatedKey2, 20)
