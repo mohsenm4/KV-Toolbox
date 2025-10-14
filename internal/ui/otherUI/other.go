@@ -321,7 +321,8 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 								saveKey.Disable()
 								truncatedKey2, err = logic.UpdateKey(key, []byte(valueEntry.Text))
 								if err != nil {
-									fmt.Println(err.Error())
+									dialog.ShowInformation("Error", err.Error(), mainWindow)
+									return
 								}
 								key = []byte(truncatedKey2)
 								dialog.ShowInformation("Success", "The key was added successfully.", mainWindow)
@@ -336,6 +337,11 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 					return
 				}
 			}
+			truncatedKey2, err = logic.UpdateKey(key, []byte(valueEntry.Text))
+			if err != nil {
+				dialog.ShowInformation("Error", err.Error(), mainWindow)
+				return
+			}
 			saveKey.Disable()
 			truncatedText = utils.TruncateString(truncatedKey2, 20)
 			label.SetText(truncatedText)
@@ -343,10 +349,10 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 			columnEditKey.Refresh()
 
 		}
-		columnEditKey.Refresh()
 
 		valueEntry.OnChanged = func(s string) {
 
+			s = strings.TrimSpace(s)
 			if s == label.Text {
 				saveKey.Disable()
 			} else {
