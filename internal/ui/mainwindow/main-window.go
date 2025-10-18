@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -28,6 +29,7 @@ var BottomDatabase []*widget.Button
 func MainWindow(myApp fyne.App) {
 
 	mainWindow := myApp.NewWindow("ManageDB")
+	mainWindow.SetMaster()
 
 	iconResource := theme.FyneLogo()
 	myApp.SetIcon(iconResource)
@@ -138,6 +140,14 @@ func MainWindow(myApp fyne.App) {
 		}
 		buttonsVisible = !buttonsVisible
 		toggleButtonsContainer.Refresh()
+	})
+
+	mainWindow.SetCloseIntercept(func() {
+		dialog.ShowConfirm("close?", "Do you want to go out?", func(confirm bool) {
+			if confirm {
+				mainWindow.Close()
+			}
+		}, mainWindow)
 	})
 
 	topLeftColumn := container.NewVBox(

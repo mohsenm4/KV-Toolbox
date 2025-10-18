@@ -200,6 +200,8 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 	newWindow.Resize(fyne.NewSize(700, 400))
 	newWindow.CenterOnScreen()
 	newWindow.SetContent(rightColumnContent)
+	newWindow.Canvas().Focus(nameEntry)
+
 	newWindow.Show()
 }
 
