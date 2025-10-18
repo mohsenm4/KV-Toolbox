@@ -64,6 +64,9 @@ func CheckCondition(rightColumnContent *fyne.Container) {
 func Checkdatabace(test string, nameDatabace string) error {
 	//parts := strings.Split(test, "|-|")
 
+	if variable.CurrentDBClient != nil {
+		variable.CurrentDBClient.Close()
+	}
 	switch nameDatabace {
 	case "levelDB":
 		variable.CurrentDBClient = leveldbb.NewDataBaseLeveldb(test)
@@ -75,6 +78,7 @@ func Checkdatabace(test string, nameDatabace string) error {
 
 		//variable.CurrentDBClient = Redisdb.NewDataBaseRedis(parts[0], parts[1], parts[2])
 	}
+	variable.CurrentDBClient.Open()
 
 	if nameDatabace != "Redis" {
 

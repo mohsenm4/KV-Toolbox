@@ -24,11 +24,6 @@ func HandleButtonClick(path string, nameDatabace string) error {
 			return fmt.Errorf("error for no found files database")
 		}
 	}
-	err = variable.CurrentDBClient.Open()
-	if err != nil {
-		return err
-	}
-	defer variable.CurrentDBClient.Close()
 
 	return nil
 }
@@ -36,11 +31,6 @@ func HandleButtonClick(path string, nameDatabace string) error {
 func SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
 
 	var values [][]byte
-	err := variable.CurrentDBClient.Open()
-	if err != nil {
-		return nil, nil, err
-	}
-	defer variable.CurrentDBClient.Close()
 
 	key := utils.CleanInput(valueEntry)
 	err, keys := variable.CurrentDBClient.Search([]byte(key))
@@ -68,12 +58,6 @@ func SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
 
 func DeleteKeyLogic(valueEntry string) error {
 
-	err := variable.CurrentDBClient.Open()
-	if err != nil {
-		return err
-	}
-	defer variable.CurrentDBClient.Close()
-
 	key := utils.CleanInput(valueEntry)
 
 	value, err := variable.CurrentDBClient.Get([]byte(key))
@@ -97,12 +81,6 @@ func AddKeyLogic(iputKey string, valueFinish []byte) error {
 
 	key := utils.CleanInput(iputKey)
 
-	err := variable.CurrentDBClient.Open()
-	if err != nil {
-		return err
-	}
-	defer variable.CurrentDBClient.Close()
-
 	value, err := variable.CurrentDBClient.Get([]byte(key))
 	if err != nil {
 		fmt.Println("error : delete func logic for get key in databace")
@@ -122,11 +100,6 @@ func AddKeyLogic(iputKey string, valueFinish []byte) error {
 }
 
 func QueryKey(iputKey string) []byte {
-	err := variable.CurrentDBClient.Open()
-	if err != nil {
-		return nil
-	}
-	defer variable.CurrentDBClient.Close()
 
 	key := utils.CleanInput(iputKey)
 
@@ -140,21 +113,11 @@ func QueryKey(iputKey string) []byte {
 }
 
 func SaveValue(key, value []byte) (string, error) {
-	err := variable.CurrentDBClient.Open()
-	if err != nil {
-		return "", fmt.Errorf("error opening database: %w", err)
-	}
-	defer variable.CurrentDBClient.Close()
 
 	return string(value), variable.CurrentDBClient.Add(key, value)
 }
 
 func UpdateKey(oldKey, newKey []byte) (string, error) {
-	err := variable.CurrentDBClient.Open()
-	if err != nil {
-		return "", fmt.Errorf("error opening database: %w", err)
-	}
-	defer variable.CurrentDBClient.Close()
 
 	valueBefore, err := variable.CurrentDBClient.Get(oldKey)
 	if err != nil {
@@ -176,12 +139,7 @@ func UpdateKey(oldKey, newKey []byte) (string, error) {
 func FetchPageData(lastStart *[]byte, lastEnd *[]byte, lastPage int, Orgdata []dbpak.KVData) ([]dbpak.KVData, error) {
 
 	var data = make([]dbpak.KVData, 0)
-
-	err := variable.CurrentDBClient.Open()
-	if err != nil {
-		return data, err
-	}
-	defer variable.CurrentDBClient.Close()
+	var err error
 
 	if lastEnd == nil && lastStart == nil {
 		Orgdata = Orgdata[:0]
