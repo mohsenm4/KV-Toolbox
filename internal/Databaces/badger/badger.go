@@ -2,7 +2,9 @@ package badgerDB
 
 import (
 	dbpak "DatabaseDB/internal/Databaces"
+	"DatabaseDB/internal/dberr"
 	"bytes"
+	"errors"
 
 	"github.com/dgraph-io/badger/v4"
 )
@@ -35,20 +37,22 @@ func (b *badgerDatabase) Close() {
 }
 
 func (b *badgerDatabase) Get(key []byte) ([]byte, error) {
-	var valORG []byte
+	var val []byte
 	err := b.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(key)
 		if err != nil {
+			if errors.Is(err, badger.ErrKeyNotFound) {
+				return dberr.ErrKeyNotFound
+			}
 			return err
 		}
-		val, err := item.ValueCopy(nil)
-		if err != nil {
-			return err
-		}
-		valORG = val
-		return nil
+		val, err = item.ValueCopy(nil)
+		return err
 	})
-	return valORG, err
+	if err != nil {
+		return nil, err
+	}
+	return val, nil
 }
 
 func (b *badgerDatabase) Delete(key []byte) error {

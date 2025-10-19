@@ -2,7 +2,9 @@ package leveldbb
 
 import (
 	dbpak "DatabaseDB/internal/Databaces"
+	"DatabaseDB/internal/dberr"
 	"bytes"
+	"errors"
 	"fmt"
 
 	"github.com/syndtr/goleveldb/leveldb"
@@ -48,6 +50,9 @@ func (l *LeveldbDatabase) Get(key []byte) ([]byte, error) {
 	}
 	data, err := l.DB.Get(key, nil)
 	if err != nil {
+		if errors.Is(err, leveldb.ErrNotFound) {
+			return nil, dberr.ErrKeyNotFound
+		}
 		return nil, err
 	}
 	return data, err

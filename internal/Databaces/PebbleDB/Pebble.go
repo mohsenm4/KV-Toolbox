@@ -2,7 +2,9 @@ package PebbleDB
 
 import (
 	dbpak "DatabaseDB/internal/Databaces"
+	"DatabaseDB/internal/dberr"
 	"bytes"
+	"errors"
 	"fmt"
 
 	"github.com/cockroachdb/pebble"
@@ -46,14 +48,19 @@ func (p *PebbleDatabase) Get(key []byte) ([]byte, error) {
 		return nil, nil
 	}
 
-	data, closer, err := p.DB.Get([]byte(key))
+	value, closer, err := p.DB.Get([]byte(key))
 	if err != nil {
+		if errors.Is(err, pebble.ErrNotFound) {
+			return nil, dberr.ErrKeyNotFound
+		}
 		return nil, err
 	}
-
 	defer closer.Close()
 
-	return data, err
+	data := make([]byte, len(value))
+	copy(data, value)
+
+	return data, nil
 }
 
 func (p *PebbleDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVData) {
