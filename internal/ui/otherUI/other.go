@@ -4,6 +4,7 @@ import (
 	variable "DatabaseDB"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	// "DatabaseDB/internal/logic/addProjectwindowlogic"
 
 	dbpak "DatabaseDB/internal/Databaces"
+	"DatabaseDB/internal/dberr"
 	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/utils"
 
@@ -311,8 +313,8 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 				if bytes.Equal(key, []byte(valueEntry.Text)) {
 					return
 				}
-				va := logic.QueryKey(valueEntry.Text)
-				if va != nil {
+				_, err := logic.QueryKey(valueEntry.Text)
+				if !errors.Is(err, dberr.ErrKeyNotFound) {
 					dialog.NewConfirm(
 						"⚠️ Duplicate Key",
 						"This key already exists.\nIf you continue, it might be merged and you could lose one of the values.\nDo you still want to continue?",
@@ -335,13 +337,19 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 						mainWindow,
 					).Show()
 					return
+				} else if errors.Is(err, dberr.ErrKeyNotFound) {
+
+					truncatedKey2, err = logic.UpdateKey(key, []byte(valueEntry.Text))
+					if err != nil {
+						dialog.ShowInformation("Error", err.Error(), mainWindow)
+						return
+					}
+				} else {
+					dialog.ShowInformation("Error", err.Error(), mainWindow)
+					return
 				}
 			}
-			truncatedKey2, err = logic.UpdateKey(key, []byte(valueEntry.Text))
-			if err != nil {
-				dialog.ShowInformation("Error", err.Error(), mainWindow)
-				return
-			}
+
 			saveKey.Disable()
 			truncatedText = utils.TruncateString(truncatedKey2, 20)
 			label.SetText(truncatedText)

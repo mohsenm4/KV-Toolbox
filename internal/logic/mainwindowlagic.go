@@ -99,17 +99,16 @@ func AddKeyLogic(iputKey string, valueFinish []byte) error {
 
 }
 
-func QueryKey(iputKey string) []byte {
+func QueryKey(inputKey string) ([]byte, error) {
 
-	key := utils.CleanInput(iputKey)
+	key := utils.CleanInput(inputKey)
 
-	value, err := variable.CurrentDBClient.Get([]byte(key))
+	value, err := variable.CurrentDBClient.Get([]byte("	" + key))
 	if err != nil {
-		fmt.Println("error : delete func logic for get key in databace")
+		return nil, err
 	}
-	defer variable.CurrentDBClient.Close()
 
-	return value
+	return value, nil
 }
 
 func SaveValue(key, value []byte) (string, error) {
