@@ -2,7 +2,6 @@ package otherUI
 
 import (
 	variable "DatabaseDB"
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -300,9 +299,6 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 
 		saveKey.OnTapped = func() {
 			if editType == "value" {
-				if bytes.Equal(value, []byte(valueEntry.Text)) {
-					return
-				}
 				truncatedKey2, err = logic.SaveValue(key, []byte(valueEntry.Text))
 				if err != nil {
 					fmt.Println(err.Error())
@@ -310,9 +306,6 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 				value = []byte(truncatedKey2)
 
 			} else {
-				if bytes.Equal(key, []byte(valueEntry.Text)) {
-					return
-				}
 				_, err := logic.QueryKey(valueEntry.Text)
 				if !errors.Is(err, dberr.ErrKeyNotFound) {
 					dialog.NewConfirm(
