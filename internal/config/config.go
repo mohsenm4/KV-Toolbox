@@ -11,7 +11,6 @@ import (
 
 type Project struct {
 	Name        string `mapstructure:"name"`
-	Comment     string `mapstructure:"comment"`
 	FileAddress string `mapstructure:"fileAddress"`
 	Databace    string `mapstructure:"databace"`
 }
@@ -83,7 +82,6 @@ func (c *Config) Add(data map[string]string) (error, bool) {
 
 	newProject := Project{
 		Name:        data["Name"],
-		Comment:     data["Comment"],
 		FileAddress: data["Addres"],
 		Databace:    data["Database"],
 	}
