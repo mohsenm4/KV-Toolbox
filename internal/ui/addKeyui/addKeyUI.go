@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func OpenWindowAddButton(myApp fyne.App, rightColumnContent *fyne.Container, mainWindow fyne.Window) {
+func OpenWindowAddButton(rightColumnContent *fyne.Container, mainWindow fyne.Window) {
 	var ded *dialog.CustomDialog
 
 	iputKey := widget.NewEntry()
