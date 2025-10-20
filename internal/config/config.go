@@ -20,6 +20,8 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
+	var config Config
+
 	v := viper.New()
 	v.SetConfigType("json")
 
@@ -48,8 +50,6 @@ func LoadConfig() *Config {
 		}
 	}
 
-	var config Config
-
 	err = v.Unmarshal(&config)
 	if err != nil {
 		fmt.Println("Error unmarshalling config:", err)
@@ -60,8 +60,11 @@ func LoadConfig() *Config {
 }
 
 func (c *Config) Write() error {
-	c.v.Set("recentProjects", c.RecentProjects)
-	return c.v.WriteConfig()
+	v := viper.New()
+	v.SetConfigType("json")
+
+	v.Set("recentProjects", c.RecentProjects)
+	return v.WriteConfig()
 }
 
 func (c *Config) Add(data map[string]string) (error, bool) {
@@ -90,7 +93,6 @@ func (c *Config) Remove(projectName string) {
 		}
 	}
 
-	return
 }
 
 // getConfigFilePath determines the best location for the config file
