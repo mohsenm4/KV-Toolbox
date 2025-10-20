@@ -20,7 +20,8 @@ import (
 )
 
 func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Container, rightColumnContentORG *fyne.Container, nameButtonProject *widget.Label, buttonAdd *widget.Button, buttonSearch *widget.Button, buttonDelete *widget.Button, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) {
-	newWindow := a.NewWindow(title)
+
+	var ded *dialog.CustomDialog
 
 	createSeparator := func() *canvas.Line {
 		line := canvas.NewLine(color.Black)
@@ -34,11 +35,6 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 	nameEntry.PlaceHolder = "Name"
 	nameContent := container.NewBorder(nil, nil, lableName, nil, nameEntry)
 
-	lableComment := widget.NewLabel("Comment :")
-	commentEntry := widget.NewEntry()
-	commentEntry.PlaceHolder = "Comment"
-	commentContent := container.NewBorder(nil, nil, lableComment, nil, commentEntry)
-
 	pathEntry := widget.NewEntry()
 	pathEntry.SetPlaceHolder("No folder selected")
 
@@ -46,9 +42,9 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 
 		err := logic.HandleButtonClick(pathEntry.Text, title)
 		if err != nil {
-			dialog.ShowError(err, newWindow)
+			dialog.ShowError(err, mainWindow)
 		} else {
-			dialog.ShowInformation("Success", "Test connection successful.", newWindow)
+			dialog.ShowInformation("Success", "Test connection successful.", mainWindow)
 		}
 	})
 	testConnectionButton.Disable()
@@ -82,9 +78,9 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 					pathEntry.SetText(variable.FolderPath)
 					testConnectionButton.Enable()
 				} else {
-					dialog.ShowInformation("Invalid Folder", "The selected folder does not contain a valid LevelDB manifest file.", newWindow)
+					dialog.ShowInformation("Invalid Folder", "The selected folder does not contain a valid LevelDB manifest file.", mainWindow)
 				}
-			}, newWindow)
+			}, mainWindow)
 			variable.NameData.FilterFormat(folderDialog)
 		} else {
 			folderDialog = dialog.NewFolderOpen(func(lu fyne.ListableURI, err error) {
@@ -102,7 +98,7 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 
 				pathEntry.SetText(variable.FolderPath)
 
-			}, newWindow)
+			}, mainWindow)
 		}
 
 		folderDialog.Show()
@@ -119,19 +115,14 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 		container.NewGridWithColumns(2, openButton, testConnectionButton),
 	)
 
-	buttonCancel := widget.NewButton("Cancel", func() {
-		newWindow.Close()
-	})
-
 	buttonOk := widget.NewButton("Add", func() {
 		data := map[string]string{
 			"Name":     nameEntry.Text,
-			"Comment":  commentEntry.Text,
 			"Addres":   pathEntry.Text,
 			"Database": title,
 		}
 		if nameEntry.Text == "" {
-			dialog.ShowInformation("Error ", "Please fill in the name field", newWindow)
+			dialog.ShowInformation("Error ", "Please fill in the name field", mainWindow)
 			return
 		}
 		datajson, err := variable.CurrentJson.Load()
@@ -140,7 +131,7 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 		}
 		for _, m := range datajson.RecentProjects {
 			if nameEntry.Text == m.Name {
-				dialog.ShowInformation("Error ", "Your database name is duplicate", newWindow)
+				dialog.ShowInformation("Error ", "Your database name is duplicate", mainWindow)
 				return
 			}
 		}
@@ -151,13 +142,13 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 
 			err, addButton = variable.CurrentJson.Add(data)
 			if err != nil {
-				dialog.ShowInformation("error", err.Error(), newWindow)
+				dialog.ShowInformation("error", err.Error(), mainWindow)
 				return
 			}
 		}
 
 		if err != nil {
-			dialog.ShowInformation("Error ", string(err.Error()), newWindow)
+			dialog.ShowInformation("Error ", string(err.Error()), mainWindow)
 		} else {
 			if !addButton {
 
@@ -169,22 +160,15 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 				lastColumnContent.Refresh()
 
 				variable.CreatDatabase = false
-				newWindow.Close()
+				ded.Hide()
 			}
 		}
 	})
 	buttonOk.Importance = widget.HighImportance
 
-	rowBotton := container.NewVBox(
-		layout.NewSpacer(),
-		container.NewGridWithColumns(2, buttonCancel, buttonOk),
-	)
-
 	rightColumnContent := container.NewVBox(
 		layout.NewSpacer(),
 		nameContent,
-		layout.NewSpacer(),
-		commentContent,
 		layout.NewSpacer(),
 		line1,
 		layout.NewSpacer(),
@@ -194,15 +178,13 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 		layout.NewSpacer(),
 		testOpenButton,
 		layout.NewSpacer(),
-		rowBotton,
+		buttonOk,
+		layout.NewSpacer(),
 	)
 
-	newWindow.Resize(fyne.NewSize(700, 400))
-	newWindow.CenterOnScreen()
-	newWindow.SetContent(rightColumnContent)
-	newWindow.Canvas().Focus(nameEntry)
-
-	newWindow.Show()
+	ded = dialog.NewCustom("Add Key and Value", "Cancel", rightColumnContent, mainWindow)
+	ded.Resize(fyne.NewSize(700, 450))
+	ded.Show()
 }
 
 func FormatFilesDatabase(path string) bool {
