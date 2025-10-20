@@ -19,7 +19,7 @@ type Config struct {
 	RecentProjects []Project `mapstructure:"recentProjects"`
 }
 
-func LoadConfig() *Config {
+func LoadConfig() Config {
 	var config Config
 
 	v := viper.New()
@@ -53,10 +53,10 @@ func LoadConfig() *Config {
 	err = v.Unmarshal(&config)
 	if err != nil {
 		fmt.Println("Error unmarshalling config:", err)
-		return nil
+		return Config{}
 	}
 
-	return &config
+	return config
 }
 
 func (c *Config) Write() error {

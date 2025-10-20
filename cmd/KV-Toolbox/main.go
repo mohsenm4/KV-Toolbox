@@ -1,8 +1,8 @@
 package main
 
 import (
-	variable "DatabaseDB"
 	configApp "DatabaseDB/internal/config"
+	"DatabaseDB/internal/model"
 	"DatabaseDB/internal/ui/mainwindow"
 
 	"fyne.io/fyne/v2/app"
@@ -11,7 +11,11 @@ import (
 func main() {
 	myApp := app.New()
 
-	variable.CurrentJson = configApp.NewConfig()
+	config := configApp.LoadConfig()
+
+	app := model.NewApp("ManageDB")
+
+	app.MainWindow.Config = config
 
 	mainwindow.MainWindow(myApp)
 }
