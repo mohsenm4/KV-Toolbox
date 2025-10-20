@@ -50,10 +50,20 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 	testConnectionButton.Disable()
 
 	pathEntry.OnChanged = func(text string) {
-		if text != "" && !variable.CreatDatabase {
-			testConnectionButton.Enable()
-		} else if variable.CreatDatabase {
-			testConnectionButton.Disable()
+		if variable.CreatDatabase {
+			if !testConnectionButton.Disabled() {
+				testConnectionButton.Disable()
+			}
+			return
+		}
+		if text != "" {
+			if testConnectionButton.Disabled() {
+				testConnectionButton.Enable()
+			}
+		} else {
+			if !testConnectionButton.Disabled() {
+				testConnectionButton.Disable()
+			}
 		}
 	}
 	var BoxCreateDatabase *widget.Check
