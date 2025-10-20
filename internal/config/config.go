@@ -1,4 +1,4 @@
-package configApp
+package config
 
 import (
 	"errors"
@@ -13,18 +13,13 @@ type Project struct {
 	Name        string `mapstructure:"name"`
 	Comment     string `mapstructure:"comment"`
 	FileAddress string `mapstructure:"fileAddress"`
-	Databace    string `mapstructure:"databace"`
+	Database    string `mapstructure:"database"`
 }
-
-type JsonInformation struct {
+type Config struct {
 	RecentProjects []Project `mapstructure:"recentProjects"`
 }
 
-type Config struct {
-	v *viper.Viper
-}
-
-func NewConfig() *Config {
+func LoadConfig() *Config {
 	v := viper.New()
 	v.SetConfigType("json")
 
@@ -53,29 +48,25 @@ func NewConfig() *Config {
 		}
 	}
 
-	return &Config{v: v}
-}
+	var config Config
 
-func (c *Config) Load() (JsonInformation, error) {
-	var state JsonInformation
-	if err := c.v.Unmarshal(&state); err != nil {
-		return state, err
+	err = v.Unmarshal(&config)
+	if err != nil {
+		fmt.Println("Error unmarshalling config:", err)
+		return nil
 	}
-	return state, nil
+
+	return &config
 }
 
-func (c *Config) Write(state JsonInformation) error {
-	c.v.Set("recentProjects", state.RecentProjects)
+func (c *Config) Write() error {
+	c.v.Set("recentProjects", c.RecentProjects)
 	return c.v.WriteConfig()
 }
 
 func (c *Config) Add(data map[string]string) (error, bool) {
-	state, err := c.Load()
-	if err != nil {
-		return err, false
-	}
 
-	for _, proj := range state.RecentProjects {
+	for _, proj := range c.RecentProjects {
 		if data["Addres"] == proj.FileAddress {
 			return fmt.Errorf("this database has already been added to your projects under the name '%s'", proj.Name), true
 		}
@@ -85,10 +76,10 @@ func (c *Config) Add(data map[string]string) (error, bool) {
 		Name:        data["Name"],
 		Comment:     data["Comment"],
 		FileAddress: data["Addres"],
-		Databace:    data["Database"],
+		Database:    data["Database"],
 	}
-	state.RecentProjects = append(state.RecentProjects, newProject)
-	return c.Write(state), false
+	c.RecentProjects = append(c.RecentProjects, newProject)
+	return nil, false
 }
 
 func (c *Config) Remove(projectName string) error {
@@ -97,9 +88,9 @@ func (c *Config) Remove(projectName string) error {
 		return err
 	}
 
-	for i, proj := range state.RecentProjects {
+	for i, proj := range state {
 		if proj.Name == projectName {
-			state.RecentProjects = append(state.RecentProjects[:i], state.RecentProjects[i+1:]...)
+			state = append(state[:i], state[i+1:]...)
 			break
 		}
 	}
