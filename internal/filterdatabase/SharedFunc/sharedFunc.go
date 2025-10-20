@@ -116,6 +116,11 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 
 	BoxCreateDatabase = widget.NewCheck("Create Database", func(value bool) {
 
+		if value {
+			testConnectionButton.Disable()
+		} else if pathEntry.Text != "" {
+			testConnectionButton.Enable()
+		}
 		variable.CreatDatabase = value
 
 	})
