@@ -82,20 +82,15 @@ func (c *Config) Add(data map[string]string) (error, bool) {
 	return nil, false
 }
 
-func (c *Config) Remove(projectName string) error {
-	state, err := c.Load()
-	if err != nil {
-		return err
-	}
-
-	for i, proj := range state {
+func (c *Config) Remove(projectName string) {
+	for i, proj := range c.RecentProjects {
 		if proj.Name == projectName {
-			state = append(state[:i], state[i+1:]...)
+			c.RecentProjects = append(c.RecentProjects[:i], c.RecentProjects[i+1:]...)
 			break
 		}
 	}
 
-	return c.Write(state)
+	return
 }
 
 // getConfigFilePath determines the best location for the config file
