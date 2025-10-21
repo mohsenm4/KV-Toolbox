@@ -3,7 +3,7 @@ package main
 import (
 	variable "DatabaseDB"
 	configApp "DatabaseDB/internal/config"
-	"DatabaseDB/internal/ui/mainwindow"
+	"DatabaseDB/internal2/ui/mainwindow"
 
 	"fyne.io/fyne/v2/app"
 )
@@ -13,5 +13,6 @@ func main() {
 
 	variable.CurrentJson = configApp.NewConfig()
 
-	mainwindow.MainWindow(myApp)
+	windiw := mainwindow.NewMainWindow()
+	windiw.MainWindow(myApp)
 }
