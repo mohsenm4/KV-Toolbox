@@ -81,7 +81,7 @@ func MainWindow(myApp fyne.App) {
 	})
 
 	buttonAdd := widget.NewButton("Add", func() {
-		addkeyui.OpenWindowAddButton(myApp, rightColumnAll, mainWindow)
+		addkeyui.OpenWindowAddButton(rightColumnAll, mainWindow)
 	})
 	buttonAdd.Disable()
 	searchButton.Disable()
