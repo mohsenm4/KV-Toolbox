@@ -2,7 +2,6 @@ package mainwindow
 
 import (
 	variable "DatabaseDB"
-	"image/color"
 
 	Filterbadger "DatabaseDB/internal/filterdatabase/badger"
 	FilterLeveldb "DatabaseDB/internal/filterdatabase/leveldb"
@@ -10,11 +9,9 @@ import (
 	addkeyui "DatabaseDB/internal/ui/addKeyui"
 	deletkeyui "DatabaseDB/internal/ui/deletKeyUi"
 	"DatabaseDB/internal/ui/otherUI"
-	searchkeyui "DatabaseDB/internal/ui/searchKeyui"
 	"DatabaseDB/internal/utils"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
@@ -29,15 +26,10 @@ type MainWindow2 struct {
 	LeftColumn  *LeftColumn2
 	RightColumn *RightColumn2
 	EditColumn  *EditColumn2
-	Other       *OtherUI2
 	Objects     ObjectsMainWindow
 }
 
 type ObjectsMainWindow struct {
-	Spacer *widget.Label
-}
-
-type OtherUI2 struct {
 	Spacer *widget.Label
 }
 
@@ -60,70 +52,49 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 	// right column show key
 	m.RightColumn.Container = container.NewVBox()
 
-	// right column Edit
-	var rightColumEdit *fyne.Container
-
-	line := canvas.NewLine(color.Black)
-	line.StrokeWidth = 2
-
 	// key top window for colunm keys
-	keyRightColunm := widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	m.RightColumn.KeyRightColunm = widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	// value top window for colunm values
-	valueRightColunm := widget.NewLabelWithStyle("value", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
-
-	// column key and value
-	keyAndRight := container.NewGridWithColumns(6, keyRightColunm, widget.NewLabel(""), valueRightColunm, widget.NewLabel(""))
+	m.RightColumn.ValueRightColunm = widget.NewLabelWithStyle("value", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 
 	// name bottom project in colunm right
-	nameButtonProject := widget.NewLabelWithStyle(
+	m.RightColumn.NameButtonProject = widget.NewLabelWithStyle(
 		"",
 		fyne.TextAlignCenter,
 		fyne.TextStyle{Bold: true},
 	)
 
-	saveEditKey := widget.NewButton("Save", nil)
-	saveEditKey.Disable()
+	m.EditColumn.SaveEditKey = widget.NewButton("Save", nil)
+	m.EditColumn.SaveEditKey.Disable()
 
-	cancelEditKey := widget.NewButton("Cancle", func() {
-		utils.CheckCondition(rightColumEdit)
+	m.EditColumn.CancelEditKey = widget.NewButton("Cancle", func() {
+		utils.CheckCondition(m.EditColumn.Container)
 	})
 
-	saveAndCancle = container.NewGridWithColumns(2, cancelEditKey, saveEditKey)
+	m.EditColumn.Container = container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), m.EditColumn.SaveAndCancle(), nil, nil, m.EditColumn.Container)
 
-	rightColumEdit = container.NewVBox()
-
-	columnEdit := container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), saveAndCancle, nil, nil, rightColumEdit)
-
-	searchButton := widget.NewButton("Search", func() {
-
-		searchkeyui.SearchKeyUi(m.RightColumn.Container, rightColumEdit, saveEditKey, m.Window)
+	m.RightColumn.SearchButton = widget.NewButton("Search", func() {
+		m.SearchKeyUi()
 	})
 
 	buttonAdd := widget.NewButton("Add", func() {
-		addkeyui.OpenWindowAddButton(myApp, m.RightColumn.Container, m.Window)
+		addkeyui.OpenWindowAddButton(m.RightColumn.Container, m.Window)
 	})
 	buttonAdd.Disable()
-	searchButton.Disable()
+	m.RightColumn.SearchButton.Disable()
 
 	buttonDelete := widget.NewButton("Delete", func() {
 		deletkeyui.DeleteKeyUi(m.RightColumn.Container, m.Window)
 	})
 
-	topRightColumn := container.NewVBox(
-		nameButtonProject,
-		line,
-		m.Objects.Spacer,
-		container.NewGridWithColumns(3, buttonDelete, searchButton, buttonAdd),
-		keyAndRight,
-	)
 	var pluss *widget.Button
 	toggleButtonsContainer := container.NewVBox()
 	buttonsVisible := false
 
 	buttonDelete.Disable()
 	// left column
-	leftColumnAll := otherUI.SetupLastColumn(m.RightColumn.Container, nameButtonProject, buttonAdd, searchButton, buttonDelete, rightColumEdit, saveEditKey, m.Window)
+	leftColumnAll := otherUI.SetupLastColumn(m.RightColumn.Container, m.RightColumn.NameButtonProject, buttonAdd, m.RightColumn.SearchButton, buttonDelete, m.EditColumn.Container, m.EditColumn.SaveEditKey, m.Window)
 	m.Objects.Spacer.Resize(fyne.NewSize(0, 30))
 
 	for _, name := range variable.NameDatabase {
@@ -142,7 +113,7 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 				//	variable.NameData = Filterredis.NewFileterRedis()
 
 			}
-			variable.NameData.FormCreate(myApp, name, leftColumnAll, m.RightColumn.Container, nameButtonProject, buttonAdd, searchButton, buttonDelete, rightColumEdit, saveEditKey, m.Window)
+			variable.NameData.FormCreate(myApp, name, leftColumnAll, m.RightColumn.Container, m.RightColumn.NameButtonProject, buttonAdd, m.RightColumn.SearchButton, buttonDelete, m.EditColumn.Container, m.EditColumn.SaveEditKey, m.Window)
 		})
 		BottomDatabase = append(BottomDatabase, leveldbButton)
 	}
@@ -179,7 +150,7 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 	darkLight := otherUI.SetupThemeButtons(myApp)
 
 	// all window
-	containerAll := ColumnContent(m.RightColumn.Container, columnEdit, leftColumnAll, topLeftColumn, darkLight, topRightColumn, rightColumEdit, saveEditKey, m.Window)
+	containerAll := ColumnContent(m.RightColumn.Container, m.EditColumn.Container, leftColumnAll, topLeftColumn, darkLight, m.RightColumn.TopRightColumn(), m.EditColumn.Container, m.EditColumn.SaveEditKey, m.Window)
 	m.Window.CenterOnScreen()
 	m.Window.SetContent(containerAll)
 	m.Window.Resize(fyne.NewSize(1200, 700))
