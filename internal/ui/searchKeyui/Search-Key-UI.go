@@ -51,8 +51,8 @@ func ShowSearchKeyDialog(rightColumn *fyne.Container, editColumn *fyne.Container
 			return
 		}
 
-		utils.CheckCondition(editColumn)
-		utils.CheckCondition(rightColumn)
+		utils.ClearContainerIfNotEmpty(editColumn)
+		utils.ClearContainerIfNotEmpty(rightColumn)
 
 		var truncatedValue string
 
