@@ -15,26 +15,26 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 )
 
-func SearchKeyUi(rightColumnContent *fyne.Container, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) {
-	valueEntry := widget.NewMultiLineEntry()
-	valueEntry.SetPlaceHolder("Key for Search")
+func ShowSearchKeyDialog(rightColumn *fyne.Container, editColumn *fyne.Container, saveButton *widget.Button, mainWindow fyne.Window) {
+	keyEntry := widget.NewMultiLineEntry()
+	keyEntry.SetPlaceHolder("Enter key to search")
 
-	buttomSearch := widget.NewButton("Search", nil)
-	buttomSearch.Importance = widget.HighImportance
+	searchButton := widget.NewButton("Search", nil)
+	searchButton.Importance = widget.HighImportance
 
-	modalContent := container.NewVBox(
-		widget.NewLabel("Enter the desired key"),
-		valueEntry,
+	dialogContent := container.NewVBox(
+		widget.NewLabel("Enter the key you want to search for"),
+		keyEntry,
 		layout.NewSpacer(),
-		buttomSearch,
+		searchButton,
 		layout.NewSpacer(),
 	)
 
-	d := dialog.NewCustom("Search in the database", "Close", modalContent, mainWindow)
-	d.Resize(fyne.NewSize(600, 300))
+	searchDialog := dialog.NewCustom("Search in Database", "Close", dialogContent, mainWindow)
+	searchDialog.Resize(fyne.NewSize(600, 300))
 
-	buttomSearch.OnTapped = func() {
-		keys, values, err := logic.SearchDatabase(valueEntry.Text)
+	searchButton.OnTapped = func() {
+		keys, values, err := logic.SearchDatabase(keyEntry.Text)
 		if err != nil {
 			dialog.ShowInformation(
 				"Database Error",
@@ -51,39 +51,39 @@ func SearchKeyUi(rightColumnContent *fyne.Container, columnEditKey *fyne.Contain
 			return
 		}
 
-		utils.CheckCondition(columnEditKey)
-		utils.CheckCondition(rightColumnContent)
+		utils.CheckCondition(editColumn)
+		utils.CheckCondition(rightColumn)
 
 		var truncatedValue string
 
 		for i := 0; i < len(values); i++ {
 			if i > 40 {
 				dialog.ShowInformation("Warning",
-					"The result of your keys is more than 60. Only the first 60 are shown.\nIf your key is not among these, please search more precisely.",
+					"The number of results exceeds 60. Only the first 60 are shown.\nIf your key is not among these, please search more precisely.",
 					mainWindow)
 				break
 			}
 
 			truncatedKey := utils.TruncateString(string(keys[i]), 20)
-			typeValue := mimetype.Detect(values[i])
+			detectedType := mimetype.Detect(values[i])
 
-			if typeValue.Extension() != ".txt" {
-				truncatedValue = fmt.Sprintf("* %s . . .", typeValue.Extension())
+			if detectedType.Extension() != ".txt" {
+				truncatedValue = fmt.Sprintf("* %s . . .", detectedType.Extension())
 			} else {
 				truncatedValue = utils.TruncateString(string(values[i]), 20)
 			}
 
-			valueLabel := otherUI.BuidLableKeyAndValue("value", keys[i], values[i], truncatedValue, rightColumnContent, columnEditKey, saveKey, mainWindow)
-			keyLabel := otherUI.BuidLableKeyAndValue("key", keys[i], values[i], truncatedKey, rightColumnContent, columnEditKey, saveKey, mainWindow)
+			valueLabel := otherUI.BuidLableKeyAndValue("value", keys[i], values[i], truncatedValue, rightColumn, editColumn, saveButton, mainWindow)
+			keyLabel := otherUI.BuidLableKeyAndValue("key", keys[i], values[i], truncatedKey, rightColumn, editColumn, saveButton, mainWindow)
 
-			buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
-			rightColumnContent.Add(buttonRow)
-			rightColumnContent.Refresh()
+			row := container.NewGridWithColumns(2, keyLabel, valueLabel)
+			rightColumn.Add(row)
+			rightColumn.Refresh()
 		}
 
-		d.Hide()
+		searchDialog.Hide()
 		variable.ResultSearch = true
 	}
 
-	d.Show()
+	searchDialog.Show()
 }

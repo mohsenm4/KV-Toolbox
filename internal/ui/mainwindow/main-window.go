@@ -77,7 +77,7 @@ func MainWindow(myApp fyne.App) {
 
 	searchButton := widget.NewButton("Search", func() {
 
-		searchkeyui.SearchKeyUi(rightColumnAll, rightColumEdit, saveEditKey, mainWindow)
+		searchkeyui.ShowSearchKeyDialog(rightColumnAll, rightColumEdit, saveEditKey, mainWindow)
 	})
 
 	buttonAdd := widget.NewButton("Add", func() {
