@@ -11,41 +11,44 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func DeleteKeyUi(rightColumnContent *fyne.Container, mainWindow fyne.Window) {
+func ShowDeleteKeyDialog(rightColumn *fyne.Container, mainWindow fyne.Window) {
+	// Input field for key to delete
+	keyEntry := widget.NewMultiLineEntry()
+	keyEntry.Resize(fyne.NewSize(500, 500))
+	keyEntry.SetPlaceHolder("Enter key to delete")
 
-	valueEntry := widget.NewMultiLineEntry()
-	valueEntry.Resize(fyne.NewSize(500, 500))
-	valueEntry.SetPlaceHolder("Key for Delete")
+	// Delete button
+	deleteButton := widget.NewButton("Delete", nil)
+	deleteButton.Importance = widget.HighImportance
 
-	buttomDelete := widget.NewButton("Delete", nil)
-	buttomDelete.Importance = widget.HighImportance
-
-	editContent := container.NewVBox(
-		widget.NewLabel("Enter the desired key"),
-		valueEntry,
+	// Layout for dialog content
+	dialogContent := container.NewVBox(
+		widget.NewLabel("Enter the key you want to delete"),
+		keyEntry,
 		layout.NewSpacer(),
-		buttomDelete,
+		deleteButton,
 		layout.NewSpacer(),
 	)
 
-	ded := dialog.NewCustom("Delete in the database", "Close", editContent, mainWindow)
-	ded.Resize(fyne.NewSize(600, 300))
+	// Dialog setup
+	deleteDialog := dialog.NewCustom("Delete from Database", "Close", dialogContent, mainWindow)
+	deleteDialog.Resize(fyne.NewSize(600, 300))
 
-	buttomDelete.OnTapped = func() {
+	// Button click handler
+	deleteButton.OnTapped = func() {
+		message := fmt.Sprintf("Are you sure you want to delete the key: _%s_?", keyEntry.Text)
 
-		message := fmt.Sprintf("Are you sure you want to delete the key: _ %s _?", valueEntry.Text)
-
-		dialog.ShowConfirm("Confirm Delete", message,
-			func(response bool) {
-				if response {
-					err := logic.DeleteKeyLogic(valueEntry.Text)
-					if err != nil {
-						dialog.ShowInformation("Error", err.Error(), mainWindow)
-					} else {
-						ded.Hide()
-					}
+		dialog.ShowConfirm("Confirm Delete", message, func(confirmed bool) {
+			if confirmed {
+				err := logic.DeleteKeyLogic(keyEntry.Text)
+				if err != nil {
+					dialog.ShowInformation("Error", err.Error(), mainWindow)
+				} else {
+					deleteDialog.Hide()
 				}
-			}, mainWindow)
+			}
+		}, mainWindow)
 	}
-	ded.Show()
+
+	deleteDialog.Show()
 }
