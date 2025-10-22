@@ -164,7 +164,7 @@ func ProjectButton(inputText string, lastColumnContent *fyne.Container, path str
 		previousRefreshButton = refreshButton
 
 		variable.ItemsAdded = true
-		utils.Checkdatabace(path, nameDatabace)
+		utils.OpenDatabase(path, nameDatabace)
 		buttonAdd.Enable()
 		buttonSearch.Enable()
 		buttonDelete.Enable()
@@ -175,8 +175,8 @@ func ProjectButton(inputText string, lastColumnContent *fyne.Container, path str
 		lastPage = 0
 		variable.PreviousOffsetY = 0
 		lastStart = nil
-		utils.CheckCondition(rightColumnContentORG)
-		utils.CheckCondition(columnEditKey)
+		utils.ClearContainerIfNotEmpty(rightColumnContentORG)
+		utils.ClearContainerIfNotEmpty(columnEditKey)
 		UpdatePage(rightColumnContentORG, columnEditKey, saveKey, mainWindow)
 		nameButtonProject.Text = ""
 		nameButtonProject.Text = inputText + " - " + nameDatabace
@@ -189,8 +189,8 @@ func ProjectButton(inputText string, lastColumnContent *fyne.Container, path str
 	closeButton = widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
 
 		if nameButtonProject.Text == inputText+" - "+nameDatabace {
-			utils.CheckCondition(rightColumnContentORG)
-			utils.CheckCondition(columnEditKey)
+			utils.ClearContainerIfNotEmpty(rightColumnContentORG)
+			utils.ClearContainerIfNotEmpty(columnEditKey)
 
 			buttonAdd.Disable()
 			buttonSearch.Disable()
@@ -215,7 +215,7 @@ func ProjectButton(inputText string, lastColumnContent *fyne.Container, path str
 		if nameButtonProject.Text == inputText+" - "+nameDatabace {
 
 			variable.ItemsAdded = true
-			utils.Checkdatabace(path, nameDatabace)
+			utils.OpenDatabase(path, nameDatabace)
 			buttonAdd.Enable()
 			buttonSearch.Enable()
 			buttonDelete.Enable()
@@ -226,8 +226,8 @@ func ProjectButton(inputText string, lastColumnContent *fyne.Container, path str
 			lastPage = 0
 			variable.PreviousOffsetY = 0
 			lastStart = nil
-			utils.CheckCondition(rightColumnContentORG)
-			utils.CheckCondition(columnEditKey)
+			utils.ClearContainerIfNotEmpty(rightColumnContentORG)
+			utils.ClearContainerIfNotEmpty(columnEditKey)
 			UpdatePage(rightColumnContentORG, columnEditKey, saveKey, mainWindow)
 
 			nameButtonProject.Refresh()
@@ -258,7 +258,7 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 		label.Refresh()
 		lastLableKeyAndValue = label
 
-		utils.CheckCondition(columnEditKey)
+		utils.ClearContainerIfNotEmpty(columnEditKey)
 		typeValue := mimetype.Detect([]byte(value))
 
 		labelEdit := widget.NewLabel("")
@@ -269,7 +269,7 @@ func BuidLableKeyAndValue(editType string, key []byte, value []byte, nameLabel s
 
 			switch {
 			case strings.HasPrefix(typeValue.String(), "image/"):
-				go utils.ImageShow([]byte(key), []byte(value), columnEditKey, mainWindow)
+				go utils.ShowImage([]byte(key), []byte(value), columnEditKey, mainWindow)
 				truncatedKey2 = fmt.Sprintf("* %s . . .", typeValue.Extension())
 
 			case strings.HasPrefix(typeValue.String(), "text/") || strings.HasPrefix(typeValue.String(), "application/"):
