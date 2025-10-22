@@ -167,8 +167,8 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 		} else {
 			if !addButton {
 
-				utils.CheckCondition(rightColumnContentORG)
-				utils.CheckCondition(columnEditKey)
+				utils.ClearContainerIfNotEmpty(rightColumnContentORG)
+				utils.ClearContainerIfNotEmpty(columnEditKey)
 
 				buttonContainer := otherUI.ProjectButton(nameEntry.Text, lastColumnContent, pathEntry.Text, rightColumnContentORG, nameButtonProject, buttonAdd, buttonSearch, buttonDelete, title, columnEditKey, saveKey, mainWindow)
 				lastColumnContent.Add(buttonContainer)

@@ -12,7 +12,7 @@ import (
 )
 
 func HandleButtonClick(path string, nameDatabace string) error {
-	err := utils.Checkdatabace(path, nameDatabace)
+	err := utils.OpenDatabase(path, nameDatabace)
 	if err != nil {
 		return err
 	}
