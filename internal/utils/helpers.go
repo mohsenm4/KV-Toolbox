@@ -5,7 +5,7 @@ import (
 	variable "DatabaseDB"
 	"DatabaseDB/internal/Databaces/PebbleDB"
 	badgerDB "DatabaseDB/internal/Databaces/badger"
-	leveldbb "DatabaseDB/internal/Databaces/leveldb"
+	leveldbDB "DatabaseDB/internal/Databaces/leveldb"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -18,72 +18,73 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-var ValueImage []byte
+var ImageBuffer []byte
 
+// TappableLabel represents a label that responds to click/tap events.
 type TappableLabel struct {
 	widget.Label
-	onTapped func()
+	OnTapped func()
 }
 
-func NewTappableLabel(text string, tapped func()) *TappableLabel {
+// NewTappableLabel creates a new tappable label with a click handler.
+func NewTappableLabel(text string, onTapped func()) *TappableLabel {
 	label := &TappableLabel{
 		Label: widget.Label{
 			Text: text,
 		},
-		onTapped: tapped,
+		OnTapped: onTapped,
 	}
 	label.ExtendBaseWidget(label)
 	return label
 }
 
+// Tapped triggers the assigned click handler.
 func (t *TappableLabel) Tapped(_ *fyne.PointEvent) {
-	t.onTapped()
+	t.OnTapped()
 }
 
+// TruncateString shortens a string and adds "..." if it exceeds a given length or contains multiple lines.
 func TruncateString(input string, length int) string {
-	nameData := input
-	if len(nameData) > length {
-		nameData = nameData[:length] + ". . ."
+	result := input
+	if len(result) > length {
+		result = result[:length] + "..."
 	}
-	parts := strings.Split(nameData, "\n")
-	if len(parts) > 1 {
-
-		nameData = parts[0] + " . . ."
+	lines := strings.Split(result, "\n")
+	if len(lines) > 1 {
+		result = lines[0] + "..."
 	}
-
-	return nameData
+	return result
 }
 
-func CheckCondition(rightColumnContent *fyne.Container) {
-	if len(rightColumnContent.Objects) > 0 {
-		rightColumnContent.Objects = []fyne.CanvasObject{}
-		rightColumnContent.Refresh()
+// ClearContainerIfNotEmpty clears the container if it contains any objects.
+func ClearContainerIfNotEmpty(container *fyne.Container) {
+	if len(container.Objects) > 0 {
+		container.Objects = []fyne.CanvasObject{}
+		container.Refresh()
 	}
 }
 
-func Checkdatabace(test string, nameDatabace string) error {
-	//parts := strings.Split(test, "|-|")
-
+// OpenDatabase initializes and opens a selected database client based on its name.
+func OpenDatabase(path string, dbName string) error {
 	if variable.CurrentDBClient != nil {
 		variable.CurrentDBClient.Close()
 	}
-	switch nameDatabace {
-	case "levelDB":
-		variable.CurrentDBClient = leveldbb.NewDataBaseLeveldb(test)
-	case "Pebble":
-		variable.CurrentDBClient = PebbleDB.NewDataBasePebble(test)
-	case "Badger":
-		variable.CurrentDBClient = badgerDB.NewDataBaseBadger(test)
-	case "Redis":
 
-		//variable.CurrentDBClient = Redisdb.NewDataBaseRedis(parts[0], parts[1], parts[2])
+	switch dbName {
+	case "levelDB":
+		variable.CurrentDBClient = leveldbDB.NewDataBaseLeveldb(path)
+	case "Pebble":
+		variable.CurrentDBClient = PebbleDB.NewDataBasePebble(path)
+	case "Badger":
+		variable.CurrentDBClient = badgerDB.NewDataBaseBadger(path)
+	case "Redis":
+		// TODO: Add Redis database connection initialization here.
 	}
+
 	variable.CurrentDBClient.Open()
 
-	if nameDatabace != "Redis" {
-
-		if _, err := os.Stat(test); os.IsNotExist(err) && !variable.CreatDatabase {
-
+	if dbName != "Redis" {
+		if _, err := os.Stat(path); os.IsNotExist(err) && !variable.CreatDatabase {
 			return err
 		}
 	}
@@ -91,45 +92,43 @@ func Checkdatabace(test string, nameDatabace string) error {
 	return nil
 }
 
+// CleanInput trims whitespace from input strings.
 func CleanInput(input string) string {
-	cleaned := strings.TrimSpace(input)
-	return cleaned
+	return strings.TrimSpace(input)
 }
 
-func ImageShow(key []byte, value []byte, mainContainer *fyne.Container, editWindow fyne.Window) {
-	var lableAddpicture *widget.Button
+// ShowImage loads and displays an image from bytes and allows updating it via file selection.
+func ShowImage(key []byte, value []byte, container *fyne.Container, parentWindow fyne.Window) {
+	var addImageButton *widget.Button
 	var image *canvas.Image
 
 	image = canvas.NewImageFromResource(fyne.NewStaticResource("placeholder.png", value))
 	image.FillMode = canvas.ImageFillContain
 	image.SetMinSize(fyne.NewSize(300, 300))
-	mainContainer.Add(image)
+	container.Add(image)
 
-	lableAddpicture = widget.NewButton("+", func() {
-		folderPath := dialog.NewFileOpen(func(dir fyne.URIReadCloser, err error) {
-			if err != nil || dir == nil {
-				fmt.Println("Error opening folder or no folder selected")
+	addImageButton = widget.NewButton("+", func() {
+		fileDialog := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+			if err != nil || reader == nil {
+				fmt.Println("Error opening image or no file selected")
 				return
 			}
 
 			go func() {
-
-				valueFinish, err := ioutil.ReadAll(dir)
+				data, err := ioutil.ReadAll(reader)
 				if err != nil {
-					fmt.Print("Error reading file:", err)
+					fmt.Println("Error reading image:", err)
 					return
 				}
 
-				image.Resource = fyne.NewStaticResource("image.png", valueFinish)
+				image.Resource = fyne.NewStaticResource("image.png", data)
 				image.Refresh()
-				ValueImage = valueFinish
+				ImageBuffer = data
 			}()
+		}, parentWindow)
 
-		}, editWindow)
-
-		folderPath.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".gif"}))
-		folderPath.Show()
+		fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".gif"}))
+		fileDialog.Show()
 	})
-	mainContainer.Add(lableAddpicture)
-
+	container.Add(addImageButton)
 }
