@@ -7,6 +7,7 @@ import (
 	Filterbadger "DatabaseDB/internal/filterdatabase/badger"
 	FilterLeveldb "DatabaseDB/internal/filterdatabase/leveldb"
 	Filterpebbledb "DatabaseDB/internal/filterdatabase/pebble"
+	"DatabaseDB/internal/logic/pref"
 	addkeyui "DatabaseDB/internal/ui/addKeyui"
 	deletkeyui "DatabaseDB/internal/ui/deletKeyUi"
 	"DatabaseDB/internal/ui/otherUI"
@@ -145,6 +146,7 @@ func MainWindow(myApp fyne.App) {
 	mainWindow.SetCloseIntercept(func() {
 		dialog.ShowConfirm("close?", "Do you want to go out?", func(confirm bool) {
 			if confirm {
+				variable.PrefValue.SaveDatabase(variable.PrefValue.ListDB, pref.KeyListDB)
 				mainWindow.Close()
 			}
 		}, mainWindow)
