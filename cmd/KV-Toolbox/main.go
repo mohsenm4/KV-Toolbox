@@ -13,6 +13,6 @@ func main() {
 
 	variable.CurrentJson = configApp.NewConfig()
 
-	windiw := mainwindow.NewMainWindow()
+	windiw := mainwindow.NewMainWindow("ManageDB")
 	windiw.MainWindow(myApp)
 }

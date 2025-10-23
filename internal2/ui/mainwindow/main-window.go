@@ -2,6 +2,7 @@ package mainwindow
 
 import (
 	variable "DatabaseDB"
+	"fmt"
 
 	Filterbadger "DatabaseDB/internal/filterdatabase/badger"
 	FilterLeveldb "DatabaseDB/internal/filterdatabase/leveldb"
@@ -26,26 +27,65 @@ type MainWindow2 struct {
 	LeftColumn  *LeftColumn2
 	RightColumn *RightColumn2
 	EditColumn  *EditColumn2
-	Objects     ObjectsMainWindow
+	Objects     *ObjectsMainWindow
 }
 
 type ObjectsMainWindow struct {
 	Spacer *widget.Label
 }
 
-var saveAndCancle *fyne.Container
-
-var leveldbButton *widget.Button
-var BottomDatabase []*widget.Button
-
-func NewMainWindow() *MainWindow2 {
-	return &MainWindow2{}
+func NewMainWindow(name string) *MainWindow2 {
+	return &MainWindow2{
+		NameWindow: name,
+		LeftColumn: &LeftColumn2{
+			Container:              container.NewVBox(),
+			ToggleButtonsContainer: container.NewVBox(),
+			DarkLight:              container.NewVBox(),
+		},
+		RightColumn: &RightColumn2{
+			Container: container.NewVBox(),
+		},
+		EditColumn: &EditColumn2{
+			Container: container.NewVBox(),
+			Edit2:     container.NewVBox(),
+		},
+		Objects: &ObjectsMainWindow{
+			Spacer: widget.NewLabel(""),
+		},
+	}
 }
 
 func (m *MainWindow2) MainWindow(myApp fyne.App) {
 
 	m.Window = myApp.NewWindow(m.NameWindow)
 	m.Window.SetMaster()
+
+	// Edit
+	m.EditColumn.CancelEditKey = widget.NewButton("", func() {})
+	m.EditColumn.SaveEditKey = widget.NewButton("", func() {})
+	m.EditColumn.Container = container.NewVBox()
+
+	// Right
+	m.RightColumn.ButtonAdd = widget.NewButton("", func() {})
+	m.RightColumn.ButtonDelete = widget.NewButton("", func() {})
+	m.RightColumn.Container = container.NewVBox()
+	m.RightColumn.KeyRightColunm = widget.NewLabel("")
+	m.RightColumn.NameButtonProject = widget.NewLabel("")
+	m.RightColumn.SearchButton = widget.NewButton("", func() {})
+	m.RightColumn.Spacer = widget.NewLabel("")
+	m.RightColumn.ValueRightColunm = widget.NewLabel("")
+
+	// Left
+
+	m.LeftColumn.BottomDatabase = []*widget.Button{}
+	m.LeftColumn.Container = container.NewVBox()
+	m.LeftColumn.DarkLight = container.NewVBox()
+	m.LeftColumn.LeveldbButton = widget.NewButton("", func() {})
+	m.LeftColumn.Pluss = widget.NewButton("", func() {})
+	m.LeftColumn.PreviousClose = widget.NewButton("", func() {})
+	m.LeftColumn.PreviousProject = widget.NewButton("", func() {})
+	m.LeftColumn.PreviousRefreshButton = widget.NewButton("", func() {})
+	m.LeftColumn.ToggleButtonsContainer = container.NewVBox()
 
 	m.Objects.Spacer = widget.NewLabel("")
 
@@ -65,42 +105,39 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		fyne.TextStyle{Bold: true},
 	)
 
-	m.EditColumn.SaveEditKey = widget.NewButton("Save", nil)
+	m.EditColumn.SaveEditKey = widget.NewButton("Save", func() {})
 	m.EditColumn.SaveEditKey.Disable()
 
 	m.EditColumn.CancelEditKey = widget.NewButton("Cancle", func() {
 		utils.CheckCondition(m.EditColumn.Container)
 	})
 
-	m.EditColumn.Container = container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), m.EditColumn.SaveAndCancle(), nil, nil, m.EditColumn.Container)
-
 	m.RightColumn.SearchButton = widget.NewButton("Search", func() {
 		m.SearchKeyUi()
 	})
 
-	buttonAdd := widget.NewButton("Add", func() {
+	m.RightColumn.ButtonAdd = widget.NewButton("Add", func() {
 		addkeyui.OpenWindowAddButton(m.RightColumn.Container, m.Window)
 	})
-	buttonAdd.Disable()
+	m.RightColumn.ButtonAdd.Disable()
 	m.RightColumn.SearchButton.Disable()
 
-	buttonDelete := widget.NewButton("Delete", func() {
+	m.RightColumn.ButtonDelete = widget.NewButton("Delete", func() {
 		deletkeyui.DeleteKeyUi(m.RightColumn.Container, m.Window)
 	})
 
-	var pluss *widget.Button
-	toggleButtonsContainer := container.NewVBox()
+	m.LeftColumn.ToggleButtonsContainer = container.NewVBox()
 	buttonsVisible := false
 
-	buttonDelete.Disable()
+	m.RightColumn.ButtonDelete.Disable()
 	// left column
-	leftColumnAll := otherUI.SetupLastColumn(m.RightColumn.Container, m.RightColumn.NameButtonProject, buttonAdd, m.RightColumn.SearchButton, buttonDelete, m.EditColumn.Container, m.EditColumn.SaveEditKey, m.Window)
+	leftColumnAll := m.SetupLastColumn()
 	m.Objects.Spacer.Resize(fyne.NewSize(0, 30))
 
 	for _, name := range variable.NameDatabase {
 
-		leveldbButton = widget.NewButton(name, func() {
-			toggleButtonsContainer.Objects = nil
+		m.LeftColumn.LeveldbButton = widget.NewButton(name, func() {
+			m.LeftColumn.ToggleButtonsContainer.Objects = nil
 			buttonsVisible = false
 			switch name {
 			case "levelDB":
@@ -113,24 +150,24 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 				//	variable.NameData = Filterredis.NewFileterRedis()
 
 			}
-			variable.NameData.FormCreate(myApp, name, leftColumnAll, m.RightColumn.Container, m.RightColumn.NameButtonProject, buttonAdd, m.RightColumn.SearchButton, buttonDelete, m.EditColumn.Container, m.EditColumn.SaveEditKey, m.Window)
+			variable.NameData.FormCreate(myApp, name, leftColumnAll, m.RightColumn.Container, m.RightColumn.NameButtonProject, m.RightColumn.ButtonAdd, m.RightColumn.SearchButton, m.RightColumn.ButtonDelete, m.EditColumn.Container, m.EditColumn.SaveEditKey, m.Window)
 		})
-		BottomDatabase = append(BottomDatabase, leveldbButton)
+		m.LeftColumn.BottomDatabase = append(m.LeftColumn.BottomDatabase, m.LeftColumn.LeveldbButton)
 	}
 
-	pluss = widget.NewButton("+", func() {
+	m.LeftColumn.Pluss = widget.NewButton("+", func() {
 		if buttonsVisible {
 
-			toggleButtonsContainer.Objects = nil
+			m.LeftColumn.ToggleButtonsContainer.Objects = nil
 		} else {
 
-			for _, m := range BottomDatabase {
+			for _, m2 := range m.LeftColumn.BottomDatabase {
 
-				toggleButtonsContainer.Add(m)
+				m.LeftColumn.ToggleButtonsContainer.Add(m2)
 			}
 		}
 		buttonsVisible = !buttonsVisible
-		toggleButtonsContainer.Refresh()
+		m.LeftColumn.ToggleButtonsContainer.Refresh()
 	})
 
 	m.Window.SetCloseIntercept(func() {
@@ -141,36 +178,40 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		}, m.Window)
 	})
 
-	topLeftColumn := container.NewVBox(
-		pluss,
-		toggleButtonsContainer,
-		m.Objects.Spacer,
-	)
-
-	darkLight := otherUI.SetupThemeButtons(myApp)
+	m.LeftColumn.DarkLight = m.SetupThemeButtons(myApp)
 
 	// all window
-	containerAll := ColumnContent(m.RightColumn.Container, m.EditColumn.Container, leftColumnAll, topLeftColumn, darkLight, m.RightColumn.TopRightColumn(), m.EditColumn.Container, m.EditColumn.SaveEditKey, m.Window)
+	containerAll := m.ColumnContent()
 	m.Window.CenterOnScreen()
 	m.Window.SetContent(containerAll)
 	m.Window.Resize(fyne.NewSize(1200, 700))
 	m.Window.ShowAndRun()
 }
 
-func LeftColumn(leftColumnAll *fyne.Container, topLeftColumn *fyne.Container, darkLight *fyne.Container) *fyne.Container {
-	lastColumnScrollable := container.NewVScroll(leftColumnAll)
+func (m *MainWindow2) LeftColumn2() fyne.CanvasObject {
+	lastColumnScrollable := container.NewVScroll(m.LeftColumn.Container)
 
-	mainContent := container.NewBorder(topLeftColumn, darkLight, nil, nil, lastColumnScrollable)
+	mainContent := container.NewBorder(m.TopLeftColumn2(), m.LeftColumn.DarkLight, nil, nil, lastColumnScrollable)
 	return mainContent
 }
 
-func RightColumn(rightColumnAll *fyne.Container, topRightColumn *fyne.Container, rightColumEdit *fyne.Container, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) fyne.CanvasObject {
-	rightColumnScrollable := container.NewVScroll(rightColumnAll)
+func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
+	if mi.RightColumn.Container == nil {
+		mi.RightColumn.Container = container.NewVBox()
+	}
+	if mi.EditColumn.Container == nil {
+		fmt.Println("")
+	}
+
+	if mi.TopRightColumn() == nil {
+		fmt.Println("")
+	}
+	rightColumnScrollable := container.NewVScroll(mi.RightColumn.Container)
 
 	up := false
 
 	rightColumnScrollable.OnScrolled = func(p fyne.Position) {
-		maxScroll := rightColumnAll.MinSize().Height - rightColumnScrollable.Size().Height
+		maxScroll := mi.RightColumn.Container.MinSize().Height - rightColumnScrollable.Size().Height
 
 		if up && p.Y == 0 && !variable.ResultSearch {
 			variable.CurrentPage--
@@ -179,10 +220,10 @@ func RightColumn(rightColumnAll *fyne.Container, topRightColumn *fyne.Container,
 				variable.CurrentPage = 3
 				return
 			}
-			numberLast := len(rightColumnAll.Objects)
-			otherUI.UpdatePage(rightColumnAll, columnEditKey, saveKey, mainWindow)
+			numberLast := len(mi.RightColumn.Container.Objects)
+			otherUI.UpdatePage(mi.RightColumn.Container, mi.EditColumn.Container, mi.EditColumn.SaveEditKey, mi.Window)
 
-			rightColumnAll.Objects = rightColumnAll.Objects[:numberLast]
+			mi.RightColumn.Container.Objects = mi.RightColumn.Container.Objects[:numberLast]
 
 			rightColumnScrollable.Offset.Y = maxScroll / 2
 			rightColumnScrollable.Refresh()
@@ -192,37 +233,41 @@ func RightColumn(rightColumnAll *fyne.Container, topRightColumn *fyne.Container,
 		} else if p.Y == maxScroll && variable.ItemsAdded && !variable.ResultSearch {
 
 			variable.CurrentPage++
-			numberLast := len(rightColumnAll.Objects)
-			otherUI.UpdatePage(rightColumnAll, columnEditKey, saveKey, mainWindow)
+			numberLast := len(mi.RightColumn.Container.Objects)
+			otherUI.UpdatePage(mi.RightColumn.Container, mi.EditColumn.Container, mi.EditColumn.SaveEditKey, mi.Window)
 			rightColumnScrollable.Offset.Y = maxScroll / 2
 
-			if len(rightColumnAll.Objects) > (variable.ItemsPerPage)*3 {
-				rightColumnAll.Objects = rightColumnAll.Objects[len(rightColumnAll.Objects)-numberLast:]
+			if len(mi.RightColumn.Container.Objects) > (variable.ItemsPerPage)*3 {
+				mi.RightColumn.Container.Objects = mi.RightColumn.Container.Objects[len(mi.RightColumn.Container.Objects)-numberLast:]
 				up = true
 			}
 
 		}
 
 	}
-	m := container.NewVScroll(columnEditKey)
-	rightColumEdit = container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), saveAndCancle, nil, nil, m)
 
-	columns := container.NewHSplit(rightColumnScrollable, rightColumEdit)
+	m := container.NewVScroll(mi.EditColumn.Edit2)
+	mi.EditColumn.Container = container.NewBorder(
+		widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		mi.SaveAndCancle(),
+		nil, nil, m,
+	)
+
+	columns := container.NewHSplit(rightColumnScrollable, mi.EditColumn.Container)
 	columns.SetOffset(0.80)
-	mainContent := container.NewBorder(topRightColumn, nil, nil, nil, columns)
+	mainContent := container.NewBorder(mi.TopRightColumn(), nil, nil, nil, columns)
 
 	return mainContent
 }
 
-func ColumnContent(rightColumnAll *fyne.Container, columnEdit *fyne.Container, leftColumnAll *fyne.Container, topLeftColumn *fyne.Container, darkLight *fyne.Container, topRightColumn *fyne.Container, rightColumEdit *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) fyne.CanvasObject {
+func (m *MainWindow2) ColumnContent() fyne.CanvasObject {
 
-	mainContent := LeftColumn(leftColumnAll, topLeftColumn, darkLight)
+	mainContent := m.LeftColumn2()
 
-	rightColumnScrollable := RightColumn(rightColumnAll, topRightColumn, columnEdit, rightColumEdit, saveKey, mainWindow)
+	rightColumnScrollable := m.RightColumn2()
 
 	columns := container.NewHSplit(mainContent, rightColumnScrollable)
 	columns.SetOffset(0.10)
 
-	container.NewScroll(columns)
 	return columns
 }
