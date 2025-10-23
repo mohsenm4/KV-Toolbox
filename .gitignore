@@ -15,3 +15,4 @@ cmd/.DS_Store
 services
 *.exe
 .codegpt
+*.app
