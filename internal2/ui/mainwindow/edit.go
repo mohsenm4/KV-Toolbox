@@ -7,11 +7,22 @@ import (
 )
 
 type EditColumn2 struct {
+	Edit2         *fyne.Container
 	Container     *fyne.Container
 	CancelEditKey *widget.Button
 	SaveEditKey   *widget.Button
 }
 
-func (e *EditColumn2) SaveAndCancle() *fyne.Container {
-	return container.NewGridWithColumns(2, e.CancelEditKey, e.SaveEditKey)
+func (e *MainWindow2) SaveAndCancle() *fyne.Container {
+	return container.NewGridWithColumns(2, e.EditColumn.CancelEditKey, e.EditColumn.SaveEditKey)
+}
+
+func (e *MainWindow2) ConfigureEntry(content string) *widget.Entry {
+	entry := widget.NewMultiLineEntry()
+	entry.Resize(fyne.NewSize(400, 500))
+	entry.SetText(content)
+	scrollableEntry := container.NewScroll(entry)
+	scrollableEntry.SetMinSize(fyne.NewSize(200, 300))
+	e.EditColumn.Container.Add(scrollableEntry)
+	return entry
 }
