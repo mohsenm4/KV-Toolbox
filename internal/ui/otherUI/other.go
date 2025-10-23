@@ -13,6 +13,7 @@ import (
 	dbpak "DatabaseDB/internal/Databaces"
 	"DatabaseDB/internal/dberr"
 	"DatabaseDB/internal/logic"
+	"DatabaseDB/internal/logic/pref"
 	"DatabaseDB/internal/utils"
 
 	"fyne.io/fyne/v2"
@@ -38,16 +39,18 @@ var (
 func SetupLastColumn(rightColumnContentORG *fyne.Container, nameButtonProject *widget.Label, buttonAdd *widget.Button, buttonSearch *widget.Button, buttonDelete *widget.Button, columnEditKey *fyne.Container, saveKey *widget.Button, mainWindow fyne.Window) *fyne.Container {
 	lastColumnContent := container.NewVBox()
 
-	jsonDataa, err := variable.CurrentJson.Load()
+	dataJson, err := variable.PrefValue.LoadDatabase(pref.KeyListDB)
 	if err != nil {
-		log.Fatal("Error loading JSON data:", err)
+
+		log.Fatal("Error loading preferences:", err)
 	} else {
-		for _, project := range jsonDataa.RecentProjects {
+		for _, project := range dataJson.RecentProjects {
 
 			buttonContainer := ProjectButton(project.Name, lastColumnContent, project.FileAddress, rightColumnContentORG, nameButtonProject, buttonAdd, buttonSearch, buttonDelete, project.Databace, columnEditKey, saveKey, mainWindow)
 			lastColumnContent.Add(buttonContainer)
 		}
 	}
+	variable.PrefValue.ListDB = dataJson
 
 	return lastColumnContent
 }
@@ -200,14 +203,26 @@ func ProjectButton(inputText string, lastColumnContent *fyne.Container, path str
 			nameButtonProject.Refresh()
 		}
 
-		err := variable.CurrentJson.Remove(inputText)
-		if err != nil {
-			fmt.Print(err)
-		} else {
+		for i, r := range variable.PrefValue.ListDB.RecentProjects {
+			if r.FileAddress == path {
+				variable.PrefValue.ListDB.RecentProjects = append(variable.PrefValue.ListDB.RecentProjects[:i], variable.PrefValue.ListDB.RecentProjects[i+1:]...)
 
-			lastColumnContent.Remove(buttonContainer)
-			lastColumnContent.Refresh()
+				lastColumnContent.Remove(buttonContainer)
+				lastColumnContent.Refresh()
+			}
 		}
+
+		/*
+
+			err := variable.CurrentJson.Remove(inputText)
+			if err != nil {
+				fmt.Print(err)
+			} else {
+
+				lastColumnContent.Remove(buttonContainer)
+				lastColumnContent.Refresh()
+			}
+		*/
 	})
 
 	refreshButton = widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {

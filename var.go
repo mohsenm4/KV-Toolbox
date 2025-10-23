@@ -4,6 +4,7 @@ import (
 	dbpak "DatabaseDB/internal/Databaces"
 	configApp "DatabaseDB/internal/config"
 	"DatabaseDB/internal/filterdatabase"
+	"DatabaseDB/internal/logic/pref"
 )
 
 var (
@@ -17,6 +18,7 @@ var (
 	PreviousOffsetY float32
 	ResultSearch    bool
 	CreatDatabase   bool
+	PrefValue       *pref.Pref
 )
 
 var (
