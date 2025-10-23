@@ -2,16 +2,16 @@ package main
 
 import (
 	variable "DatabaseDB"
-	configApp "DatabaseDB/internal/config"
+	"DatabaseDB/internal/logic/pref"
 	"DatabaseDB/internal/ui/mainwindow"
 
 	"fyne.io/fyne/v2/app"
 )
 
 func main() {
-	myApp := app.New()
+	myApp := app.NewWithID("com.DatabaseDB.KV-Toolbox")
 
-	variable.CurrentJson = configApp.NewConfig()
+	variable.PrefValue = pref.NewPref(myApp)
 
 	mainwindow.MainWindow(myApp)
 }

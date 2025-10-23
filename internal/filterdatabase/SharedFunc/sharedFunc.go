@@ -3,6 +3,7 @@ package sharedfunc
 import (
 	variable "DatabaseDB"
 	"DatabaseDB/internal/logic"
+	"DatabaseDB/internal/logic/pref"
 	"DatabaseDB/internal/ui/otherUI"
 	"DatabaseDB/internal/utils"
 	"fmt"
@@ -131,20 +132,18 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 	)
 
 	buttonOk := widget.NewButton("Add", func() {
-		data := map[string]string{
-			"Name":     nameEntry.Text,
-			"Addres":   pathEntry.Text,
-			"Database": title,
+		data := pref.Project{
+			Name:        nameEntry.Text,
+			FileAddress: pathEntry.Text,
+			Databace:    title,
 		}
+
 		if nameEntry.Text == "" {
 			dialog.ShowInformation("Error ", "Please fill in the name field", mainWindow)
 			return
 		}
-		datajson, err := variable.CurrentJson.Load()
-		if err != nil {
-			fmt.Println("Error opening folder:", err)
-		}
-		for _, m := range datajson.RecentProjects {
+
+		for _, m := range variable.PrefValue.ListDB.RecentProjects {
 			if nameEntry.Text == m.Name {
 				dialog.ShowInformation("Error ", "Your database name is duplicate", mainWindow)
 				return
@@ -152,14 +151,11 @@ func FormPasteDatabase(a fyne.App, title string, lastColumnContent *fyne.Contain
 		}
 
 		var addButton bool
-		err = logic.HandleButtonClick(pathEntry.Text, title)
+		err := logic.HandleButtonClick(pathEntry.Text, title)
 		if err == nil {
 
-			err, addButton = variable.CurrentJson.Add(data)
-			if err != nil {
-				dialog.ShowInformation("error", err.Error(), mainWindow)
-				return
-			}
+			variable.PrefValue.ListDB.RecentProjects = append(variable.PrefValue.ListDB.RecentProjects, data)
+			addButton = false
 		}
 
 		if err != nil {
