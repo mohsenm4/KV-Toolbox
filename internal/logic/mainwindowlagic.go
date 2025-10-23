@@ -8,7 +8,6 @@ import (
 	"log"
 
 	"github.com/gabriel-vasile/mimetype"
-	// "DatabaseDB/internal/logic/mainwindowlagic"
 )
 
 func HandleButtonClick(path string, nameDatabace string) error {
