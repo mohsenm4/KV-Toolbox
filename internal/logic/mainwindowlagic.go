@@ -3,7 +3,9 @@ package logic
 import (
 	variable "DatabaseDB"
 	dbpak "DatabaseDB/internal/Databaces"
+	"DatabaseDB/internal/dberr"
 	"DatabaseDB/internal/utils"
+	"errors"
 	"fmt"
 	"log"
 
@@ -77,26 +79,23 @@ func DeleteKeyLogic(valueEntry string) error {
 	}
 }
 
-func AddKeyLogic(iputKey string, valueFinish []byte) error {
-
-	key := utils.CleanInput(iputKey)
+func AddKeyLogic(inputKey string, valueFinish []byte) error {
+	key := utils.CleanInput(inputKey)
 
 	value, err := variable.CurrentDBClient.Get([]byte(key))
-	if err != nil {
-		fmt.Println("error : delete func logic for get key in databace")
+	if err != nil && !errors.Is(err, dberr.ErrKeyNotFound) {
+		return fmt.Errorf("failed to get key from database: %w", err)
 	}
+
 	if value != nil {
-		//dialog.ShowInformation("Error", "This key has already been added to your database", windowAdd)
-		return fmt.Errorf("this key has already been added to your database")
-	} else {
-		err = variable.CurrentDBClient.Add([]byte(key), valueFinish)
-		if err != nil {
-			fmt.Print(err.Error())
-		}
-
-		return nil
+		return fmt.Errorf("key '%s' already exists in the database", key)
 	}
 
+	if err := variable.CurrentDBClient.Add([]byte(key), valueFinish); err != nil {
+		return fmt.Errorf("failed to add key '%s': %w", key, err)
+	}
+
+	return nil
 }
 
 func QueryKey(inputKey string) ([]byte, error) {
