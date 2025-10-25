@@ -3,7 +3,7 @@ package variable
 import (
 	dbpak "DatabaseDB/internal/Databaces"
 	"DatabaseDB/internal/filterdatabase"
-	"DatabaseDB/internal/logic/pref"
+	"DatabaseDB/internal/pref"
 )
 
 var (
