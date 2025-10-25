@@ -13,113 +13,114 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func (mi *MainWindow2) OpenWindowAddButton() {
-	var ded *dialog.CustomDialog
+func (mw *MainWindow2) OpenAddDialog() {
+	var addDialog *dialog.CustomDialog
 
-	iputKey := widget.NewEntry()
-	iputKey.SetPlaceHolder("Key")
+	keyEntry := widget.NewEntry()
+	keyEntry.SetPlaceHolder("Enter Key")
 
-	iputvalue := widget.NewMultiLineEntry()
-	iputvalue.SetPlaceHolder("value")
+	valueEntry := widget.NewMultiLineEntry()
+	valueEntry.SetPlaceHolder("Enter Value")
 
-	nameFile := widget.NewButton("Name File", nil)
+	fileNameButton := widget.NewButton("File Name", nil)
 
-	var valueFinish []byte
-	uploadFile := widget.NewButton("UploadFile", func() {
-		folderPath := dialog.NewFileOpen(func(dir fyne.URIReadCloser, err error) {
+	var fileData []byte
+	uploadFileButton := widget.NewButton("Upload File", func() {
+		fileDialog := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			if err != nil {
-				log.Println("Error opening folder:", err)
+				log.Println("Error opening file:", err)
 				return
 			}
-			if dir == nil {
-				log.Println("No folder selected")
+			if reader == nil {
+				log.Println("No file selected")
 				return
 			}
 
-			filename := dir.URI().Name()
+			filename := reader.URI().Name()
 
-			valueFinish, err = ioutil.ReadAll(dir)
+			fileData, err = ioutil.ReadAll(reader)
 			if err != nil {
-				log.Println(err.Error())
+				log.Println("Error reading file:", err)
 				return
 			}
 
-			nameFile.SetText(filename)
-			nameFile.Refresh()
-		}, mi.Window)
-		folderPath.SetFilter(storage.NewExtensionFileFilter([]string{
-			".ico", ".svg",
-			".jpeg", ".jpg", ".png", ".txt", ".json", ".go",
-			".md", ".xml", ".csv", ".ini", ".yml", ".yaml", ".log", ".config", ".properties",
-			".env", ".sql", ".xml", ".json5", ".rst", ".tex", ".asm", ".hbs", ".tpl", ".html",
-			".conf", ".mdx", ".latex", ".scala", ".swift", ".lua", ".ts", ".scss", ".less",
-			".asm", ".awk", ".bat", ".csh", ".c", ".cpp", ".h", ".java", ".kt", ".lisp", ".css",
-			".m", ".pas", ".pl", ".php", ".ps", ".ps1", ".py", ".r", ".rb", ".sh", ".sql",
-			".tcl", ".vbs", ".vhd", ".vue", ".yaml", ".yml", ".zsh", ".coffee", ".clj", ".js",
-			".erl", ".fs", ".dart", ".handlebars", ".scss", ".sass", ".mustache", ".jinja",
-			".asciidoc", ".org", ".tex", ".rst", ".sml", ".v", ".verilog", ".vhdl", ".scala",
-			".swift", ".m4", ".xhtml", ".xml5", ".wsdl", ".xsd", ".dtd", ".gdsl", ".jsonc",
-			".hbs", ".hs", ".limbo", ".loco", ".ml", ".nim", ".oz", ".pddl", ".rexx", ".rmd",
-			".sh", ".tcl", ".xsl", ".yml",
+			fileNameButton.SetText(filename)
+			fileNameButton.Refresh()
+		}, mw.Window)
+
+		fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{
+			".ico", ".svg", ".jpeg", ".jpg", ".png", ".txt", ".json", ".go",
+			".md", ".xml", ".csv", ".ini", ".yml", ".yaml", ".log", ".config",
+			".properties", ".env", ".sql", ".json5", ".rst", ".tex", ".asm",
+			".hbs", ".tpl", ".html", ".conf", ".mdx", ".latex", ".scala", ".swift",
+			".lua", ".ts", ".scss", ".less", ".awk", ".bat", ".csh", ".c", ".cpp",
+			".h", ".java", ".kt", ".lisp", ".css", ".m", ".pas", ".pl", ".php",
+			".ps", ".ps1", ".py", ".r", ".rb", ".sh", ".tcl", ".vbs", ".vhd",
+			".vue", ".coffee", ".clj", ".js", ".erl", ".fs", ".dart", ".handlebars",
+			".sass", ".mustache", ".jinja", ".asciidoc", ".org", ".sml", ".v",
+			".verilog", ".vhdl", ".m4", ".xhtml", ".xml5", ".wsdl", ".xsd", ".dtd",
+			".gdsl", ".jsonc", ".hs", ".limbo", ".loco", ".ml", ".nim", ".oz",
+			".pddl", ".rexx", ".rmd", ".xsl", ".zsh",
 		}))
-		folderPath.Show()
+		fileDialog.Show()
 	})
 
-	uploadFile.Disable()
-	iputvalue.Disable()
-	nameFile.Disable()
+	// Default disabled state
+	uploadFileButton.Disable()
+	valueEntry.Disable()
+	fileNameButton.Disable()
 
-	typeValue := widget.NewLabel("Select the type of file you want")
-	redioType := widget.NewRadioGroup([]string{"Text", "File"}, func(typeRedio string) {
-		switch typeRedio {
+	fileTypeLabel := widget.NewLabel("Select file type:")
+	fileTypeRadio := widget.NewRadioGroup([]string{"Text", "File"}, func(selected string) {
+		switch selected {
 		case "Text":
-			iputvalue.Enable()
-			uploadFile.Disable()
-			nameFile.Disable()
+			valueEntry.Enable()
+			uploadFileButton.Disable()
+			fileNameButton.Disable()
 		case "File":
-			uploadFile.Enable()
-			nameFile.Enable()
-			iputvalue.Disable()
-
+			uploadFileButton.Enable()
+			fileNameButton.Enable()
+			valueEntry.Disable()
 		}
 	})
+	fileTypeRadio.Horizontal = true
 
-	redioType.Horizontal = true
-	rowRedio := container.NewHBox(typeValue, redioType)
+	fileTypeRow := container.NewHBox(fileTypeLabel, fileTypeRadio)
+	fileButtonsRow := container.NewHSplit(uploadFileButton, fileNameButton)
+	fileButtonsRow.SetOffset(0.8)
 
-	columns := container.NewHSplit(uploadFile, nameFile)
-	columns.SetOffset(0.80)
-
-	ButtonAddAdd := widget.NewButton("Add", func() {
-		if uploadFile.Disabled() {
-			valueFinish = []byte(iputvalue.Text)
+	addButton := widget.NewButton("Add", func() {
+		if uploadFileButton.Disabled() {
+			fileData = []byte(valueEntry.Text)
 		}
-		if len(iputKey.Text) == 0 && len(valueFinish) == 0 {
-			dialog.ShowInformation("Error", "Key and Value is empty", mi.Window)
+
+		if len(keyEntry.Text) == 0 && len(fileData) == 0 {
+			dialog.ShowInformation("Error", "Key and Value cannot be empty", mw.Window)
 			return
 		}
-		err := logic.AddKeyLogic(iputKey.Text, valueFinish)
+
+		err := logic.AddKeyLogic(keyEntry.Text, fileData)
 		if err != nil {
-			dialog.ShowInformation("Error", err.Error(), mi.Window)
+			dialog.ShowInformation("Error", err.Error(), mw.Window)
 			return
-		} else {
-			ded.Hide()
-			mi.RightColumn.Container.Refresh()
 		}
+
+		addDialog.Hide()
+		mw.RightColumn.Container.Refresh()
 	})
-	ButtonAddAdd.Importance = widget.HighImportance
-	cont := container.NewVBox(
-		iputKey,
-		rowRedio,
-		iputvalue,
-		columns,
+	addButton.Importance = widget.HighImportance
+
+	content := container.NewVBox(
+		keyEntry,
+		fileTypeRow,
+		valueEntry,
+		fileButtonsRow,
 		layout.NewSpacer(),
-		ButtonAddAdd,
+		addButton,
 		layout.NewSpacer(),
 	)
 
-	ded = dialog.NewCustom("Add Key and Value", "Close", cont, mi.Window)
-	ded.Resize(fyne.NewSize(600, 400))
-	ded.Show()
-
+	addDialog = dialog.NewCustom("Add Key and Value", "Close", content, mw.Window)
+	addDialog.Resize(fyne.NewSize(600, 400))
+	addDialog.Show()
 }

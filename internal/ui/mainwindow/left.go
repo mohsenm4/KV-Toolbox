@@ -19,7 +19,6 @@ type LeftColumn2 struct {
 	PreviousClose          *widget.Button
 	PreviousProject        *widget.Button
 	PreviousRefreshButton  *widget.Button
-	LastLableKeyAndValue   *utils.TappableLabel
 	ToggleButtonsContainer *fyne.Container
 	DarkLight              *fyne.Container
 	Pluss                  *widget.Button

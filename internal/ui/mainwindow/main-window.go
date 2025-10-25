@@ -4,6 +4,7 @@ import (
 	variable "DatabaseDB"
 	"fmt"
 
+	dbpak "DatabaseDB/internal/Databaces"
 	Filterbadger "DatabaseDB/internal/filterdatabase/badger"
 	FilterLeveldb "DatabaseDB/internal/filterdatabase/leveldb"
 	Filterpebbledb "DatabaseDB/internal/filterdatabase/pebble"
@@ -11,8 +12,10 @@ import (
 	"DatabaseDB/internal/utils"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -34,24 +37,49 @@ type ObjectsMainWindow struct {
 }
 
 func NewMainWindow(name string) *MainWindow2 {
-	return &MainWindow2{
+	mw := &MainWindow2{
 		NameWindow: name,
+		TypeDB:     "", // default or placeholder DB type
 		LeftColumn: &LeftColumn2{
 			Container:              container.NewVBox(),
+			PreviousClose:          widget.NewButton("", nil),
+			PreviousProject:        widget.NewButton("", nil),
+			PreviousRefreshButton:  widget.NewButton("", nil),
 			ToggleButtonsContainer: container.NewVBox(),
 			DarkLight:              container.NewVBox(),
+			Pluss:                  widget.NewButton("+", nil),
+			LeveldbButton:          widget.NewButton("LevelDB", nil),
+			BottomDatabase:         []*widget.Button{},
 		},
 		RightColumn: &RightColumn2{
-			Container: container.NewVBox(),
+			Container:            container.NewVBox(),
+			NameButtonProject:    widget.NewLabel("Project Name"),
+			Line:                 canvas.NewLine(theme.PrimaryColor()),
+			Spacer:               widget.NewLabel(""),
+			ButtonDelete:         widget.NewButton("Delete", nil),
+			SearchButton:         widget.NewButton("Search", nil),
+			ButtonAdd:            widget.NewButton("Add", nil),
+			KeyRightColunm:       widget.NewLabel("Key"),
+			ValueRightColunm:     widget.NewLabel("Value"),
+			LastLableKeyAndValue: utils.NewTappableLabel("Last KV", nil),
+			LastStart:            &[]byte{},
+			LastEnd:              &[]byte{},
+			LastPage:             0,
+			Orgdata:              []dbpak.KVData{},
 		},
 		EditColumn: &EditColumn2{
-			Container: container.NewVBox(),
-			Edit2:     container.NewVBox(),
+			Container:     container.NewVBox(),
+			Edit2:         container.NewVBox(),
+			CancelEditKey: widget.NewButton("Cancel", nil),
+			SaveEditKey:   widget.NewButton("Save", nil),
+			ValueEntry:    widget.NewEntry(),
 		},
 		Objects: &ObjectsMainWindow{
 			Spacer: widget.NewLabel(""),
 		},
 	}
+
+	return mw
 }
 
 func (m *MainWindow2) MainWindow(myApp fyne.App) {
@@ -59,39 +87,7 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 	m.Window = myApp.NewWindow(m.NameWindow)
 	m.Window.SetMaster()
 
-	// Edit
-	m.EditColumn.CancelEditKey = widget.NewButton("", func() {})
-	m.EditColumn.SaveEditKey = widget.NewButton("", func() {})
-	m.EditColumn.Container = container.NewVBox()
-	m.EditColumn.ValueEntry = widget.NewEntry()
-	m.EditColumn.Edit2 = container.NewVBox()
-
-	// Right
-	m.RightColumn.ButtonAdd = widget.NewButton("", func() {})
-	m.RightColumn.ButtonDelete = widget.NewButton("", func() {})
-	m.RightColumn.Container = container.NewVBox()
-	m.RightColumn.KeyRightColunm = widget.NewLabel("")
-	m.RightColumn.NameButtonProject = widget.NewLabel("")
-	m.RightColumn.SearchButton = widget.NewButton("", func() {})
-	m.RightColumn.Spacer = widget.NewLabel("")
-	m.RightColumn.ValueRightColunm = widget.NewLabel("")
-
-	// Left
-
-	m.LeftColumn.BottomDatabase = []*widget.Button{}
-	m.LeftColumn.Container = container.NewVBox()
-	m.LeftColumn.DarkLight = container.NewVBox()
-	m.LeftColumn.LeveldbButton = widget.NewButton("", func() {})
-	m.LeftColumn.Pluss = widget.NewButton("", func() {})
-	m.LeftColumn.PreviousClose = widget.NewButton("", func() {})
-	m.LeftColumn.PreviousProject = widget.NewButton("", func() {})
-	m.LeftColumn.PreviousRefreshButton = widget.NewButton("", func() {})
-	m.LeftColumn.ToggleButtonsContainer = container.NewVBox()
-
 	m.Objects.Spacer = widget.NewLabel("")
-
-	// right column show key
-	m.RightColumn.Container = container.NewVBox()
 
 	// key top window for colunm keys
 	m.RightColumn.KeyRightColunm = widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
@@ -120,7 +116,7 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 	m.EditColumn.Container = container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), m.SaveAndCancle(), nil, nil, m.EditColumn.Edit2)
 
 	m.RightColumn.ButtonAdd = widget.NewButton("Add", func() {
-		m.OpenWindowAddButton()
+		m.OpenAddDialog()
 	})
 	m.RightColumn.ButtonAdd.Disable()
 	m.RightColumn.SearchButton.Disable()
@@ -129,7 +125,6 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		m.DeleteKeyUi()
 	})
 
-	m.LeftColumn.ToggleButtonsContainer = container.NewVBox()
 	buttonsVisible := false
 
 	m.RightColumn.ButtonDelete.Disable()
