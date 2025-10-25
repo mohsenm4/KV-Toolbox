@@ -8,6 +8,7 @@ import (
 
 // keys
 var KeyListDB = "ListKey_DB"
+var KeyLastDB = "LastDBKey"
 
 type Pref struct {
 	Preferences fyne.Preferences
