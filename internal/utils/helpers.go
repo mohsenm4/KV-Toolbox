@@ -67,6 +67,7 @@ func Checkdatabace(test string, nameDatabace string) error {
 	if variable.CurrentDBClient != nil {
 		variable.CurrentDBClient.Close()
 	}
+
 	switch nameDatabace {
 	case "levelDB":
 		variable.CurrentDBClient = leveldbb.NewDataBaseLeveldb(test)
