@@ -2,8 +2,8 @@ package variable
 
 import (
 	dbpak "DatabaseDB/internal/Databaces"
-	configApp "DatabaseDB/internal/config"
 	"DatabaseDB/internal/filterdatabase"
+	"DatabaseDB/internal/pref"
 )
 
 var (
@@ -11,12 +11,12 @@ var (
 	CurrentPage     int
 	ItemsPerPage    = 16
 	FolderPath      string
-	CurrentJson     *configApp.Config
 	NameData        filterdatabase.FilterData
 	ItemsAdded      bool
 	PreviousOffsetY float32
 	ResultSearch    bool
 	CreatDatabase   bool
+	PrefValue       *pref.Pref
 )
 
 var (
