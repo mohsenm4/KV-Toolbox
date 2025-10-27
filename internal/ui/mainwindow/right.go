@@ -23,7 +23,6 @@ import (
 type RightColumn2 struct {
 	Container            *fyne.Container
 	NameButtonProject    *widget.Label
-	Line                 *canvas.Line
 	Spacer               *widget.Label
 	ButtonDelete         *widget.Button
 	SearchButton         *widget.Button
@@ -165,12 +164,12 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 }
 
 func (r *MainWindow2) TopRightColumn() *fyne.Container {
-	r.RightColumn.Line = canvas.NewLine(color.Black)
-	r.RightColumn.Line.StrokeWidth = 2
+	r.Objects.Line = canvas.NewLine(color.Black)
+	r.Objects.Line.StrokeWidth = 2
 
 	container := container.NewVBox(
 		r.RightColumn.NameButtonProject,
-		r.RightColumn.Line,
+		r.Objects.Line,
 		r.RightColumn.Spacer,
 		r.RightColumn.Tool(),
 		r.RightColumn.KeyAndValue(),
