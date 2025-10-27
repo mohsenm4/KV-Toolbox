@@ -20,6 +20,7 @@ func (r *MainWindow2) SearchKeyUi() {
 
 	buttomSearch := widget.NewButton("Search", nil)
 	buttomSearch.Importance = widget.HighImportance
+	buttomSearch.Disable()
 
 	modalContent := container.NewVBox(
 		widget.NewLabel("Enter the desired key"),
@@ -31,6 +32,14 @@ func (r *MainWindow2) SearchKeyUi() {
 
 	d := dialog.NewCustom("Search in the database", "Close", modalContent, r.Window)
 	d.Resize(fyne.NewSize(600, 300))
+
+	valueEntry.OnChanged = func(s string) {
+		if s != "" {
+			buttomSearch.Enable()
+		} else {
+			buttomSearch.Disable()
+		}
+	}
 
 	buttomSearch.OnTapped = func() {
 		keys, values, err := logic.SearchDatabase(valueEntry.Text)
