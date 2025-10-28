@@ -30,6 +30,7 @@ type MainWindow2 struct {
 	RightColumn *RightColumn2
 	EditColumn  *EditColumn2
 	Objects     *ObjectsMainWindow
+	pref        *pref.Pref
 }
 
 type ObjectsMainWindow struct {
@@ -87,6 +88,7 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 
 	m.Window = myApp.NewWindow(m.NameWindow)
 	m.Window.SetMaster()
+	m.pref = pref.NewPref(myApp)
 
 	m.Objects.Spacer = widget.NewLabel("")
 
@@ -174,7 +176,8 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 	m.Window.SetCloseIntercept(func() {
 		dialog.ShowConfirm("close?", "Do you want to go out?", func(confirm bool) {
 			if confirm {
-				variable.PrefValue.SaveDatabase(variable.PrefValue.ListDB, pref.KeyListDB)
+				m.pref.SaveDatabase(m.pref.ListDB, pref.KeyListDB)
+
 				m.Window.Close()
 			}
 		}, m.Window)
