@@ -15,6 +15,7 @@ import (
 
 func (mw *MainWindow2) OpenAddDialog() {
 	var addDialog *dialog.CustomDialog
+	var addButton *widget.Button
 
 	keyEntry := widget.NewEntry()
 	keyEntry.SetPlaceHolder("Enter Key")
@@ -45,6 +46,7 @@ func (mw *MainWindow2) OpenAddDialog() {
 			}
 
 			fileNameButton.SetText(filename)
+			addButton.Enable()
 			fileNameButton.Refresh()
 		}, mw.Window)
 
@@ -65,6 +67,14 @@ func (mw *MainWindow2) OpenAddDialog() {
 		fileDialog.Show()
 	})
 
+	valueEntry.OnChanged = func(s string) {
+		if s != "" {
+			addButton.Enable()
+		} else {
+			addButton.Disable()
+		}
+	}
+
 	// Default disabled state
 	uploadFileButton.Disable()
 	valueEntry.Disable()
@@ -72,12 +82,18 @@ func (mw *MainWindow2) OpenAddDialog() {
 
 	fileTypeLabel := widget.NewLabel("Select file type:")
 	fileTypeRadio := widget.NewRadioGroup([]string{"Text", "File"}, func(selected string) {
+		addButton.Disable()
 		switch selected {
 		case "Text":
+			fileData = nil
 			valueEntry.Enable()
 			uploadFileButton.Disable()
+			uploadFileButton.SetText("Upload File")
+			fileNameButton.SetText("File Name")
 			fileNameButton.Disable()
 		case "File":
+			fileData = nil
+			valueEntry.SetText("")
 			uploadFileButton.Enable()
 			fileNameButton.Enable()
 			valueEntry.Disable()
@@ -89,7 +105,7 @@ func (mw *MainWindow2) OpenAddDialog() {
 	fileButtonsRow := container.NewHSplit(uploadFileButton, fileNameButton)
 	fileButtonsRow.SetOffset(0.8)
 
-	addButton := widget.NewButton("Add", func() {
+	addButton = widget.NewButton("Add", func() {
 		if uploadFileButton.Disabled() {
 			fileData = []byte(valueEntry.Text)
 		}
@@ -109,6 +125,8 @@ func (mw *MainWindow2) OpenAddDialog() {
 		mw.RightColumn.Container.Refresh()
 	})
 	addButton.Importance = widget.HighImportance
+
+	addButton.Disable()
 
 	content := container.NewVBox(
 		keyEntry,

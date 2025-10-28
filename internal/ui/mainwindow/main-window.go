@@ -34,6 +34,7 @@ type MainWindow2 struct {
 
 type ObjectsMainWindow struct {
 	Spacer *widget.Label
+	Line   *canvas.Line
 }
 
 func NewMainWindow(name string) *MainWindow2 {
@@ -47,21 +48,20 @@ func NewMainWindow(name string) *MainWindow2 {
 			PreviousRefreshButton:  widget.NewButton("", nil),
 			ToggleButtonsContainer: container.NewVBox(),
 			DarkLight:              container.NewVBox(),
-			Pluss:                  widget.NewButton("+", nil),
-			LeveldbButton:          widget.NewButton("LevelDB", nil),
+			Pluss:                  widget.NewButton("", nil),
+			LeveldbButton:          widget.NewButton("", nil),
 			BottomDatabase:         []*widget.Button{},
 		},
 		RightColumn: &RightColumn2{
 			Container:            container.NewVBox(),
-			NameButtonProject:    widget.NewLabel("Project Name"),
-			Line:                 canvas.NewLine(theme.PrimaryColor()),
+			NameButtonProject:    widget.NewLabel(""),
 			Spacer:               widget.NewLabel(""),
-			ButtonDelete:         widget.NewButton("Delete", nil),
-			SearchButton:         widget.NewButton("Search", nil),
-			ButtonAdd:            widget.NewButton("Add", nil),
-			KeyRightColunm:       widget.NewLabel("Key"),
-			ValueRightColunm:     widget.NewLabel("Value"),
-			LastLableKeyAndValue: utils.NewTappableLabel("Last KV", nil),
+			ButtonDelete:         widget.NewButton("", nil),
+			SearchButton:         widget.NewButton("", nil),
+			ButtonAdd:            widget.NewButton("", nil),
+			KeyRightColunm:       widget.NewLabel(""),
+			ValueRightColunm:     widget.NewLabel(""),
+			LastLableKeyAndValue: utils.NewTappableLabel("", nil),
 			LastStart:            &[]byte{},
 			LastEnd:              &[]byte{},
 			LastPage:             0,
@@ -70,11 +70,12 @@ func NewMainWindow(name string) *MainWindow2 {
 		EditColumn: &EditColumn2{
 			Container:     container.NewVBox(),
 			Edit2:         container.NewVBox(),
-			CancelEditKey: widget.NewButton("Cancel", nil),
-			SaveEditKey:   widget.NewButton("Save", nil),
+			CancelEditKey: widget.NewButton("", nil),
+			SaveEditKey:   widget.NewButton("", nil),
 			ValueEntry:    widget.NewEntry(),
 		},
 		Objects: &ObjectsMainWindow{
+			Line:   canvas.NewLine(theme.PrimaryColor()),
 			Spacer: widget.NewLabel(""),
 		},
 	}

@@ -31,6 +31,13 @@ func (mi *MainWindow2) DeleteKeyUi() {
 	ded := dialog.NewCustom("Delete in the database", "Close", editContent, mi.Window)
 	ded.Resize(fyne.NewSize(600, 300))
 
+	valueEntry.OnChanged = func(s string) {
+		if s != "" {
+			buttomDelete.Enable()
+		} else {
+			buttomDelete.Disable()
+		}
+	}
 	buttomDelete.OnTapped = func() {
 
 		message := fmt.Sprintf("Are you sure you want to delete the key: _ %s _?", valueEntry.Text)
