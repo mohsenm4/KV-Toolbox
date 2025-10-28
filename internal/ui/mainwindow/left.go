@@ -88,9 +88,9 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 			l.RightColumn.NameButtonProject.Refresh()
 		}
 
-		for i, r := range l.pref.ListDB.RecentProjects {
+		for i, r := range l.Pref.ListDB.RecentProjects {
 			if r.FileAddress == path {
-				l.pref.ListDB.RecentProjects = append(l.pref.ListDB.RecentProjects[:i], l.pref.ListDB.RecentProjects[i+1:]...)
+				l.Pref.ListDB.RecentProjects = append(l.Pref.ListDB.RecentProjects[:i], l.Pref.ListDB.RecentProjects[i+1:]...)
 				lastColumnContent.Remove(buttonContainer)
 				lastColumnContent.Refresh()
 			}
@@ -130,7 +130,7 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 func (l *MainWindow2) SetupLastColumn() *fyne.Container {
 	lastColumnContent := container.NewVBox()
 
-	dataJson, err := l.pref.LoadDatabase(pref.KeyListDB)
+	dataJson, err := l.Pref.LoadDatabase(pref.KeyListDB)
 	if err != nil {
 		log.Fatal("Error loading JSON data:", err)
 	} else {
@@ -140,7 +140,7 @@ func (l *MainWindow2) SetupLastColumn() *fyne.Container {
 			lastColumnContent.Add(buttonContainer)
 		}
 	}
-	l.pref.ListDB = dataJson
+	l.Pref.ListDB = dataJson
 	return lastColumnContent
 }
 

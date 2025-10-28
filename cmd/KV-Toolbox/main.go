@@ -1,6 +1,7 @@
 package main
 
 import (
+	"DatabaseDB/internal/pref"
 	"DatabaseDB/internal/ui/mainwindow"
 
 	"fyne.io/fyne/v2/app"
@@ -9,7 +10,9 @@ import (
 func main() {
 	myApp := app.NewWithID("com.DatabaseDB.KV-Toolbox")
 
-	windiw := mainwindow.NewMainWindow("ManageDB")
+	window := mainwindow.NewMainWindow("ManageDB")
 
-	windiw.MainWindow(myApp)
+	window.Pref = pref.NewPref(myApp)
+
+	window.MainWindow(myApp)
 }

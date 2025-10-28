@@ -139,7 +139,7 @@ func (mi *MainWindow2) FormPasteDatabase(title string) {
 			return
 		}
 
-		for _, m := range mi.pref.ListDB.RecentProjects {
+		for _, m := range mi.Pref.ListDB.RecentProjects {
 
 			if nameEntry.Text == m.Name {
 				dialog.ShowInformation("Error ", "Your database name is duplicate", mi.Window)
@@ -151,7 +151,7 @@ func (mi *MainWindow2) FormPasteDatabase(title string) {
 		err := logic.HandleButtonClick(pathEntry.Text, title)
 		if err == nil {
 
-			mi.pref.ListDB.RecentProjects = append(mi.pref.ListDB.RecentProjects, data)
+			mi.Pref.ListDB.RecentProjects = append(mi.Pref.ListDB.RecentProjects, data)
 			addButton = false
 		}
 
