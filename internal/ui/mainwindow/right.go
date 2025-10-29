@@ -44,6 +44,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 	var label *utils.TappableLabel
 	var err error
 	var truncatedKey2 string
+	var BaseValue string
 
 	label = utils.NewTappableLabel(nameLabel, func() {
 		r.EditColumn.SaveEditKey.Disable()
@@ -58,6 +59,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		utils.CheckCondition(r.EditColumn.Edit2)
 
 		typeValue := mimetype.Detect([]byte(value))
+		BaseValue = string(value)
 
 		labelEdit := widget.NewLabel("")
 		r.EditColumn.Edit2.Add(labelEdit)
@@ -103,6 +105,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 				if err != nil {
 					fmt.Println(err.Error())
 				}
+				BaseValue = r.EditColumn.FinishValue
 				BaseImage = []byte(r.EditColumn.FinishValue)
 				value = []byte(truncatedKey2)
 
@@ -120,6 +123,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 									dialog.ShowInformation("Error", err.Error(), r.Window)
 									return
 								}
+								BaseValue = r.EditColumn.ValueEntry.Text
 								key = []byte(truncatedKey2)
 								dialog.ShowInformation("Success", "The key was added successfully.", r.Window)
 								return
@@ -138,6 +142,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 						dialog.ShowInformation("Error", err.Error(), r.Window)
 						return
 					}
+					BaseValue = r.EditColumn.ValueEntry.Text
 					r.EditColumn.FinishValue = r.EditColumn.ValueEntry.Text
 				} else {
 					dialog.ShowInformation("Error", err.Error(), r.Window)
@@ -155,8 +160,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 
 		r.EditColumn.ValueEntry.OnChanged = func(s string) {
 
-			s = strings.TrimSpace(s)
-			if s == r.EditColumn.FinishValue {
+			if s == BaseValue {
 				r.EditColumn.SaveEditKey.Disable()
 			} else {
 				r.EditColumn.SaveEditKey.Enable()
