@@ -110,9 +110,9 @@ func QueryKey(inputKey string) ([]byte, error) {
 	return value, nil
 }
 
-func SaveValue(key, value []byte) (string, error) {
+func SaveValue(key, value []byte) error {
 
-	return string(value), variable.CurrentDBClient.Add(key, value)
+	return variable.CurrentDBClient.Add(key, value)
 }
 
 func UpdateKey(oldKey, newKey []byte) (string, error) {

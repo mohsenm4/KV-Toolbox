@@ -112,25 +112,18 @@ func ImageShow(key []byte, value []byte, mainContainer *fyne.Container, editWind
 				fmt.Println("Error opening folder or no folder selected")
 				return
 			}
+			valueFinish, err := ioutil.ReadAll(dir)
+			if err != nil {
+				fmt.Print("Error reading file:", err)
+				return
+			}
 
-			go func() {
-
-				valueFinish, err := ioutil.ReadAll(dir)
-				if err != nil {
-					fmt.Print("Error reading file:", err)
-					return
-				}
-
-				image.Resource = fyne.NewStaticResource("image.png", valueFinish)
-				image.Refresh()
-				ValueImage = valueFinish
-			}()
-
+			image.Resource = fyne.NewStaticResource("image.png", valueFinish)
+			image.Refresh()
 		}, editWindow)
 
 		folderPath.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".gif"}))
 		folderPath.Show()
 	})
 	mainContainer.Add(lableAddpicture)
-
 }
