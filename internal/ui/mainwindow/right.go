@@ -42,10 +42,8 @@ func NewRightColumn() *RightColumn2 {
 
 func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value []byte, nameLabel string) *utils.TappableLabel {
 	var label *utils.TappableLabel
-	var truncatedText string
 	var err error
 	var truncatedKey2 string
-	var nameLable string
 
 	label = utils.NewTappableLabel(nameLabel, func() {
 		r.EditColumn.SaveEditKey.Disable()
@@ -58,17 +56,18 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		r.RightColumn.LastLableKeyAndValue = label
 
 		utils.CheckCondition(r.EditColumn.Edit2)
+
 		typeValue := mimetype.Detect([]byte(value))
 
 		labelEdit := widget.NewLabel("")
 		r.EditColumn.Edit2.Add(labelEdit)
 
 		if editType == "value" {
-			nameLable = fmt.Sprintf("Edit %s - %s", editType, utils.TruncateString(string(value), 20))
+			labelEdit.SetText(fmt.Sprintf("Edit %s - %s", editType, utils.TruncateString(string(value), 20)))
 
 			switch {
 			case strings.HasPrefix(typeValue.String(), "image/"):
-				go utils.ImageShow([]byte(key), []byte(value), r.EditColumn.Edit2, r.Window)
+				r.ImageShow([]byte(key), []byte(value))
 				truncatedKey2 = fmt.Sprintf("* %s . . .", typeValue.Extension())
 
 			case strings.HasPrefix(typeValue.String(), "text/") || strings.HasPrefix(typeValue.String(), "application/"):
@@ -88,20 +87,23 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 				}
 				r.EditColumn.ValueEntry = r.ConfigureEntry(string(value))
 				value = []byte(r.EditColumn.ValueEntry.Text)
+				r.EditColumn.FinishValue = string(value)
 			}
 		} else {
-			nameLable = fmt.Sprintf("Edit %s - %s", editType, utils.TruncateString(string(key), 20))
+			keyName := fmt.Sprintf("Edit %s - %s", editType, utils.TruncateString(string(key), 20))
+			labelEdit.SetText(keyName)
+			r.EditColumn.FinishValue = string(key)
 
 			r.EditColumn.ValueEntry = r.ConfigureEntry(string(key))
 		}
-		labelEdit.SetText(nameLable)
 
 		r.EditColumn.SaveEditKey.OnTapped = func() {
 			if editType == "value" {
-				truncatedKey2, err = logic.SaveValue(key, []byte(r.EditColumn.ValueEntry.Text))
+				err = logic.SaveValue(key, []byte(r.EditColumn.FinishValue))
 				if err != nil {
 					fmt.Println(err.Error())
 				}
+				BaseImage = []byte(r.EditColumn.FinishValue)
 				value = []byte(truncatedKey2)
 
 			} else {
@@ -136,6 +138,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 						dialog.ShowInformation("Error", err.Error(), r.Window)
 						return
 					}
+					r.EditColumn.FinishValue = r.EditColumn.ValueEntry.Text
 				} else {
 					dialog.ShowInformation("Error", err.Error(), r.Window)
 					return
@@ -143,7 +146,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 			}
 
 			r.EditColumn.SaveEditKey.Disable()
-			truncatedText = utils.TruncateString(truncatedKey2, 20)
+			truncatedText := utils.TruncateString(truncatedKey2, 20)
 			label.SetText(truncatedText)
 			labelEdit.SetText(fmt.Sprintf("Edit %s - %s", editType, truncatedText))
 			r.EditColumn.Edit2.Refresh()
@@ -153,7 +156,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		r.EditColumn.ValueEntry.OnChanged = func(s string) {
 
 			s = strings.TrimSpace(s)
-			if s == label.Text {
+			if s == r.EditColumn.FinishValue {
 				r.EditColumn.SaveEditKey.Disable()
 			} else {
 				r.EditColumn.SaveEditKey.Enable()
