@@ -88,9 +88,9 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 			l.RightColumn.NameButtonProject.Refresh()
 		}
 
-		for i, r := range l.Pref.ListDB.RecentProjects {
+		for i, r := range l.Pref.ListDB {
 			if r.FileAddress == path {
-				l.Pref.ListDB.RecentProjects = append(l.Pref.ListDB.RecentProjects[:i], l.Pref.ListDB.RecentProjects[i+1:]...)
+				l.Pref.ListDB = append(l.Pref.ListDB[:i], l.Pref.ListDB[i+1:]...)
 				lastColumnContent.Remove(buttonContainer)
 				lastColumnContent.Refresh()
 			}
@@ -134,7 +134,7 @@ func (l *MainWindow2) SetupLastColumn() *fyne.Container {
 	if err != nil {
 		log.Fatal("Error loading JSON data:", err)
 	} else {
-		for _, project := range dataJson.RecentProjects {
+		for _, project := range dataJson {
 			l.TypeDB = project.Databace
 			buttonContainer := l.ProjectButton(project.Name, lastColumnContent, project.FileAddress)
 			lastColumnContent.Add(buttonContainer)

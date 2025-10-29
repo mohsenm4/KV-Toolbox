@@ -12,7 +12,7 @@ var KeyLastDB = "LastDBKey"
 
 type Pref struct {
 	Preferences fyne.Preferences
-	ListDB      JsonInformation
+	ListDB      []Project
 }
 
 type Project struct {
@@ -21,32 +21,28 @@ type Project struct {
 	Databace    string `mapstructure:"databace"`
 }
 
-type JsonInformation struct {
-	RecentProjects []Project `mapstructure:"recentProjects"`
-}
-
 func NewPref(a fyne.App) *Pref {
 	return &Pref{
 		Preferences: a.Preferences(),
 	}
 }
 
-func (p *Pref) LoadDatabase(key string) (JsonInformation, error) {
+func (p *Pref) LoadDatabase(key string) ([]Project, error) {
 	data := p.Preferences.String(key)
 
 	if data == "" {
-		return JsonInformation{}, nil
+		return []Project{}, nil
 	}
 
-	var items JsonInformation
+	var items []Project
 	err := json.Unmarshal([]byte(data), &items)
 	if err != nil {
-		return JsonInformation{}, err
+		return []Project{}, err
 	}
 	return items, nil
 }
 
-func (p *Pref) SaveDatabase(items JsonInformation, key string) error {
+func (p *Pref) SaveDatabase(items []Project, key string) error {
 	data, err := json.Marshal(items)
 	if err != nil {
 		return err
