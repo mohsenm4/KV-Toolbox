@@ -120,7 +120,6 @@ func ImageShow(key []byte, value []byte, mainContainer *fyne.Container, editWind
 
 			image.Resource = fyne.NewStaticResource("image.png", valueFinish)
 			image.Refresh()
-			ValueImage = valueFinish
 		}, editWindow)
 
 		folderPath.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".gif"}))
