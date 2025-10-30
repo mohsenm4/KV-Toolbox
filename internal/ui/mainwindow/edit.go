@@ -42,7 +42,7 @@ func hashSlice(data []byte) [32]byte {
 	return sha256.Sum256(data)
 }
 
-func (m *MainWindow2) ImageShow(key []byte, value []byte) {
+func (m *MainWindow2) ImageShow(key []byte, value []byte, types string) {
 	var lableAddpicture *widget.Button
 	var image *canvas.Image
 
@@ -70,9 +70,12 @@ func (m *MainWindow2) ImageShow(key []byte, value []byte) {
 
 			if hashSlice(valueFinish) != hashSlice(BaseImage) {
 				m.EditColumn.SaveEditKey.Enable()
+				m.EditColumn.FinishValue = string(valueFinish)
+			} else {
+				m.EditColumn.SaveEditKey.Disable()
 			}
+			NameLabel = fmt.Sprintf("* %s . . .", types)
 			//ValueImage = valueFinish
-			m.EditColumn.FinishValue = string(valueFinish)
 		}, m.Window)
 
 		folderPath.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".gif"}))
