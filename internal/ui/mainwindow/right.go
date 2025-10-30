@@ -102,7 +102,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 			r.EditColumn.ValueEntry = r.ConfigureEntry(string(key))
 		}
 
-		labelEdit.SetText(fmt.Sprintf("Edit %s - %s", editType, NameLabel))
+		labelEdit.SetText(fmt.Sprintf("Edit %s - %s", editType, utils.TruncateString(NameLabel, 10)))
 		r.EditColumn.SaveEditKey.OnTapped = func() {
 			if editType == "value" {
 				err = logic.SaveValue(key, []byte(r.EditColumn.FinishValue))
@@ -111,7 +111,6 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 				}
 				Base = r.EditColumn.FinishValue
 				BaseImage = []byte(r.EditColumn.FinishValue)
-				nameLabel = r.EditColumn.FinishValue
 				//value = []byte(truncatedKey2)
 
 			} else {
