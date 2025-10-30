@@ -102,7 +102,7 @@ func QueryKey(inputKey string) ([]byte, error) {
 
 	key := utils.CleanInput(inputKey)
 
-	value, err := variable.CurrentDBClient.Get([]byte("	" + key))
+	value, err := variable.CurrentDBClient.Get([]byte(key))
 	if err != nil {
 		return nil, err
 	}
