@@ -159,6 +159,7 @@ func (l *MainWindow2) SetupThemeButtons(app fyne.App) *fyne.Container {
 	var lightButton *widget.Button
 
 	darkButton = widget.NewButton("Dark", func() {
+
 		app.Settings().SetTheme(theme.DarkTheme())
 
 		darkButton.Importance = widget.HighImportance
@@ -176,11 +177,33 @@ func (l *MainWindow2) SetupThemeButtons(app fyne.App) *fyne.Container {
 		lightButton.Refresh()
 	})
 
-	darkButton.Importance = widget.HighImportance
+	setThemeButtonImportance(app, darkButton, lightButton)
 
 	darkLight := container.NewVBox(
 		layout.NewSpacer(),
 		container.NewGridWithColumns(2, lightButton, darkButton),
 	)
 	return darkLight
+}
+
+func setThemeButtonImportance(app fyne.App, darkButton, lightButton *widget.Button) {
+	t := app.Settings().Theme()
+	currentBG := t.Color(theme.ColorNameBackground, app.Settings().ThemeVariant())
+	darkBG := theme.DarkTheme().Color(theme.ColorNameBackground, app.Settings().ThemeVariant())
+	lightBG := theme.LightTheme().Color(theme.ColorNameBackground, app.Settings().ThemeVariant())
+
+	switch {
+	case currentBG == darkBG:
+		darkButton.Importance = widget.HighImportance
+		lightButton.Importance = widget.MediumImportance
+	case currentBG == lightBG:
+		lightButton.Importance = widget.HighImportance
+		darkButton.Importance = widget.MediumImportance
+	default:
+		darkButton.Importance = widget.MediumImportance
+		lightButton.Importance = widget.MediumImportance
+	}
+
+	darkButton.Refresh()
+	lightButton.Refresh()
 }
