@@ -7,8 +7,11 @@ import (
 )
 
 // keys
-var KeyListDB = "ListKey_DB"
-var KeyLastDB = "LastDBKey"
+const (
+	KeyListDB = "ListKey_DB"
+	KeyLastDB = "LastDBKey"
+	KeyTheme  = "ThemeKey"
+)
 
 type Pref struct {
 	Preferences fyne.Preferences
@@ -49,4 +52,13 @@ func (p *Pref) SaveDatabase(items []Project, key string) error {
 	}
 	p.Preferences.SetString(key, string(data))
 	return nil
+}
+
+func (p *Pref) LoadTheme(key string) string {
+	theme := p.Preferences.String(key)
+	return theme
+}
+
+func (p *Pref) SaveTheme(theme string, key string) {
+	p.Preferences.SetString(key, theme)
 }
