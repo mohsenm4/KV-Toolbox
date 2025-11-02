@@ -67,7 +67,7 @@ func (mw *MainWindow2) OpenAddDialog() {
 		fileDialog.Show()
 	})
 
-	valueEntry.OnChanged = func(s string) {
+	keyEntry.OnChanged = func(s string) {
 		if s != "" {
 			addButton.Enable()
 		} else {
