@@ -173,6 +173,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 			r.EditColumn.FinishValue = s
 			NameLabel = s
 		}
+		r.Window.Canvas().Focus(r.EditColumn.ValueEntry)
 	})
 	return label
 }

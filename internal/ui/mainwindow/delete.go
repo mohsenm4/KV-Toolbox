@@ -55,4 +55,5 @@ func (mi *MainWindow2) DeleteKeyUi() {
 			}, mi.Window)
 	}
 	ded.Show()
+	mi.Window.Canvas().Focus(valueEntry)
 }

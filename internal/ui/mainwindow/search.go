@@ -94,4 +94,5 @@ func (r *MainWindow2) SearchKeyUi() {
 	}
 
 	d.Show()
+	r.Window.Canvas().Focus(valueEntry)
 }

@@ -141,4 +141,5 @@ func (mw *MainWindow2) OpenAddDialog() {
 	addDialog = dialog.NewCustom("Add Key and Value", "Close", content, mw.Window)
 	addDialog.Resize(fyne.NewSize(600, 400))
 	addDialog.Show()
+	mw.Window.Canvas().Focus(keyEntry)
 }
