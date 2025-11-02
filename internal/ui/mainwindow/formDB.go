@@ -30,7 +30,7 @@ func (mi *MainWindow2) FormPasteDatabase(title string) {
 
 	lableName := widget.NewLabel("Name :")
 	nameEntry := widget.NewEntry()
-	nameEntry.PlaceHolder = "Name"
+	nameEntry.SetPlaceHolder("Name")
 	nameContent := container.NewBorder(nil, nil, lableName, nil, nameEntry)
 
 	pathEntry := widget.NewEntry()
@@ -193,4 +193,6 @@ func (mi *MainWindow2) FormPasteDatabase(title string) {
 	ded = dialog.NewCustom("Add Key and Value", "Cancel", rightColumnContent, mi.Window)
 	ded.Resize(fyne.NewSize(700, 450))
 	ded.Show()
+	mi.Window.Canvas().Focus(nameEntry)
+
 }
