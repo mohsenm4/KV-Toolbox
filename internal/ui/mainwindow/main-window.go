@@ -45,46 +45,53 @@ type ObjectsMainWindow struct {
 }
 
 func NewMainWindow(name string) *MainWindow2 {
+	leftColumn := &LeftColumn2{
+		Container:              container.NewVBox(),
+		PreviousClose:          widget.NewButtonWithIcon("", theme.CancelIcon(), nil),
+		PreviousProject:        widget.NewButton("", nil), // dinamic name of project
+		PreviousRefreshButton:  widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), nil),
+		ToggleButtonsContainer: container.NewVBox(),
+		DarkLight:              container.NewVBox(),
+		Pluss:                  widget.NewButton("+", nil),
+		LeveldbButton:          widget.NewButton("", nil), // dinamic name of database
+		BottomDatabase:         []*widget.Button{},
+	}
+
+	rightColumn := &RightColumn2{
+		Container:            container.NewVBox(),
+		NameButtonProject:    widget.NewLabel(""), // dinamic name of project
+		ButtonDelete:         widget.NewButton("Delete", nil),
+		SearchButton:         widget.NewButton("Search", nil),
+		ButtonAdd:            widget.NewButton("Add", nil),
+		KeyRightColunm:       widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		ValueRightColunm:     widget.NewLabelWithStyle("value", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		LastLableKeyAndValue: utils.NewTappableLabel("", nil), // dinamic last label key and value
+		LastStart:            &[]byte{},
+		LastEnd:              &[]byte{},
+		LastPage:             0,
+		Orgdata:              []dbpak.KVData{},
+	}
+
+	editColumn := &EditColumn2{
+		Container:     container.NewVBox(),
+		Edit2:         container.NewVBox(),
+		CancelEditKey: widget.NewButton("Cancel", nil),
+		SaveEditKey:   widget.NewButton("Save", nil),
+		ValueEntry:    widget.NewEntry(),
+	}
+
+	object := &ObjectsMainWindow{
+		Line:   canvas.NewLine(theme.PrimaryColor()),
+		Spacer: widget.NewLabel(""),
+	}
+
 	mw := &MainWindow2{
-		NameWindow: name,
-		TypeDB:     "", // default or placeholder DB type
-		LeftColumn: &LeftColumn2{
-			Container:              container.NewVBox(),
-			PreviousClose:          widget.NewButton("", nil),
-			PreviousProject:        widget.NewButton("", nil),
-			PreviousRefreshButton:  widget.NewButton("", nil),
-			ToggleButtonsContainer: container.NewVBox(),
-			DarkLight:              container.NewVBox(),
-			Pluss:                  widget.NewButton("", nil),
-			LeveldbButton:          widget.NewButton("", nil),
-			BottomDatabase:         []*widget.Button{},
-		},
-		RightColumn: &RightColumn2{
-			Container:            container.NewVBox(),
-			NameButtonProject:    widget.NewLabel(""),
-			Spacer:               widget.NewLabel(""),
-			ButtonDelete:         widget.NewButton("", nil),
-			SearchButton:         widget.NewButton("", nil),
-			ButtonAdd:            widget.NewButton("", nil),
-			KeyRightColunm:       widget.NewLabel(""),
-			ValueRightColunm:     widget.NewLabel(""),
-			LastLableKeyAndValue: utils.NewTappableLabel("", nil),
-			LastStart:            &[]byte{},
-			LastEnd:              &[]byte{},
-			LastPage:             0,
-			Orgdata:              []dbpak.KVData{},
-		},
-		EditColumn: &EditColumn2{
-			Container:     container.NewVBox(),
-			Edit2:         container.NewVBox(),
-			CancelEditKey: widget.NewButton("", nil),
-			SaveEditKey:   widget.NewButton("", nil),
-			ValueEntry:    widget.NewEntry(),
-		},
-		Objects: &ObjectsMainWindow{
-			Line:   canvas.NewLine(theme.PrimaryColor()),
-			Spacer: widget.NewLabel(""),
-		},
+		NameWindow:  name,
+		TypeDB:      "", // default or placeholder DB type
+		LeftColumn:  leftColumn,
+		RightColumn: rightColumn,
+		EditColumn:  editColumn,
+		Objects:     object,
 	}
 
 	return mw
