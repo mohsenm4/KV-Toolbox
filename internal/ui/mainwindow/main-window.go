@@ -32,59 +32,66 @@ type MainWindow2 struct {
 	//DBService *service.DBService
 	//Storage   *service.StorageService
 
-	LeftColumn  *LeftColumn2
-	RightColumn *RightColumn2
-	EditColumn  *EditColumn2
+	LeftColumn  *LeftColumn
+	RightColumn *RightColumn
+	EditColumn  *EditColumn
 	Objects     *ObjectsMainWindow
 	Pref        *pref.Pref
 }
 
 type ObjectsMainWindow struct {
-	Spacer *widget.Label
-	Line   *canvas.Line
+	spacer *widget.Label
+	line   *canvas.Line
 }
 
 func NewMainWindow(name string) *MainWindow2 {
+	leftColumn := &LeftColumn{
+		container:              container.NewVBox(),
+		previousClose:          widget.NewButtonWithIcon("", theme.CancelIcon(), nil),
+		previousProject:        widget.NewButton("", nil), // dinamic name of project
+		previousRefreshButton:  widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), nil),
+		toggleButtonsContainer: container.NewVBox(),
+		darkLight:              container.NewVBox(),
+		pluss:                  widget.NewButton("+", nil),
+		leveldbButton:          widget.NewButton("", nil), // dinamic name of database
+		bottomDatabase:         []*widget.Button{},
+	}
+
+	rightColumn := &RightColumn{
+		container:            container.NewVBox(),
+		nameButtonProject:    widget.NewLabel(""), // dinamic name of project
+		buttonDelete:         widget.NewButton("Delete", nil),
+		searchButton:         widget.NewButton("Search", nil),
+		buttonAdd:            widget.NewButton("Add", nil),
+		keyRightColunm:       widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		valueRightColunm:     widget.NewLabelWithStyle("value", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		lastLableKeyAndValue: utils.NewTappableLabel("", nil), // dinamic last label key and value
+		lastStart:            &[]byte{},
+		lastEnd:              &[]byte{},
+		lastPage:             0,
+		orgdata:              []dbpak.KVData{},
+	}
+
+	editColumn := &EditColumn{
+		container:     container.NewVBox(),
+		edit2:         container.NewVBox(),
+		cancelEditKey: widget.NewButton("Cancel", nil),
+		saveEditKey:   widget.NewButton("Save", nil),
+		valueEntry:    widget.NewEntry(),
+	}
+
+	object := &ObjectsMainWindow{
+		line:   canvas.NewLine(theme.PrimaryColor()),
+		spacer: widget.NewLabel(""),
+	}
+
 	mw := &MainWindow2{
-		NameWindow: name,
-		TypeDB:     "", // default or placeholder DB type
-		LeftColumn: &LeftColumn2{
-			Container:              container.NewVBox(),
-			PreviousClose:          widget.NewButton("", nil),
-			PreviousProject:        widget.NewButton("", nil),
-			PreviousRefreshButton:  widget.NewButton("", nil),
-			ToggleButtonsContainer: container.NewVBox(),
-			DarkLight:              container.NewVBox(),
-			Pluss:                  widget.NewButton("", nil),
-			LeveldbButton:          widget.NewButton("", nil),
-			BottomDatabase:         []*widget.Button{},
-		},
-		RightColumn: &RightColumn2{
-			Container:            container.NewVBox(),
-			NameButtonProject:    widget.NewLabel(""),
-			Spacer:               widget.NewLabel(""),
-			ButtonDelete:         widget.NewButton("", nil),
-			SearchButton:         widget.NewButton("", nil),
-			ButtonAdd:            widget.NewButton("", nil),
-			KeyRightColunm:       widget.NewLabel(""),
-			ValueRightColunm:     widget.NewLabel(""),
-			LastLableKeyAndValue: utils.NewTappableLabel("", nil),
-			LastStart:            &[]byte{},
-			LastEnd:              &[]byte{},
-			LastPage:             0,
-			Orgdata:              []dbpak.KVData{},
-		},
-		EditColumn: &EditColumn2{
-			Container:     container.NewVBox(),
-			Edit2:         container.NewVBox(),
-			CancelEditKey: widget.NewButton("", nil),
-			SaveEditKey:   widget.NewButton("", nil),
-			ValueEntry:    widget.NewEntry(),
-		},
-		Objects: &ObjectsMainWindow{
-			Line:   canvas.NewLine(theme.PrimaryColor()),
-			Spacer: widget.NewLabel(""),
-		},
+		NameWindow:  name,
+		TypeDB:      "", // default or placeholder DB type
+		LeftColumn:  leftColumn,
+		RightColumn: rightColumn,
+		EditColumn:  editColumn,
+		Objects:     object,
 	}
 
 	return mw
@@ -103,55 +110,55 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		myApp.Settings().SetTheme(theme.LightTheme())
 	}
 
-	m.Objects.Spacer = widget.NewLabel("")
+	m.Objects.spacer = widget.NewLabel("")
 
 	// key top window for colunm keys
-	m.RightColumn.KeyRightColunm = widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	m.RightColumn.keyRightColunm = widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	// value top window for colunm values
-	m.RightColumn.ValueRightColunm = widget.NewLabelWithStyle("value", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
+	m.RightColumn.valueRightColunm = widget.NewLabelWithStyle("value", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 
 	// name bottom project in colunm right
-	m.RightColumn.NameButtonProject = widget.NewLabelWithStyle(
+	m.RightColumn.nameButtonProject = widget.NewLabelWithStyle(
 		"",
 		fyne.TextAlignCenter,
 		fyne.TextStyle{Bold: true},
 	)
 
-	m.EditColumn.SaveEditKey = widget.NewButton("Save", func() {})
-	m.EditColumn.SaveEditKey.Disable()
+	m.EditColumn.saveEditKey = widget.NewButton("Save", func() {})
+	m.EditColumn.saveEditKey.Disable()
 
-	m.EditColumn.CancelEditKey = widget.NewButton("Cancle", func() {
-		utils.CheckCondition(m.EditColumn.Edit2)
+	m.EditColumn.cancelEditKey = widget.NewButton("Cancle", func() {
+		utils.CheckCondition(m.EditColumn.edit2)
 	})
 
-	m.RightColumn.SearchButton = widget.NewButton("Search", func() {
+	m.RightColumn.searchButton = widget.NewButton("Search", func() {
 		m.SearchKeyUi()
 	})
 
-	m.EditColumn.Container = container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), m.SaveAndCancle(), nil, nil, m.EditColumn.Edit2)
+	m.EditColumn.container = container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), m.SaveAndCancle(), nil, nil, m.EditColumn.edit2)
 
-	m.RightColumn.ButtonAdd = widget.NewButton("Add", func() {
+	m.RightColumn.buttonAdd = widget.NewButton("Add", func() {
 		m.OpenAddDialog()
 	})
-	m.RightColumn.ButtonAdd.Disable()
-	m.RightColumn.SearchButton.Disable()
+	m.RightColumn.buttonAdd.Disable()
+	m.RightColumn.searchButton.Disable()
 
-	m.RightColumn.ButtonDelete = widget.NewButton("Delete", func() {
+	m.RightColumn.buttonDelete = widget.NewButton("Delete", func() {
 		m.DeleteKeyUi()
 	})
 
 	buttonsVisible := false
 
-	m.RightColumn.ButtonDelete.Disable()
+	m.RightColumn.buttonDelete.Disable()
 	// left column
-	m.LeftColumn.Container = m.SetupLastColumn()
-	m.Objects.Spacer.Resize(fyne.NewSize(0, 30))
+	m.LeftColumn.container = m.SetupLastColumn()
+	m.Objects.spacer.Resize(fyne.NewSize(0, 30))
 
 	for _, name := range variable.NameDatabase {
 
-		m.LeftColumn.LeveldbButton = widget.NewButton(name, func() {
-			m.LeftColumn.ToggleButtonsContainer.Objects = nil
+		m.LeftColumn.leveldbButton = widget.NewButton(name, func() {
+			m.LeftColumn.toggleButtonsContainer.Objects = nil
 			buttonsVisible = false
 			m.TypeDB = name
 			switch name {
@@ -168,22 +175,22 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 
 			m.FormPasteDatabase(name)
 		})
-		m.LeftColumn.BottomDatabase = append(m.LeftColumn.BottomDatabase, m.LeftColumn.LeveldbButton)
+		m.LeftColumn.bottomDatabase = append(m.LeftColumn.bottomDatabase, m.LeftColumn.leveldbButton)
 	}
 
-	m.LeftColumn.Pluss = widget.NewButton("+", func() {
+	m.LeftColumn.pluss = widget.NewButton("+", func() {
 		if buttonsVisible {
 
-			m.LeftColumn.ToggleButtonsContainer.Objects = nil
+			m.LeftColumn.toggleButtonsContainer.Objects = nil
 		} else {
 
-			for _, m2 := range m.LeftColumn.BottomDatabase {
+			for _, m2 := range m.LeftColumn.bottomDatabase {
 
-				m.LeftColumn.ToggleButtonsContainer.Add(m2)
+				m.LeftColumn.toggleButtonsContainer.Add(m2)
 			}
 		}
 		buttonsVisible = !buttonsVisible
-		m.LeftColumn.ToggleButtonsContainer.Refresh()
+		m.LeftColumn.toggleButtonsContainer.Refresh()
 	})
 
 	m.Window.SetCloseIntercept(func() {
@@ -198,7 +205,7 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		}, m.Window)
 	})
 
-	m.LeftColumn.DarkLight = m.SetupThemeButtons(myApp)
+	m.LeftColumn.darkLight = m.SetupThemeButtons(myApp)
 
 	// all window
 	containerAll := m.ColumnContent()
@@ -209,25 +216,25 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 }
 
 func (m *MainWindow2) LeftColumn2() fyne.CanvasObject {
-	lastColumnScrollable := container.NewVScroll(m.LeftColumn.Container)
+	lastColumnScrollable := container.NewVScroll(m.LeftColumn.container)
 
-	mainContent := container.NewBorder(m.TopLeftColumn2(), m.LeftColumn.DarkLight, nil, nil, lastColumnScrollable)
+	mainContent := container.NewBorder(m.TopLeftColumn2(), m.LeftColumn.darkLight, nil, nil, lastColumnScrollable)
 	return mainContent
 }
 
 func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
-	if mi.RightColumn.Container == nil {
-		mi.RightColumn.Container = container.NewVBox()
+	if mi.RightColumn.container == nil {
+		mi.RightColumn.container = container.NewVBox()
 	}
 	if mi.TopRightColumn() == nil {
 		fmt.Println("")
 	}
-	rightColumnScrollable := container.NewVScroll(mi.RightColumn.Container)
+	rightColumnScrollable := container.NewVScroll(mi.RightColumn.container)
 
 	up := false
 
 	rightColumnScrollable.OnScrolled = func(p fyne.Position) {
-		maxScroll := mi.RightColumn.Container.MinSize().Height - rightColumnScrollable.Size().Height
+		maxScroll := mi.RightColumn.container.MinSize().Height - rightColumnScrollable.Size().Height
 
 		if up && p.Y == 0 && !variable.ResultSearch {
 			variable.CurrentPage--
@@ -236,10 +243,10 @@ func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
 				variable.CurrentPage = 3
 				return
 			}
-			numberLast := len(mi.RightColumn.Container.Objects)
+			numberLast := len(mi.RightColumn.container.Objects)
 			mi.UpdatePage()
 
-			mi.RightColumn.Container.Objects = mi.RightColumn.Container.Objects[:numberLast]
+			mi.RightColumn.container.Objects = mi.RightColumn.container.Objects[:numberLast]
 
 			rightColumnScrollable.Offset.Y = maxScroll / 2
 			rightColumnScrollable.Refresh()
@@ -249,12 +256,12 @@ func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
 		} else if p.Y == maxScroll && variable.ItemsAdded && !variable.ResultSearch {
 
 			variable.CurrentPage++
-			numberLast := len(mi.RightColumn.Container.Objects)
+			numberLast := len(mi.RightColumn.container.Objects)
 			mi.UpdatePage()
 			rightColumnScrollable.Offset.Y = maxScroll / 2
 
-			if len(mi.RightColumn.Container.Objects) > (variable.ItemsPerPage)*3 {
-				mi.RightColumn.Container.Objects = mi.RightColumn.Container.Objects[len(mi.RightColumn.Container.Objects)-numberLast:]
+			if len(mi.RightColumn.container.Objects) > (variable.ItemsPerPage)*3 {
+				mi.RightColumn.container.Objects = mi.RightColumn.container.Objects[len(mi.RightColumn.container.Objects)-numberLast:]
 				up = true
 			}
 
@@ -262,15 +269,15 @@ func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
 
 	}
 
-	m := container.NewVScroll(mi.EditColumn.Edit2)
-	mi.EditColumn.Container = container.NewBorder(
+	m := container.NewVScroll(mi.EditColumn.edit2)
+	mi.EditColumn.container = container.NewBorder(
 		widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		mi.SaveAndCancle(),
 		nil, nil, m,
 	)
-	mi.EditColumn.Container.Refresh()
+	mi.EditColumn.container.Refresh()
 
-	columns := container.NewHSplit(rightColumnScrollable, mi.EditColumn.Container)
+	columns := container.NewHSplit(rightColumnScrollable, mi.EditColumn.container)
 	columns.SetOffset(0.80)
 	mainContent := container.NewBorder(mi.TopRightColumn(), nil, nil, nil, columns)
 

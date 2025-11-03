@@ -59,8 +59,8 @@ func (r *MainWindow2) SearchKeyUi() {
 			return
 		}
 
-		utils.CheckCondition(r.EditColumn.Edit2)
-		utils.CheckCondition(r.RightColumn.Container)
+		utils.CheckCondition(r.EditColumn.edit2)
+		utils.CheckCondition(r.RightColumn.container)
 
 		var truncatedValue string
 
@@ -85,8 +85,8 @@ func (r *MainWindow2) SearchKeyUi() {
 			keyLabel := r.BuildLabelKeyAndValue("key", keys[i], values[i], truncatedKey)
 
 			buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
-			r.RightColumn.Container.Add(buttonRow)
-			r.RightColumn.Container.Refresh()
+			r.RightColumn.container.Add(buttonRow)
+			r.RightColumn.container.Refresh()
 		}
 
 		d.Hide()

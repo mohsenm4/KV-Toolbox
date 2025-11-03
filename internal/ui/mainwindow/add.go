@@ -122,7 +122,7 @@ func (mw *MainWindow2) OpenAddDialog() {
 		}
 
 		addDialog.Hide()
-		mw.RightColumn.Container.Refresh()
+		mw.RightColumn.container.Refresh()
 	})
 	addButton.Importance = widget.HighImportance
 
