@@ -161,7 +161,7 @@ func (mi *MainWindow2) FormPasteDatabase(title string) {
 			if !addButton {
 
 				utils.CheckCondition(mi.RightColumn.container)
-				utils.CheckCondition(mi.EditColumn.Edit2)
+				utils.CheckCondition(mi.EditColumn.edit2)
 
 				buttonContainer := mi.ProjectButton(nameEntry.Text, mi.LeftColumn.container, pathEntry.Text)
 				mi.LeftColumn.container.Add(buttonContainer)

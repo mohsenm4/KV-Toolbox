@@ -40,7 +40,7 @@ type MainWindow2 struct {
 }
 
 type ObjectsMainWindow struct {
-	Spacer *widget.Label
+	spacer *widget.Label
 	line   *canvas.Line
 }
 
@@ -73,16 +73,16 @@ func NewMainWindow(name string) *MainWindow2 {
 	}
 
 	editColumn := &EditColumn{
-		Container:     container.NewVBox(),
-		Edit2:         container.NewVBox(),
-		CancelEditKey: widget.NewButton("Cancel", nil),
-		SaveEditKey:   widget.NewButton("Save", nil),
-		ValueEntry:    widget.NewEntry(),
+		container:     container.NewVBox(),
+		edit2:         container.NewVBox(),
+		cancelEditKey: widget.NewButton("Cancel", nil),
+		saveEditKey:   widget.NewButton("Save", nil),
+		valueEntry:    widget.NewEntry(),
 	}
 
 	object := &ObjectsMainWindow{
 		line:   canvas.NewLine(theme.PrimaryColor()),
-		Spacer: widget.NewLabel(""),
+		spacer: widget.NewLabel(""),
 	}
 
 	mw := &MainWindow2{
@@ -110,7 +110,7 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		myApp.Settings().SetTheme(theme.LightTheme())
 	}
 
-	m.Objects.Spacer = widget.NewLabel("")
+	m.Objects.spacer = widget.NewLabel("")
 
 	// key top window for colunm keys
 	m.RightColumn.keyRightColunm = widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
@@ -125,18 +125,18 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		fyne.TextStyle{Bold: true},
 	)
 
-	m.EditColumn.SaveEditKey = widget.NewButton("Save", func() {})
-	m.EditColumn.SaveEditKey.Disable()
+	m.EditColumn.saveEditKey = widget.NewButton("Save", func() {})
+	m.EditColumn.saveEditKey.Disable()
 
-	m.EditColumn.CancelEditKey = widget.NewButton("Cancle", func() {
-		utils.CheckCondition(m.EditColumn.Edit2)
+	m.EditColumn.cancelEditKey = widget.NewButton("Cancle", func() {
+		utils.CheckCondition(m.EditColumn.edit2)
 	})
 
 	m.RightColumn.searchButton = widget.NewButton("Search", func() {
 		m.SearchKeyUi()
 	})
 
-	m.EditColumn.Container = container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), m.SaveAndCancle(), nil, nil, m.EditColumn.Edit2)
+	m.EditColumn.container = container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), m.SaveAndCancle(), nil, nil, m.EditColumn.edit2)
 
 	m.RightColumn.buttonAdd = widget.NewButton("Add", func() {
 		m.OpenAddDialog()
@@ -153,7 +153,7 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 	m.RightColumn.buttonDelete.Disable()
 	// left column
 	m.LeftColumn.container = m.SetupLastColumn()
-	m.Objects.Spacer.Resize(fyne.NewSize(0, 30))
+	m.Objects.spacer.Resize(fyne.NewSize(0, 30))
 
 	for _, name := range variable.NameDatabase {
 
@@ -269,15 +269,15 @@ func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
 
 	}
 
-	m := container.NewVScroll(mi.EditColumn.Edit2)
-	mi.EditColumn.Container = container.NewBorder(
+	m := container.NewVScroll(mi.EditColumn.edit2)
+	mi.EditColumn.container = container.NewBorder(
 		widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		mi.SaveAndCancle(),
 		nil, nil, m,
 	)
-	mi.EditColumn.Container.Refresh()
+	mi.EditColumn.container.Refresh()
 
-	columns := container.NewHSplit(rightColumnScrollable, mi.EditColumn.Container)
+	columns := container.NewHSplit(rightColumnScrollable, mi.EditColumn.container)
 	columns.SetOffset(0.80)
 	mainContent := container.NewBorder(mi.TopRightColumn(), nil, nil, nil, columns)
 

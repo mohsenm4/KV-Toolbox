@@ -59,7 +59,7 @@ func (r *MainWindow2) SearchKeyUi() {
 			return
 		}
 
-		utils.CheckCondition(r.EditColumn.Edit2)
+		utils.CheckCondition(r.EditColumn.edit2)
 		utils.CheckCondition(r.RightColumn.container)
 
 		var truncatedValue string

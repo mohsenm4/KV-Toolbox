@@ -62,14 +62,14 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 		variable.PreviousOffsetY = 0
 		l.RightColumn.lastStart = nil
 		utils.CheckCondition(l.RightColumn.container)
-		utils.CheckCondition(l.EditColumn.Edit2)
+		utils.CheckCondition(l.EditColumn.edit2)
 		l.UpdatePage()
 		l.RightColumn.nameButtonProject.Text = ""
 		l.RightColumn.nameButtonProject.Text = inputText + " - " + l.TypeDB
 
 		l.RightColumn.container.Refresh()
 		l.LeftColumn.container.Refresh()
-		l.EditColumn.Container.Refresh()
+		l.EditColumn.container.Refresh()
 
 	})
 	buttonContainer := container.NewHBox()
@@ -78,7 +78,7 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 
 		if l.RightColumn.nameButtonProject.Text == inputText+" - "+l.TypeDB {
 			utils.CheckCondition(l.RightColumn.container)
-			utils.CheckCondition(l.EditColumn.Edit2)
+			utils.CheckCondition(l.EditColumn.edit2)
 
 			l.RightColumn.buttonAdd.Disable()
 			l.RightColumn.searchButton.Disable()
@@ -114,7 +114,7 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 			variable.PreviousOffsetY = 0
 			l.RightColumn.lastStart = nil
 			utils.CheckCondition(l.RightColumn.container)
-			utils.CheckCondition(l.EditColumn.Edit2)
+			utils.CheckCondition(l.EditColumn.edit2)
 			l.UpdatePage()
 
 			l.RightColumn.nameButtonProject.Refresh()
@@ -145,11 +145,11 @@ func (l *MainWindow2) SetupLastColumn() *fyne.Container {
 }
 
 func (r *MainWindow2) TopLeftColumn2() *fyne.Container {
-	r.Objects.Spacer = widget.NewLabel("")
+	r.Objects.spacer = widget.NewLabel("")
 	topLeftColumn := container.NewVBox(
 		r.LeftColumn.pluss,
 		r.LeftColumn.toggleButtonsContainer,
-		r.Objects.Spacer,
+		r.Objects.spacer,
 	)
 	return topLeftColumn
 }

@@ -48,7 +48,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 	var err error
 	// Determine the base value based on the edit type
 	label = utils.NewTappableLabel(nameLabel, func() {
-		r.EditColumn.SaveEditKey.Disable()
+		r.EditColumn.saveEditKey.Disable()
 		if r.RightColumn.lastLableKeyAndValue != nil {
 			r.RightColumn.lastLableKeyAndValue.Importance = widget.MediumImportance
 			r.RightColumn.lastLableKeyAndValue.Refresh()
@@ -57,10 +57,10 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		label.Refresh()
 		r.RightColumn.lastLableKeyAndValue = label
 
-		utils.CheckCondition(r.EditColumn.Edit2)
+		utils.CheckCondition(r.EditColumn.edit2)
 
 		labelEdit := widget.NewLabel("")
-		r.EditColumn.Edit2.Add(labelEdit)
+		r.EditColumn.edit2.Add(labelEdit)
 
 		if editType == "value" {
 			typeValue := mimetype.Detect([]byte(value))
@@ -69,7 +69,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 			switch {
 			case strings.HasPrefix(typeValue.String(), "image/"):
 				r.ImageShow([]byte(key), []byte(value), typeValue.Extension())
-				r.EditColumn.FinishValue = string(value)
+				r.EditColumn.finishValue = string(value)
 				NameLabel = fmt.Sprintf("* %s . . .", typeValue.Extension())
 
 			case strings.HasPrefix(typeValue.String(), "text/") || strings.HasPrefix(typeValue.String(), "application/"):
@@ -88,9 +88,9 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 
 				}
 
-				r.EditColumn.ValueEntry = r.ConfigureEntry(string(value))
-				value = []byte(r.EditColumn.ValueEntry.Text)
-				r.EditColumn.FinishValue = string(value)
+				r.EditColumn.valueEntry = r.ConfigureEntry(string(value))
+				value = []byte(r.EditColumn.valueEntry.Text)
+				r.EditColumn.finishValue = string(value)
 				NameLabel = string(value)
 			}
 
@@ -98,36 +98,36 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 			Base = string(key)
 			NameLabel = string(key)
 
-			r.EditColumn.FinishValue = string(key)
-			r.EditColumn.ValueEntry = r.ConfigureEntry(string(key))
+			r.EditColumn.finishValue = string(key)
+			r.EditColumn.valueEntry = r.ConfigureEntry(string(key))
 		}
 
 		labelEdit.SetText(fmt.Sprintf("Edit %s - %s", editType, utils.TruncateString(NameLabel, 10)))
-		r.EditColumn.SaveEditKey.OnTapped = func() {
+		r.EditColumn.saveEditKey.OnTapped = func() {
 			if editType == "value" {
-				err = logic.SaveValue(key, []byte(r.EditColumn.FinishValue))
+				err = logic.SaveValue(key, []byte(r.EditColumn.finishValue))
 				if err != nil {
 					fmt.Println(err.Error())
 				}
-				Base = r.EditColumn.FinishValue
-				BaseImage = []byte(r.EditColumn.FinishValue)
+				Base = r.EditColumn.finishValue
+				BaseImage = []byte(r.EditColumn.finishValue)
 				//value = []byte(truncatedKey2)
 
 			} else {
-				_, err := logic.QueryKey(r.EditColumn.ValueEntry.Text)
+				_, err := logic.QueryKey(r.EditColumn.valueEntry.Text)
 				if !errors.Is(err, dberr.ErrKeyNotFound) {
 					dialog.NewConfirm(
 						"⚠️ Duplicate Key",
 						"This key already exists.\nIf you continue, it might be merged and you could lose one of the values.\nDo you still want to continue?",
 						func(confirmed bool) {
 							if confirmed {
-								r.EditColumn.SaveEditKey.Disable()
-								Base, err = logic.UpdateKey(key, []byte(r.EditColumn.ValueEntry.Text))
+								r.EditColumn.saveEditKey.Disable()
+								Base, err = logic.UpdateKey(key, []byte(r.EditColumn.valueEntry.Text))
 								if err != nil {
 									dialog.ShowInformation("Error", err.Error(), r.Window)
 									return
 								}
-								NameLabel = r.EditColumn.ValueEntry.Text
+								NameLabel = r.EditColumn.valueEntry.Text
 								dialog.ShowInformation("Success", "The key was added successfully.", r.Window)
 								return
 							} else {
@@ -140,12 +140,12 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 					return
 				} else if errors.Is(err, dberr.ErrKeyNotFound) {
 
-					Base, err = logic.UpdateKey([]byte(Base), []byte(r.EditColumn.ValueEntry.Text))
+					Base, err = logic.UpdateKey([]byte(Base), []byte(r.EditColumn.valueEntry.Text))
 					if err != nil {
 						dialog.ShowInformation("Error", err.Error(), r.Window)
 						return
 					}
-					NameLabel = r.EditColumn.ValueEntry.Text
+					NameLabel = r.EditColumn.valueEntry.Text
 					//r.EditColumn.FinishValue = r.EditColumn.ValueEntry.Text
 				} else {
 					dialog.ShowInformation("Error", err.Error(), r.Window)
@@ -153,27 +153,27 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 				}
 			}
 
-			r.EditColumn.SaveEditKey.Disable()
-			value = []byte(r.EditColumn.FinishValue)
+			r.EditColumn.saveEditKey.Disable()
+			value = []byte(r.EditColumn.finishValue)
 			truncatedText := utils.TruncateString(NameLabel, 10)
 			label.SetText(truncatedText)
 			labelEdit.SetText(fmt.Sprintf("Edit %s - %s", editType, truncatedText))
-			r.EditColumn.Edit2.Refresh()
+			r.EditColumn.edit2.Refresh()
 			r.RightColumn.container.Refresh()
 
 		}
 
-		r.EditColumn.ValueEntry.OnChanged = func(s string) {
+		r.EditColumn.valueEntry.OnChanged = func(s string) {
 
 			if s == Base {
-				r.EditColumn.SaveEditKey.Disable()
+				r.EditColumn.saveEditKey.Disable()
 			} else {
-				r.EditColumn.SaveEditKey.Enable()
+				r.EditColumn.saveEditKey.Enable()
 			}
-			r.EditColumn.FinishValue = s
+			r.EditColumn.finishValue = s
 			NameLabel = s
 		}
-		r.Window.Canvas().Focus(r.EditColumn.ValueEntry)
+		r.Window.Canvas().Focus(r.EditColumn.valueEntry)
 	})
 	return label
 }
