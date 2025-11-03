@@ -23,7 +23,6 @@ import (
 type RightColumn struct {
 	container            *fyne.Container
 	nameButtonProject    *widget.Label
-	spacer               *widget.Label
 	buttonDelete         *widget.Button
 	searchButton         *widget.Button
 	buttonAdd            *widget.Button
@@ -185,7 +184,7 @@ func (r *MainWindow2) TopRightColumn() *fyne.Container {
 	container := container.NewVBox(
 		r.RightColumn.nameButtonProject,
 		r.Objects.line,
-		r.RightColumn.spacer,
+		r.Objects.spacer,
 		r.RightColumn.Tool(),
 		r.RightColumn.KeyAndValue(),
 	)

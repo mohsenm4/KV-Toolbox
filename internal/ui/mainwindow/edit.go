@@ -1,7 +1,7 @@
 package mainwindow
 
 import (
-	"crypto/sha256"
+	"bytes"
 	"fmt"
 	"io/ioutil"
 
@@ -38,10 +38,6 @@ func (e *MainWindow2) ConfigureEntry(content string) *widget.Entry {
 
 var BaseImage []byte
 
-func hashSlice(data []byte) [32]byte {
-	return sha256.Sum256(data)
-}
-
 func (m *MainWindow2) ImageShow(key []byte, value []byte, types string) {
 	var lableAddpicture *widget.Button
 	var image *canvas.Image
@@ -68,7 +64,7 @@ func (m *MainWindow2) ImageShow(key []byte, value []byte, types string) {
 			image.Resource = fyne.NewStaticResource("image.png", valueFinish)
 			image.Refresh()
 
-			if hashSlice(valueFinish) != hashSlice(BaseImage) {
+			if !bytes.Equal(valueFinish, BaseImage) {
 				m.EditColumn.saveEditKey.Enable()
 				m.EditColumn.finishValue = string(valueFinish)
 			} else {
