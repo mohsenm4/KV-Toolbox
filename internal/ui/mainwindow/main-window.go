@@ -32,32 +32,32 @@ type MainWindow2 struct {
 	//DBService *service.DBService
 	//Storage   *service.StorageService
 
-	LeftColumn  *LeftColumn2
-	RightColumn *RightColumn2
-	EditColumn  *EditColumn2
+	LeftColumn  *LeftColumn
+	RightColumn *RightColumn
+	EditColumn  *EditColumn
 	Objects     *ObjectsMainWindow
 	Pref        *pref.Pref
 }
 
 type ObjectsMainWindow struct {
 	Spacer *widget.Label
-	Line   *canvas.Line
+	line   *canvas.Line
 }
 
 func NewMainWindow(name string) *MainWindow2 {
-	leftColumn := &LeftColumn2{
-		Container:              container.NewVBox(),
-		PreviousClose:          widget.NewButtonWithIcon("", theme.CancelIcon(), nil),
-		PreviousProject:        widget.NewButton("", nil), // dinamic name of project
-		PreviousRefreshButton:  widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), nil),
-		ToggleButtonsContainer: container.NewVBox(),
-		DarkLight:              container.NewVBox(),
-		Pluss:                  widget.NewButton("+", nil),
-		LeveldbButton:          widget.NewButton("", nil), // dinamic name of database
-		BottomDatabase:         []*widget.Button{},
+	leftColumn := &LeftColumn{
+		container:              container.NewVBox(),
+		previousClose:          widget.NewButtonWithIcon("", theme.CancelIcon(), nil),
+		previousProject:        widget.NewButton("", nil), // dinamic name of project
+		previousRefreshButton:  widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), nil),
+		toggleButtonsContainer: container.NewVBox(),
+		darkLight:              container.NewVBox(),
+		pluss:                  widget.NewButton("+", nil),
+		leveldbButton:          widget.NewButton("", nil), // dinamic name of database
+		bottomDatabase:         []*widget.Button{},
 	}
 
-	rightColumn := &RightColumn2{
+	rightColumn := &RightColumn{
 		Container:            container.NewVBox(),
 		NameButtonProject:    widget.NewLabel(""), // dinamic name of project
 		ButtonDelete:         widget.NewButton("Delete", nil),
@@ -72,7 +72,7 @@ func NewMainWindow(name string) *MainWindow2 {
 		Orgdata:              []dbpak.KVData{},
 	}
 
-	editColumn := &EditColumn2{
+	editColumn := &EditColumn{
 		Container:     container.NewVBox(),
 		Edit2:         container.NewVBox(),
 		CancelEditKey: widget.NewButton("Cancel", nil),
@@ -81,7 +81,7 @@ func NewMainWindow(name string) *MainWindow2 {
 	}
 
 	object := &ObjectsMainWindow{
-		Line:   canvas.NewLine(theme.PrimaryColor()),
+		line:   canvas.NewLine(theme.PrimaryColor()),
 		Spacer: widget.NewLabel(""),
 	}
 
@@ -152,13 +152,13 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 
 	m.RightColumn.ButtonDelete.Disable()
 	// left column
-	m.LeftColumn.Container = m.SetupLastColumn()
+	m.LeftColumn.container = m.SetupLastColumn()
 	m.Objects.Spacer.Resize(fyne.NewSize(0, 30))
 
 	for _, name := range variable.NameDatabase {
 
-		m.LeftColumn.LeveldbButton = widget.NewButton(name, func() {
-			m.LeftColumn.ToggleButtonsContainer.Objects = nil
+		m.LeftColumn.leveldbButton = widget.NewButton(name, func() {
+			m.LeftColumn.toggleButtonsContainer.Objects = nil
 			buttonsVisible = false
 			m.TypeDB = name
 			switch name {
@@ -175,22 +175,22 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 
 			m.FormPasteDatabase(name)
 		})
-		m.LeftColumn.BottomDatabase = append(m.LeftColumn.BottomDatabase, m.LeftColumn.LeveldbButton)
+		m.LeftColumn.bottomDatabase = append(m.LeftColumn.bottomDatabase, m.LeftColumn.leveldbButton)
 	}
 
-	m.LeftColumn.Pluss = widget.NewButton("+", func() {
+	m.LeftColumn.pluss = widget.NewButton("+", func() {
 		if buttonsVisible {
 
-			m.LeftColumn.ToggleButtonsContainer.Objects = nil
+			m.LeftColumn.toggleButtonsContainer.Objects = nil
 		} else {
 
-			for _, m2 := range m.LeftColumn.BottomDatabase {
+			for _, m2 := range m.LeftColumn.bottomDatabase {
 
-				m.LeftColumn.ToggleButtonsContainer.Add(m2)
+				m.LeftColumn.toggleButtonsContainer.Add(m2)
 			}
 		}
 		buttonsVisible = !buttonsVisible
-		m.LeftColumn.ToggleButtonsContainer.Refresh()
+		m.LeftColumn.toggleButtonsContainer.Refresh()
 	})
 
 	m.Window.SetCloseIntercept(func() {
@@ -205,7 +205,7 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		}, m.Window)
 	})
 
-	m.LeftColumn.DarkLight = m.SetupThemeButtons(myApp)
+	m.LeftColumn.darkLight = m.SetupThemeButtons(myApp)
 
 	// all window
 	containerAll := m.ColumnContent()
@@ -216,9 +216,9 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 }
 
 func (m *MainWindow2) LeftColumn2() fyne.CanvasObject {
-	lastColumnScrollable := container.NewVScroll(m.LeftColumn.Container)
+	lastColumnScrollable := container.NewVScroll(m.LeftColumn.container)
 
-	mainContent := container.NewBorder(m.TopLeftColumn2(), m.LeftColumn.DarkLight, nil, nil, lastColumnScrollable)
+	mainContent := container.NewBorder(m.TopLeftColumn2(), m.LeftColumn.darkLight, nil, nil, lastColumnScrollable)
 	return mainContent
 }
 

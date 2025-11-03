@@ -163,9 +163,9 @@ func (mi *MainWindow2) FormPasteDatabase(title string) {
 				utils.CheckCondition(mi.RightColumn.Container)
 				utils.CheckCondition(mi.EditColumn.Edit2)
 
-				buttonContainer := mi.ProjectButton(nameEntry.Text, mi.LeftColumn.Container, pathEntry.Text)
-				mi.LeftColumn.Container.Add(buttonContainer)
-				mi.LeftColumn.Container.Refresh()
+				buttonContainer := mi.ProjectButton(nameEntry.Text, mi.LeftColumn.container, pathEntry.Text)
+				mi.LeftColumn.container.Add(buttonContainer)
+				mi.LeftColumn.container.Refresh()
 
 				variable.CreatDatabase = false
 				ded.Hide()

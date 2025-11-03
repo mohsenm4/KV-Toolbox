@@ -20,7 +20,7 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 )
 
-type RightColumn2 struct {
+type RightColumn struct {
 	Container            *fyne.Container
 	NameButtonProject    *widget.Label
 	Spacer               *widget.Label
@@ -36,8 +36,8 @@ type RightColumn2 struct {
 	Orgdata              []dbpak.KVData
 }
 
-func NewRightColumn() *RightColumn2 {
-	return &RightColumn2{}
+func NewRightColumn() *RightColumn {
+	return &RightColumn{}
 }
 
 var Base string
@@ -179,12 +179,12 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 }
 
 func (r *MainWindow2) TopRightColumn() *fyne.Container {
-	r.Objects.Line = canvas.NewLine(color.Black)
-	r.Objects.Line.StrokeWidth = 2
+	r.Objects.line = canvas.NewLine(color.Black)
+	r.Objects.line.StrokeWidth = 2
 
 	container := container.NewVBox(
 		r.RightColumn.NameButtonProject,
-		r.Objects.Line,
+		r.Objects.line,
 		r.RightColumn.Spacer,
 		r.RightColumn.Tool(),
 		r.RightColumn.KeyAndValue(),
@@ -192,11 +192,11 @@ func (r *MainWindow2) TopRightColumn() *fyne.Container {
 	return container
 }
 
-func (r *RightColumn2) Tool() *fyne.Container {
+func (r *RightColumn) Tool() *fyne.Container {
 	return container.NewGridWithColumns(3, r.ButtonDelete, r.SearchButton, r.ButtonAdd)
 }
 
-func (r *RightColumn2) KeyAndValue() *fyne.Container {
+func (r *RightColumn) KeyAndValue() *fyne.Container {
 	return container.NewGridWithColumns(6, r.KeyRightColunm, widget.NewLabel(""), r.ValueRightColunm, widget.NewLabel(""))
 }
 

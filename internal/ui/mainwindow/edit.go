@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type EditColumn2 struct {
+type EditColumn struct {
 	Edit2         *fyne.Container
 	Container     *fyne.Container
 	CancelEditKey *widget.Button

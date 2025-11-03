@@ -14,16 +14,16 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type LeftColumn2 struct {
-	Container              *fyne.Container
-	PreviousClose          *widget.Button
-	PreviousProject        *widget.Button
-	PreviousRefreshButton  *widget.Button
-	ToggleButtonsContainer *fyne.Container
-	DarkLight              *fyne.Container
-	Pluss                  *widget.Button
-	LeveldbButton          *widget.Button
-	BottomDatabase         []*widget.Button
+type LeftColumn struct {
+	container              *fyne.Container
+	previousClose          *widget.Button
+	previousProject        *widget.Button
+	previousRefreshButton  *widget.Button
+	toggleButtonsContainer *fyne.Container
+	darkLight              *fyne.Container
+	pluss                  *widget.Button
+	leveldbButton          *widget.Button
+	bottomDatabase         []*widget.Button
 }
 
 func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Container, path string) *fyne.Container {
@@ -36,18 +36,18 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 		typeDB := strings.Split(projectButton.Text, " - ")
 		l.TypeDB = typeDB[len(typeDB)-1]
 
-		if l.LeftColumn.PreviousProject != nil {
-			l.LeftColumn.PreviousProject.Importance = widget.MediumImportance
-			l.LeftColumn.PreviousClose.Importance = widget.MediumImportance
-			l.LeftColumn.PreviousRefreshButton.Importance = widget.MediumImportance
+		if l.LeftColumn.previousProject != nil {
+			l.LeftColumn.previousProject.Importance = widget.MediumImportance
+			l.LeftColumn.previousClose.Importance = widget.MediumImportance
+			l.LeftColumn.previousRefreshButton.Importance = widget.MediumImportance
 		}
 		projectButton.Importance = widget.HighImportance
 		closeButton.Importance = widget.HighImportance
 		refreshButton.Importance = widget.HighImportance
 
-		l.LeftColumn.PreviousProject = projectButton
-		l.LeftColumn.PreviousClose = closeButton
-		l.LeftColumn.PreviousRefreshButton = refreshButton
+		l.LeftColumn.previousProject = projectButton
+		l.LeftColumn.previousClose = closeButton
+		l.LeftColumn.previousRefreshButton = refreshButton
 
 		variable.ItemsAdded = true
 		utils.Checkdatabace(path, l.TypeDB)
@@ -68,7 +68,7 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 		l.RightColumn.NameButtonProject.Text = inputText + " - " + l.TypeDB
 
 		l.RightColumn.Container.Refresh()
-		l.LeftColumn.Container.Refresh()
+		l.LeftColumn.container.Refresh()
 		l.EditColumn.Container.Refresh()
 
 	})
@@ -147,8 +147,8 @@ func (l *MainWindow2) SetupLastColumn() *fyne.Container {
 func (r *MainWindow2) TopLeftColumn2() *fyne.Container {
 	r.Objects.Spacer = widget.NewLabel("")
 	topLeftColumn := container.NewVBox(
-		r.LeftColumn.Pluss,
-		r.LeftColumn.ToggleButtonsContainer,
+		r.LeftColumn.pluss,
+		r.LeftColumn.toggleButtonsContainer,
 		r.Objects.Spacer,
 	)
 	return topLeftColumn
