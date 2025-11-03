@@ -21,19 +21,19 @@ import (
 )
 
 type RightColumn struct {
-	Container            *fyne.Container
-	NameButtonProject    *widget.Label
-	Spacer               *widget.Label
-	ButtonDelete         *widget.Button
-	SearchButton         *widget.Button
-	ButtonAdd            *widget.Button
-	KeyRightColunm       *widget.Label
-	ValueRightColunm     *widget.Label
-	LastLableKeyAndValue *utils.TappableLabel
-	LastStart            *[]byte
-	LastEnd              *[]byte
-	LastPage             int
-	Orgdata              []dbpak.KVData
+	container            *fyne.Container
+	nameButtonProject    *widget.Label
+	spacer               *widget.Label
+	buttonDelete         *widget.Button
+	searchButton         *widget.Button
+	buttonAdd            *widget.Button
+	keyRightColunm       *widget.Label
+	valueRightColunm     *widget.Label
+	lastLableKeyAndValue *utils.TappableLabel
+	lastStart            *[]byte
+	lastEnd              *[]byte
+	lastPage             int
+	orgdata              []dbpak.KVData
 }
 
 func NewRightColumn() *RightColumn {
@@ -49,13 +49,13 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 	// Determine the base value based on the edit type
 	label = utils.NewTappableLabel(nameLabel, func() {
 		r.EditColumn.SaveEditKey.Disable()
-		if r.RightColumn.LastLableKeyAndValue != nil {
-			r.RightColumn.LastLableKeyAndValue.Importance = widget.MediumImportance
-			r.RightColumn.LastLableKeyAndValue.Refresh()
+		if r.RightColumn.lastLableKeyAndValue != nil {
+			r.RightColumn.lastLableKeyAndValue.Importance = widget.MediumImportance
+			r.RightColumn.lastLableKeyAndValue.Refresh()
 		}
 		label.Importance = widget.HighImportance
 		label.Refresh()
-		r.RightColumn.LastLableKeyAndValue = label
+		r.RightColumn.lastLableKeyAndValue = label
 
 		utils.CheckCondition(r.EditColumn.Edit2)
 
@@ -159,7 +159,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 			label.SetText(truncatedText)
 			labelEdit.SetText(fmt.Sprintf("Edit %s - %s", editType, truncatedText))
 			r.EditColumn.Edit2.Refresh()
-			r.RightColumn.Container.Refresh()
+			r.RightColumn.container.Refresh()
 
 		}
 
@@ -183,9 +183,9 @@ func (r *MainWindow2) TopRightColumn() *fyne.Container {
 	r.Objects.line.StrokeWidth = 2
 
 	container := container.NewVBox(
-		r.RightColumn.NameButtonProject,
+		r.RightColumn.nameButtonProject,
 		r.Objects.line,
-		r.RightColumn.Spacer,
+		r.RightColumn.spacer,
 		r.RightColumn.Tool(),
 		r.RightColumn.KeyAndValue(),
 	)
@@ -193,37 +193,37 @@ func (r *MainWindow2) TopRightColumn() *fyne.Container {
 }
 
 func (r *RightColumn) Tool() *fyne.Container {
-	return container.NewGridWithColumns(3, r.ButtonDelete, r.SearchButton, r.ButtonAdd)
+	return container.NewGridWithColumns(3, r.buttonDelete, r.searchButton, r.buttonAdd)
 }
 
 func (r *RightColumn) KeyAndValue() *fyne.Container {
-	return container.NewGridWithColumns(6, r.KeyRightColunm, widget.NewLabel(""), r.ValueRightColunm, widget.NewLabel(""))
+	return container.NewGridWithColumns(6, r.keyRightColunm, widget.NewLabel(""), r.valueRightColunm, widget.NewLabel(""))
 }
 
 func (r *MainWindow2) UpdatePage() {
 
-	data, err := logic.FetchPageData(r.RightColumn.LastStart, r.RightColumn.LastEnd, r.RightColumn.LastPage, r.RightColumn.Orgdata)
+	data, err := logic.FetchPageData(r.RightColumn.lastStart, r.RightColumn.lastEnd, r.RightColumn.lastPage, r.RightColumn.orgdata)
 	if err != nil {
 		return
 	}
 
-	if r.RightColumn.LastPage < variable.CurrentPage {
+	if r.RightColumn.lastPage < variable.CurrentPage {
 
-		if len(r.RightColumn.Container.Objects) >= variable.ItemsPerPage*3 {
-			r.RightColumn.Orgdata = r.RightColumn.Orgdata[len(data):]
+		if len(r.RightColumn.container.Objects) >= variable.ItemsPerPage*3 {
+			r.RightColumn.orgdata = r.RightColumn.orgdata[len(data):]
 		}
 
-		r.RightColumn.Orgdata = append(r.RightColumn.Orgdata, data...)
+		r.RightColumn.orgdata = append(r.RightColumn.orgdata, data...)
 	} else {
 
-		r.RightColumn.Orgdata = r.RightColumn.Orgdata[:len(r.RightColumn.Orgdata)-len(data)]
-		r.RightColumn.Orgdata = append(data, r.RightColumn.Orgdata...)
+		r.RightColumn.orgdata = r.RightColumn.orgdata[:len(r.RightColumn.orgdata)-len(data)]
+		r.RightColumn.orgdata = append(data, r.RightColumn.orgdata...)
 
 	}
 
 	if len(data) != 0 {
-		r.RightColumn.LastStart = &r.RightColumn.Orgdata[0].Key
-		r.RightColumn.LastEnd = &r.RightColumn.Orgdata[len(r.RightColumn.Orgdata)-1].Key
+		r.RightColumn.lastStart = &r.RightColumn.orgdata[0].Key
+		r.RightColumn.lastEnd = &r.RightColumn.orgdata[len(r.RightColumn.orgdata)-1].Key
 	}
 
 	var truncatedValue string
@@ -240,15 +240,15 @@ func (r *MainWindow2) UpdatePage() {
 		buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
 		arrayContainer = append(arrayContainer, buttonRow)
 	}
-	if r.RightColumn.LastPage > variable.CurrentPage {
+	if r.RightColumn.lastPage > variable.CurrentPage {
 
-		r.RightColumn.Container.Objects = append(arrayContainer, r.RightColumn.Container.Objects...)
+		r.RightColumn.container.Objects = append(arrayContainer, r.RightColumn.container.Objects...)
 	} else {
 
-		r.RightColumn.Container.Objects = append(r.RightColumn.Container.Objects, arrayContainer...)
+		r.RightColumn.container.Objects = append(r.RightColumn.container.Objects, arrayContainer...)
 
 	}
 
-	r.RightColumn.Container.Refresh()
-	r.RightColumn.LastPage = variable.CurrentPage
+	r.RightColumn.container.Refresh()
+	r.RightColumn.lastPage = variable.CurrentPage
 }

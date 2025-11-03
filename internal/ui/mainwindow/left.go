@@ -51,23 +51,23 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 
 		variable.ItemsAdded = true
 		utils.Checkdatabace(path, l.TypeDB)
-		l.RightColumn.ButtonAdd.Enable()
-		l.RightColumn.SearchButton.Enable()
-		l.RightColumn.ButtonDelete.Enable()
+		l.RightColumn.buttonAdd.Enable()
+		l.RightColumn.searchButton.Enable()
+		l.RightColumn.buttonDelete.Enable()
 		variable.FolderPath = path
-		l.RightColumn.LastEnd = nil
+		l.RightColumn.lastEnd = nil
 		variable.ResultSearch = false
 		variable.CurrentPage = 1
-		l.RightColumn.LastPage = 0
+		l.RightColumn.lastPage = 0
 		variable.PreviousOffsetY = 0
-		l.RightColumn.LastStart = nil
-		utils.CheckCondition(l.RightColumn.Container)
+		l.RightColumn.lastStart = nil
+		utils.CheckCondition(l.RightColumn.container)
 		utils.CheckCondition(l.EditColumn.Edit2)
 		l.UpdatePage()
-		l.RightColumn.NameButtonProject.Text = ""
-		l.RightColumn.NameButtonProject.Text = inputText + " - " + l.TypeDB
+		l.RightColumn.nameButtonProject.Text = ""
+		l.RightColumn.nameButtonProject.Text = inputText + " - " + l.TypeDB
 
-		l.RightColumn.Container.Refresh()
+		l.RightColumn.container.Refresh()
 		l.LeftColumn.container.Refresh()
 		l.EditColumn.Container.Refresh()
 
@@ -76,16 +76,16 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 
 	closeButton = widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
 
-		if l.RightColumn.NameButtonProject.Text == inputText+" - "+l.TypeDB {
-			utils.CheckCondition(l.RightColumn.Container)
+		if l.RightColumn.nameButtonProject.Text == inputText+" - "+l.TypeDB {
+			utils.CheckCondition(l.RightColumn.container)
 			utils.CheckCondition(l.EditColumn.Edit2)
 
-			l.RightColumn.ButtonAdd.Disable()
-			l.RightColumn.SearchButton.Disable()
-			l.RightColumn.ButtonDelete.Disable()
+			l.RightColumn.buttonAdd.Disable()
+			l.RightColumn.searchButton.Disable()
+			l.RightColumn.buttonDelete.Disable()
 
-			l.RightColumn.NameButtonProject.Text = ""
-			l.RightColumn.NameButtonProject.Refresh()
+			l.RightColumn.nameButtonProject.Text = ""
+			l.RightColumn.nameButtonProject.Refresh()
 		}
 
 		for i, r := range l.Pref.ListDB {
@@ -99,25 +99,25 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 
 	refreshButton = widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
 
-		if l.RightColumn.NameButtonProject.Text == inputText+" - "+l.TypeDB {
+		if l.RightColumn.nameButtonProject.Text == inputText+" - "+l.TypeDB {
 
 			variable.ItemsAdded = true
 			utils.Checkdatabace(path, l.TypeDB)
-			l.RightColumn.ButtonAdd.Enable()
-			l.RightColumn.SearchButton.Enable()
-			l.RightColumn.ButtonDelete.Enable()
+			l.RightColumn.buttonAdd.Enable()
+			l.RightColumn.searchButton.Enable()
+			l.RightColumn.buttonDelete.Enable()
 			variable.FolderPath = path
-			l.RightColumn.LastEnd = nil
+			l.RightColumn.lastEnd = nil
 			variable.ResultSearch = false
 			variable.CurrentPage = 1
-			l.RightColumn.LastPage = 0
+			l.RightColumn.lastPage = 0
 			variable.PreviousOffsetY = 0
-			l.RightColumn.LastStart = nil
-			utils.CheckCondition(l.RightColumn.Container)
+			l.RightColumn.lastStart = nil
+			utils.CheckCondition(l.RightColumn.container)
 			utils.CheckCondition(l.EditColumn.Edit2)
 			l.UpdatePage()
 
-			l.RightColumn.NameButtonProject.Refresh()
+			l.RightColumn.nameButtonProject.Refresh()
 		}
 
 	})
