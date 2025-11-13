@@ -1,8 +1,6 @@
 package mainwindow
 
 import (
-	variable "DatabaseDB"
-	dbpak "DatabaseDB/internal/Databaces"
 	"DatabaseDB/internal/dberr"
 	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/utils"
@@ -29,10 +27,7 @@ type RightColumn struct {
 	keyRightColunm       *widget.Label
 	valueRightColunm     *widget.Label
 	lastLableKeyAndValue *utils.TappableLabel
-	lastStart            *[]byte
-	lastEnd              *[]byte
-	lastPage             int
-	orgdata              []dbpak.KVData
+	list                 *widget.List
 }
 
 func NewRightColumn() *RightColumn {
@@ -201,53 +196,12 @@ func (r *RightColumn) KeyAndValue() *fyne.Container {
 
 func (r *MainWindow2) UpdatePage() {
 
-	data, err := logic.FetchPageData(r.RightColumn.lastStart, r.RightColumn.lastEnd, r.RightColumn.lastPage, r.RightColumn.orgdata)
+	all, err := logic.GetAllKeys()
 	if err != nil {
+		fmt.Println("error update page right column")
 		return
 	}
 
-	if r.RightColumn.lastPage < variable.CurrentPage {
+	r.UpdateRightList(all)
 
-		if len(r.RightColumn.container.Objects) >= variable.ItemsPerPage*3 {
-			r.RightColumn.orgdata = r.RightColumn.orgdata[len(data):]
-		}
-
-		r.RightColumn.orgdata = append(r.RightColumn.orgdata, data...)
-	} else {
-
-		r.RightColumn.orgdata = r.RightColumn.orgdata[:len(r.RightColumn.orgdata)-len(data)]
-		r.RightColumn.orgdata = append(data, r.RightColumn.orgdata...)
-
-	}
-
-	if len(data) != 0 {
-		r.RightColumn.lastStart = &r.RightColumn.orgdata[0].Key
-		r.RightColumn.lastEnd = &r.RightColumn.orgdata[len(r.RightColumn.orgdata)-1].Key
-	}
-
-	var truncatedValue string
-	var truncatedKey string
-
-	var arrayContainer []fyne.CanvasObject
-	for _, item := range data {
-
-		truncatedKey, truncatedValue = logic.FormatKeyValue(item)
-
-		valueLabel := r.BuildLabelKeyAndValue("value", item.Key, item.Value, truncatedValue)
-		keyLabel := r.BuildLabelKeyAndValue("key", item.Key, item.Value, truncatedKey)
-
-		buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
-		arrayContainer = append(arrayContainer, buttonRow)
-	}
-	if r.RightColumn.lastPage > variable.CurrentPage {
-
-		r.RightColumn.container.Objects = append(arrayContainer, r.RightColumn.container.Objects...)
-	} else {
-
-		r.RightColumn.container.Objects = append(r.RightColumn.container.Objects, arrayContainer...)
-
-	}
-
-	r.RightColumn.container.Refresh()
-	r.RightColumn.lastPage = variable.CurrentPage
 }

@@ -7,15 +7,13 @@ import (
 
 var (
 	CurrentDBClient dbpak.DBClient
-	CurrentPage     int
-	ItemsPerPage    = 16
 	FolderPath      string
 	NameData        filterdatabase.FilterData
 	ItemsAdded      bool
-	PreviousOffsetY float32
 	ResultSearch    bool
 	CreatDatabase   bool
 )
+var CH = make(chan []dbpak.KVData, 50)
 
 var (
 	NameDatabase = []string{
