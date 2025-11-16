@@ -7,10 +7,8 @@ import (
 	"DatabaseDB/internal/utils"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/gabriel-vasile/mimetype"
-	// "DatabaseDB/internal/logic/mainwindowlagic"
 )
 
 func HandleButtonClick(path string, nameDatabace string) error {
@@ -134,55 +132,6 @@ func UpdateKey(oldKey, newKey []byte) (string, error) {
 	return string(newKey), nil
 }
 
-func FetchPageData(lastStart *[]byte, lastEnd *[]byte, lastPage int, Orgdata []dbpak.KVData) ([]dbpak.KVData, error) {
-
-	var data = make([]dbpak.KVData, 0)
-	var err error
-
-	if lastEnd == nil && lastStart == nil {
-		Orgdata = Orgdata[:0]
-	}
-	if lastPage < variable.CurrentPage {
-
-		//next page
-
-		//The reason why "variable.ItemsPerPage" is added by one is that we want to see if the next pages have a value to enable or disable the next or prev key.
-		err, data = variable.CurrentDBClient.Read(lastEnd, nil, variable.ItemsPerPage+1)
-		if err != nil {
-			log.Println(err.Error())
-		}
-
-		if len(data) == variable.ItemsPerPage+1 {
-			data = data[:variable.ItemsPerPage]
-			variable.ItemsAdded = true
-
-		} else {
-			variable.ItemsAdded = false
-
-		}
-		if len(data) == 0 {
-			return data, err
-		}
-	} else {
-
-		//The reason why "variable.ItemsPerPage" is added by one is that we want to see if the next pages have a value to enable or disable the next or prev key.
-		err, data = variable.CurrentDBClient.Read(nil, lastStart, variable.ItemsPerPage+1)
-		if err != nil {
-			log.Println(err.Error())
-		}
-
-		if len(data) == variable.ItemsPerPage+1 {
-			data = data[1:]
-			variable.ItemsAdded = true
-		}
-		if len(data) == 0 {
-			return data, err
-		}
-
-	}
-	return data, nil
-}
-
 func FormatKeyValue(item dbpak.KVData) (string, string) {
 	truncatedKey := utils.TruncateString(string(item.Key), 20)
 
@@ -195,4 +144,27 @@ func FormatKeyValue(item dbpak.KVData) (string, string) {
 	}
 
 	return truncatedKey, truncatedValue
+}
+func GetAllKeys() ([]dbpak.KVData, error) {
+	var result []dbpak.KVData
+	var startKey, endKey *[]byte
+
+	for {
+		// Read the next batch of records (20 items per batch)
+		err, batch := variable.CurrentDBClient.Read(startKey, endKey, 200)
+		if err != nil {
+			return nil, err
+		}
+		if len(batch) == 0 {
+			break
+		}
+
+		// Append this batch to the final result
+		result = append(result, batch...)
+
+		// Set the start key for the next iteration (continue from the last key)
+		startKey = &batch[len(batch)-1].Key
+	}
+
+	return result, nil
 }

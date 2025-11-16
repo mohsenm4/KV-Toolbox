@@ -1,7 +1,6 @@
 package mainwindow
 
 import (
-	variable "DatabaseDB"
 	dbpak "DatabaseDB/internal/Databaces"
 	"DatabaseDB/internal/dberr"
 	"DatabaseDB/internal/logic"
@@ -29,10 +28,6 @@ type RightColumn struct {
 	keyRightColunm       *widget.Label
 	valueRightColunm     *widget.Label
 	lastLableKeyAndValue *utils.TappableLabel
-	lastStart            *[]byte
-	lastEnd              *[]byte
-	lastPage             int
-	orgdata              []dbpak.KVData
 }
 
 func NewRightColumn() *RightColumn {
@@ -200,54 +195,28 @@ func (r *RightColumn) KeyAndValue() *fyne.Container {
 }
 
 func (r *MainWindow2) UpdatePage() {
+	var all []dbpak.KVData
+	var err error
+	done := make(chan struct{})
 
-	data, err := logic.FetchPageData(r.RightColumn.lastStart, r.RightColumn.lastEnd, r.RightColumn.lastPage, r.RightColumn.orgdata)
-	if err != nil {
-		return
-	}
-
-	if r.RightColumn.lastPage < variable.CurrentPage {
-
-		if len(r.RightColumn.container.Objects) >= variable.ItemsPerPage*3 {
-			r.RightColumn.orgdata = r.RightColumn.orgdata[len(data):]
+	go func() {
+		all, err = logic.GetAllKeys()
+		if err != nil {
+			fmt.Println("error update page right column")
+			return
 		}
+		done <- struct{}{}
+	}()
+	// creat dialog for loading
+	loadingDialog := dialog.NewProgressInfinite("Loading", "Please wait...", r.Window)
+	loadingDialog.Show()
 
-		r.RightColumn.orgdata = append(r.RightColumn.orgdata, data...)
-	} else {
+	go func() {
+		<-done
+		fyne.Do(func() {
+			loadingDialog.Hide()
+			r.UpdateRightList(all)
+		})
+	}()
 
-		r.RightColumn.orgdata = r.RightColumn.orgdata[:len(r.RightColumn.orgdata)-len(data)]
-		r.RightColumn.orgdata = append(data, r.RightColumn.orgdata...)
-
-	}
-
-	if len(data) != 0 {
-		r.RightColumn.lastStart = &r.RightColumn.orgdata[0].Key
-		r.RightColumn.lastEnd = &r.RightColumn.orgdata[len(r.RightColumn.orgdata)-1].Key
-	}
-
-	var truncatedValue string
-	var truncatedKey string
-
-	var arrayContainer []fyne.CanvasObject
-	for _, item := range data {
-
-		truncatedKey, truncatedValue = logic.FormatKeyValue(item)
-
-		valueLabel := r.BuildLabelKeyAndValue("value", item.Key, item.Value, truncatedValue)
-		keyLabel := r.BuildLabelKeyAndValue("key", item.Key, item.Value, truncatedKey)
-
-		buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
-		arrayContainer = append(arrayContainer, buttonRow)
-	}
-	if r.RightColumn.lastPage > variable.CurrentPage {
-
-		r.RightColumn.container.Objects = append(arrayContainer, r.RightColumn.container.Objects...)
-	} else {
-
-		r.RightColumn.container.Objects = append(r.RightColumn.container.Objects, arrayContainer...)
-
-	}
-
-	r.RightColumn.container.Refresh()
-	r.RightColumn.lastPage = variable.CurrentPage
 }

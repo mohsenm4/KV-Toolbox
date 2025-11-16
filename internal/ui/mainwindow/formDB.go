@@ -169,6 +169,9 @@ func (mi *MainWindow2) FormPasteDatabase(title string) {
 
 				variable.CreatDatabase = false
 				ded.Hide()
+				mi.RightColumn.buttonAdd.Disable()
+				mi.RightColumn.searchButton.Disable()
+				mi.RightColumn.buttonDelete.Disable()
 			}
 		}
 	})
