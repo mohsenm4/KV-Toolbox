@@ -62,33 +62,42 @@ func (r *MainWindow2) SearchKeyUi() {
 		utils.CheckCondition(r.EditColumn.edit2)
 		utils.CheckCondition(r.RightColumn.container)
 
-		var truncatedValue string
+		newList := widget.NewList(
+			func() int {
+				return len(values)
+			},
+			func() fyne.CanvasObject {
+				keyLabel := widget.NewLabel("key")
+				valueLabel := widget.NewLabel("value")
+				buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
+				return buttonRow
+			},
+			func(i widget.ListItemID, obj fyne.CanvasObject) {
 
-		for i := 0; i < len(values); i++ {
-			if i > 40 {
-				dialog.ShowInformation("Warning",
-					"The result of your keys is more than 60. Only the first 60 are shown.\nIf your key is not among these, please search more precisely.",
-					r.Window)
-				break
-			}
+				item := values[i]
 
-			truncatedKey := utils.TruncateString(string(keys[i]), 20)
-			typeValue := mimetype.Detect(values[i])
+				typeValue := mimetype.Detect(item)
+				var truncatedValue string
+				if typeValue.Extension() != ".txt" {
+					truncatedValue = fmt.Sprintf("* %s . . .", typeValue.Extension())
+				} else {
+					truncatedValue = utils.TruncateString(string(item), 20)
+				}
+				truncatedKey := utils.TruncateString(string(keys[i]), 20)
 
-			if typeValue.Extension() != ".txt" {
-				truncatedValue = fmt.Sprintf("* %s . . .", typeValue.Extension())
-			} else {
-				truncatedValue = utils.TruncateString(string(values[i]), 20)
-			}
+				keyLabel := r.BuildLabelKeyAndValue("key", keys[i], item, truncatedKey)
+				valueLabel := r.BuildLabelKeyAndValue("value", keys[i], item, truncatedValue)
 
-			valueLabel := r.BuildLabelKeyAndValue("value", keys[i], values[i], truncatedValue)
-			keyLabel := r.BuildLabelKeyAndValue("key", keys[i], values[i], truncatedKey)
+				row := obj.(*fyne.Container)
+				row.Objects[0] = keyLabel
+				row.Objects[1] = valueLabel
 
-			buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
-			r.RightColumn.container.Add(buttonRow)
-			r.RightColumn.container.Refresh()
-		}
-
+			},
+		)
+		r.RightColumn.list = newList
+		r.RightColumn.container.Objects = nil
+		r.RightColumn.container.Add(newList)
+		r.RightColumn.container.Refresh()
 		d.Hide()
 		variable.ResultSearch = true
 	}

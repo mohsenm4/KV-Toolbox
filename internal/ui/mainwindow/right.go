@@ -1,6 +1,7 @@
 package mainwindow
 
 import (
+	dbpak "DatabaseDB/internal/Databaces"
 	"DatabaseDB/internal/dberr"
 	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/utils"
@@ -195,13 +196,28 @@ func (r *RightColumn) KeyAndValue() *fyne.Container {
 }
 
 func (r *MainWindow2) UpdatePage() {
+	var all []dbpak.KVData
+	var err error
+	done := make(chan struct{})
 
-	all, err := logic.GetAllKeys()
-	if err != nil {
-		fmt.Println("error update page right column")
-		return
-	}
+	go func() {
+		all, err = logic.GetAllKeys()
+		if err != nil {
+			fmt.Println("error update page right column")
+			return
+		}
+		done <- struct{}{}
+	}()
+	// creat dialog for loading
+	loadingDialog := dialog.NewProgressInfinite("Loading", "Please wait...", r.Window)
+	loadingDialog.Show()
 
-	r.UpdateRightList(all)
+	go func() {
+		<-done
+		fyne.Do(func() {
+			loadingDialog.Hide()
+			r.UpdateRightList(all)
+		})
+	}()
 
 }
