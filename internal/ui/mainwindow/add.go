@@ -82,7 +82,6 @@ func (mw *MainWindow2) OpenAddDialog() {
 
 	fileTypeLabel := widget.NewLabel("Select file type:")
 	fileTypeRadio := widget.NewRadioGroup([]string{"Text", "File"}, func(selected string) {
-		addButton.Disable()
 		switch selected {
 		case "Text":
 			fileData = nil
