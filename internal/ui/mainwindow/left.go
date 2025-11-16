@@ -91,8 +91,6 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 		for i, r := range l.Pref.ListDB {
 			if r.FileAddress == path {
 				l.Pref.ListDB = append(l.Pref.ListDB[:i], l.Pref.ListDB[i+1:]...)
-				//l.Pref.SaveDatabase(l.Pref.ListDB, pref.KeyListDB)
-
 				lastColumnContent.Remove(buttonContainer)
 				lastColumnContent.Refresh()
 				break

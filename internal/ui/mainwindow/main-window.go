@@ -38,7 +38,6 @@ type MainWindow2 struct {
 	EditColumn  *EditColumn
 	Objects     *ObjectsMainWindow
 	Pref        *pref.Pref
-	All         []dbpak.KVData
 }
 
 type ObjectsMainWindow struct {
@@ -68,7 +67,6 @@ func NewMainWindow(name string) *MainWindow2 {
 		keyRightColunm:       widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		valueRightColunm:     widget.NewLabelWithStyle("value", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		lastLableKeyAndValue: utils.NewTappableLabel("", nil), // dinamic last label key and value
-		list:                 widget.NewList(nil, nil, nil),
 	}
 
 	editColumn := &EditColumn{
@@ -311,6 +309,4 @@ func (mi *MainWindow2) UpdateRightList(all []dbpak.KVData) {
 	mi.RightColumn.container.Objects = nil
 	mi.RightColumn.container.Add(newList)
 	mi.RightColumn.container.Refresh()
-
-	mi.RightColumn.list = newList
 }

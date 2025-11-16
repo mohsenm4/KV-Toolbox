@@ -94,7 +94,6 @@ func (r *MainWindow2) SearchKeyUi() {
 
 			},
 		)
-		r.RightColumn.list = newList
 		r.RightColumn.container.Objects = nil
 		r.RightColumn.container.Add(newList)
 		r.RightColumn.container.Refresh()

@@ -13,7 +13,6 @@ var (
 	ResultSearch    bool
 	CreatDatabase   bool
 )
-var CH = make(chan []dbpak.KVData, 50)
 
 var (
 	NameDatabase = []string{

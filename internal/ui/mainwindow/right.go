@@ -28,7 +28,6 @@ type RightColumn struct {
 	keyRightColunm       *widget.Label
 	valueRightColunm     *widget.Label
 	lastLableKeyAndValue *utils.TappableLabel
-	list                 *widget.List
 }
 
 func NewRightColumn() *RightColumn {
