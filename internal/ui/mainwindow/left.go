@@ -54,13 +54,11 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 		l.LeftColumn.previousClose = closeButton
 		l.LeftColumn.previousRefreshButton = refreshButton
 
-		variable.ItemsAdded = true
 		utils.Checkdatabace(path, l.TypeDB)
 		l.RightColumn.buttonAdd.Enable()
 		l.RightColumn.searchButton.Enable()
 		l.RightColumn.buttonDelete.Enable()
 		variable.FolderPath = path
-		variable.ResultSearch = false
 		utils.CheckCondition(l.RightColumn.container)
 		utils.CheckCondition(l.EditColumn.edit2)
 		l.UpdatePage()
@@ -102,13 +100,11 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 
 		if l.RightColumn.nameButtonProject.Text == inputText+" - "+l.TypeDB {
 
-			variable.ItemsAdded = true
 			utils.Checkdatabace(path, l.TypeDB)
 			l.RightColumn.buttonAdd.Enable()
 			l.RightColumn.searchButton.Enable()
 			l.RightColumn.buttonDelete.Enable()
 			variable.FolderPath = path
-			variable.ResultSearch = false
 			utils.CheckCondition(l.RightColumn.container)
 			utils.CheckCondition(l.EditColumn.edit2)
 			l.UpdatePage()

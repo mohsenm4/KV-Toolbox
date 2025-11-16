@@ -9,8 +9,6 @@ var (
 	CurrentDBClient dbpak.DBClient
 	FolderPath      string
 	NameData        filterdatabase.FilterData
-	ItemsAdded      bool
-	ResultSearch    bool
 	CreatDatabase   bool
 )
 

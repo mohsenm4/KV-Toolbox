@@ -1,7 +1,6 @@
 package mainwindow
 
 import (
-	variable "DatabaseDB"
 	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/utils"
 	"fmt"
@@ -98,7 +97,6 @@ func (r *MainWindow2) SearchKeyUi() {
 		r.RightColumn.container.Add(newList)
 		r.RightColumn.container.Refresh()
 		d.Hide()
-		variable.ResultSearch = true
 	}
 
 	d.Show()
