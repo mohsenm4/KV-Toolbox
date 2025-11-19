@@ -1,7 +1,6 @@
 package mainwindow
 
 import (
-	"DatabaseDB/internal/logic"
 	"fmt"
 
 	"fyne.io/fyne/v2"
@@ -45,7 +44,7 @@ func (mi *MainWindow2) DeleteKeyUi() {
 		dialog.ShowConfirm("Confirm Delete", message,
 			func(response bool) {
 				if response {
-					err := logic.DeleteKeyLogic(valueEntry.Text)
+					err := mi.Logic.DeleteKeyLogic(valueEntry.Text)
 					if err != nil {
 						dialog.ShowInformation("Error", err.Error(), mi.Window)
 					} else {

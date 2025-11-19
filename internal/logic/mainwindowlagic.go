@@ -11,24 +11,13 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 )
 
-func HandleButtonClick(path string, nameDatabace string) error {
-	err := utils.Checkdatabace(path, nameDatabace)
-	if err != nil {
-		return err
-	}
+type Logic struct{}
 
-	if !variable.CreatDatabase {
-
-		nun := variable.NameData.FilterFile(path)
-		if !nun {
-			return fmt.Errorf("error for no found files database")
-		}
-	}
-
-	return nil
+func NewLogic() *Logic {
+	return &Logic{}
 }
 
-func SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
+func (l *Logic) SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
 
 	var values [][]byte
 
@@ -56,7 +45,7 @@ func SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
 	return keys, values, nil
 }
 
-func DeleteKeyLogic(valueEntry string) error {
+func (l *Logic) DeleteKeyLogic(valueEntry string) error {
 
 	key := utils.CleanInput(valueEntry)
 
@@ -77,7 +66,7 @@ func DeleteKeyLogic(valueEntry string) error {
 	}
 }
 
-func AddKeyLogic(inputKey string, valueFinish []byte) error {
+func (l *Logic) AddKeyLogic(inputKey string, valueFinish []byte) error {
 	key := utils.CleanInput(inputKey)
 
 	value, err := variable.CurrentDBClient.Get([]byte(key))
@@ -96,7 +85,7 @@ func AddKeyLogic(inputKey string, valueFinish []byte) error {
 	return nil
 }
 
-func QueryKey(inputKey string) ([]byte, error) {
+func (l *Logic) QueryKey(inputKey string) ([]byte, error) {
 
 	key := utils.CleanInput(inputKey)
 
@@ -108,12 +97,12 @@ func QueryKey(inputKey string) ([]byte, error) {
 	return value, nil
 }
 
-func SaveValue(key, value []byte) error {
+func (l *Logic) SaveValue(key, value []byte) error {
 
 	return variable.CurrentDBClient.Add(key, value)
 }
 
-func UpdateKey(oldKey, newKey []byte) (string, error) {
+func (l *Logic) UpdateKey(oldKey, newKey []byte) (string, error) {
 
 	valueBefore, err := variable.CurrentDBClient.Get(oldKey)
 	if err != nil {
@@ -132,7 +121,7 @@ func UpdateKey(oldKey, newKey []byte) (string, error) {
 	return string(newKey), nil
 }
 
-func FormatKeyValue(item dbpak.KVData) (string, string) {
+func (l *Logic) FormatKeyValue(item dbpak.KVData) (string, string) {
 	truncatedKey := utils.TruncateString(string(item.Key), 20)
 
 	typeValue := mimetype.Detect(item.Value)
@@ -145,7 +134,7 @@ func FormatKeyValue(item dbpak.KVData) (string, string) {
 
 	return truncatedKey, truncatedValue
 }
-func GetAllKeys() ([]dbpak.KVData, error) {
+func (l *Logic) GetAllKeys() ([]dbpak.KVData, error) {
 	var result []dbpak.KVData
 	var startKey, endKey *[]byte
 

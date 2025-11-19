@@ -8,7 +8,9 @@ import (
 	Filterbadger "DatabaseDB/internal/filterdatabase/badger"
 	FilterLeveldb "DatabaseDB/internal/filterdatabase/leveldb"
 	Filterpebbledb "DatabaseDB/internal/filterdatabase/pebble"
+	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/pref"
+	"DatabaseDB/internal/ui/ids"
 	"DatabaseDB/internal/utils"
 
 	"fyne.io/fyne/v2"
@@ -38,6 +40,7 @@ type MainWindow2 struct {
 	EditColumn  *EditColumn
 	Objects     *ObjectsMainWindow
 	Pref        *pref.Pref
+	Logic       *logic.Logic
 }
 
 type ObjectsMainWindow struct {
@@ -61,19 +64,19 @@ func NewMainWindow(name string) *MainWindow2 {
 	rightColumn := &RightColumn{
 		container:            container.NewVBox(),
 		nameButtonProject:    widget.NewLabel(""), // dinamic name of project
-		buttonDelete:         widget.NewButton("Delete", nil),
-		searchButton:         widget.NewButton("Search", nil),
-		buttonAdd:            widget.NewButton("Add", nil),
-		keyRightColunm:       widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		valueRightColunm:     widget.NewLabelWithStyle("value", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		buttonDelete:         widget.NewButton(ids.DeleteButtonMain, nil),
+		searchButton:         widget.NewButton(ids.SearchButtonMain, nil),
+		buttonAdd:            widget.NewButton(ids.AddButtonMain, nil),
+		keyRightColunm:       widget.NewLabelWithStyle(ids.KeyRightColunm, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		valueRightColunm:     widget.NewLabelWithStyle(ids.ValueRightColunm, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		lastLableKeyAndValue: utils.NewTappableLabel("", nil), // dinamic last label key and value
 	}
 
 	editColumn := &EditColumn{
 		container:     container.NewVBox(),
 		edit2:         container.NewVBox(),
-		cancelEditKey: widget.NewButton("Cancel", nil),
-		saveEditKey:   widget.NewButton("Save", nil),
+		cancelEditKey: widget.NewButton(ids.CancelButtonEdit, nil),
+		saveEditKey:   widget.NewButton(ids.SaveButtonEdit, nil),
 		valueEntry:    widget.NewEntry(),
 	}
 
@@ -82,16 +85,15 @@ func NewMainWindow(name string) *MainWindow2 {
 		spacer: widget.NewLabel(""),
 	}
 
-	mw := &MainWindow2{
+	return &MainWindow2{
 		NameWindow:  name,
 		TypeDB:      "", // default or placeholder DB type
 		LeftColumn:  leftColumn,
 		RightColumn: rightColumn,
 		EditColumn:  editColumn,
 		Objects:     object,
+		Logic:       logic.NewLogic(),
 	}
-
-	return mw
 }
 
 func (m *MainWindow2) MainWindow(myApp fyne.App) {

@@ -127,3 +127,20 @@ func ImageShow(key []byte, value []byte, mainContainer *fyne.Container, editWind
 	})
 	mainContainer.Add(lableAddpicture)
 }
+
+func HandleButtonClick(path string, nameDatabace string) error {
+	err := Checkdatabace(path, nameDatabace)
+	if err != nil {
+		return err
+	}
+
+	if !variable.CreatDatabase {
+
+		nun := variable.NameData.FilterFile(path)
+		if !nun {
+			return fmt.Errorf("error for no found files database")
+		}
+	}
+
+	return nil
+}
