@@ -1,7 +1,6 @@
 package mainwindow
 
 import (
-	"DatabaseDB/internal/logic"
 	"io/ioutil"
 	"log"
 
@@ -114,7 +113,7 @@ func (mw *MainWindow2) OpenAddDialog() {
 			return
 		}
 
-		err := logic.AddKeyLogic(keyEntry.Text, fileData)
+		err := mw.Logic.AddKeyLogic(keyEntry.Text, fileData)
 		if err != nil {
 			dialog.ShowInformation("Error", err.Error(), mw.Window)
 			return

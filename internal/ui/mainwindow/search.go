@@ -1,7 +1,6 @@
 package mainwindow
 
 import (
-	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/utils"
 	"fmt"
 
@@ -41,7 +40,7 @@ func (r *MainWindow2) SearchKeyUi() {
 	}
 
 	buttomSearch.OnTapped = func() {
-		keys, values, err := logic.SearchDatabase(valueEntry.Text)
+		keys, values, err := r.Logic.SearchDatabase(valueEntry.Text)
 		if err != nil {
 			dialog.ShowInformation(
 				"Database Error",

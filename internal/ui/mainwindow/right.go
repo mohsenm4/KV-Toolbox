@@ -3,7 +3,6 @@ package mainwindow
 import (
 	dbpak "DatabaseDB/internal/Databaces"
 	"DatabaseDB/internal/dberr"
-	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/utils"
 	"encoding/json"
 	"errors"
@@ -99,7 +98,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		labelEdit.SetText(fmt.Sprintf("Edit %s - %s", editType, utils.TruncateString(NameLabel, 10)))
 		r.EditColumn.saveEditKey.OnTapped = func() {
 			if editType == "value" {
-				err = logic.SaveValue(key, []byte(r.EditColumn.finishValue))
+				err = r.Logic.SaveValue(key, []byte(r.EditColumn.finishValue))
 				if err != nil {
 					fmt.Println(err.Error())
 				}
@@ -108,7 +107,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 				//value = []byte(truncatedKey2)
 
 			} else {
-				_, err := logic.QueryKey(r.EditColumn.valueEntry.Text)
+				_, err := r.Logic.QueryKey(r.EditColumn.valueEntry.Text)
 				if !errors.Is(err, dberr.ErrKeyNotFound) {
 					dialog.NewConfirm(
 						"⚠️ Duplicate Key",
@@ -116,7 +115,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 						func(confirmed bool) {
 							if confirmed {
 								r.EditColumn.saveEditKey.Disable()
-								Base, err = logic.UpdateKey(key, []byte(r.EditColumn.valueEntry.Text))
+								Base, err = r.Logic.UpdateKey(key, []byte(r.EditColumn.valueEntry.Text))
 								if err != nil {
 									dialog.ShowInformation("Error", err.Error(), r.Window)
 									return
@@ -134,7 +133,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 					return
 				} else if errors.Is(err, dberr.ErrKeyNotFound) {
 
-					Base, err = logic.UpdateKey([]byte(Base), []byte(r.EditColumn.valueEntry.Text))
+					Base, err = r.Logic.UpdateKey([]byte(Base), []byte(r.EditColumn.valueEntry.Text))
 					if err != nil {
 						dialog.ShowInformation("Error", err.Error(), r.Window)
 						return
@@ -200,7 +199,7 @@ func (r *MainWindow2) UpdatePage() {
 	done := make(chan struct{})
 
 	go func() {
-		all, err = logic.GetAllKeys()
+		all, err = r.Logic.GetAllKeys()
 		if err != nil {
 			fmt.Println("error update page right column")
 			return
