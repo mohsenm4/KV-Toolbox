@@ -3,7 +3,6 @@ package main
 import (
 	"DatabaseDB/internal/pref"
 	"DatabaseDB/internal/ui/mainwindow"
-	_ "net/http/pprof"
 
 	"fyne.io/fyne/v2/app"
 )
