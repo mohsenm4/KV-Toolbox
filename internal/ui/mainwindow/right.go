@@ -6,10 +6,14 @@ import (
 	"DatabaseDB/internal/dberr"
 	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/utils"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"image/color"
+	"io"
+	"runtime"
+	"runtime/debug"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -208,19 +212,30 @@ func (r *MainWindow2) UpdatePage() {
 
 	if r.RightColumn.lastPage < variable.CurrentPage {
 
-		if len(r.RightColumn.container.Objects) >= variable.ItemsPerPage*3 {
-			r.RightColumn.orgdata = r.RightColumn.orgdata[len(data):]
+		if len(r.RightColumn.orgdata) >= variable.ItemsPerPage*3 {
+			tmp := make([]dbpak.KVData, len(r.RightColumn.orgdata)-len(data))
+			copy(tmp, r.RightColumn.orgdata[len(data):])
+			r.RightColumn.orgdata = tmp
 		}
 
-		r.RightColumn.orgdata = append(r.RightColumn.orgdata, data...)
+		tmp := make([]dbpak.KVData, len(r.RightColumn.orgdata)+len(data))
+		copy(tmp, r.RightColumn.orgdata)
+		copy(tmp[len(r.RightColumn.orgdata):], data)
+		r.RightColumn.orgdata = tmp
+
 	} else {
 
-		r.RightColumn.orgdata = r.RightColumn.orgdata[:len(r.RightColumn.orgdata)-len(data)]
-		r.RightColumn.orgdata = append(data, r.RightColumn.orgdata...)
+		tmp := make([]dbpak.KVData, len(r.RightColumn.orgdata)-len(data))
+		copy(tmp, r.RightColumn.orgdata[:len(r.RightColumn.orgdata)-len(data)])
+		r.RightColumn.orgdata = tmp
 
+		tmp2 := make([]dbpak.KVData, len(data)+len(r.RightColumn.orgdata))
+		copy(tmp2, data)
+		copy(tmp2[len(data):], r.RightColumn.orgdata)
+		r.RightColumn.orgdata = tmp2
 	}
 
-	if len(data) != 0 {
+	if len(r.RightColumn.orgdata) != 0 {
 		r.RightColumn.lastStart = &r.RightColumn.orgdata[0].Key
 		r.RightColumn.lastEnd = &r.RightColumn.orgdata[len(r.RightColumn.orgdata)-1].Key
 	}
@@ -233,21 +248,32 @@ func (r *MainWindow2) UpdatePage() {
 
 		truncatedKey, truncatedValue = logic.FormatKeyValue(item)
 
-		valueLabel := r.BuildLabelKeyAndValue("value", item.Key, item.Value, truncatedValue)
-		keyLabel := r.BuildLabelKeyAndValue("key", item.Key, item.Value, truncatedKey)
+		var buf bytes.Buffer
+		item.Value.Seek(0, io.SeekStart)
+		io.Copy(&buf, item.Value)
+		valueStr := buf.Bytes()
+
+		valueLabel := r.BuildLabelKeyAndValue("value", item.Key, valueStr, truncatedValue)
+		keyLabel := r.BuildLabelKeyAndValue("key", item.Key, valueStr, truncatedKey)
 
 		buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
 		arrayContainer = append(arrayContainer, buttonRow)
 	}
 	if r.RightColumn.lastPage > variable.CurrentPage {
 
-		r.RightColumn.container.Objects = append(arrayContainer, r.RightColumn.container.Objects...)
+		arrayContainer = append(arrayContainer, r.RightColumn.container.Objects...)
+		r.RightColumn.container.Objects = arrayContainer
+
 	} else {
 
-		r.RightColumn.container.Objects = append(r.RightColumn.container.Objects, arrayContainer...)
+		n := append(r.RightColumn.container.Objects, arrayContainer...)
+		r.RightColumn.container.Objects = n
 
 	}
-
+	arrayContainer = nil
+	data = nil
+	runtime.GC()
+	debug.FreeOSMemory()
 	r.RightColumn.container.Refresh()
 	r.RightColumn.lastPage = variable.CurrentPage
 }

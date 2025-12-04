@@ -26,14 +26,14 @@ type TappableLabel struct {
 }
 
 func NewTappableLabel(text string, tapped func()) *TappableLabel {
-	label := &TappableLabel{
+	labelee := &TappableLabel{
 		Label: widget.Label{
 			Text: text,
 		},
 		onTapped: tapped,
 	}
-	label.ExtendBaseWidget(label)
-	return label
+	labelee.ExtendBaseWidget(labelee)
+	return labelee
 }
 
 func (t *TappableLabel) Tapped(_ *fyne.PointEvent) {

@@ -8,7 +8,7 @@ import (
 var (
 	CurrentDBClient dbpak.DBClient
 	CurrentPage     int
-	ItemsPerPage    = 16
+	ItemsPerPage    = 20
 	FolderPath      string
 	NameData        filterdatabase.FilterData
 	ItemsAdded      bool

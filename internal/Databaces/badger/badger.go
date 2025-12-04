@@ -101,9 +101,7 @@ func (c *badgerDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVD
 				key1 := make([]byte, len(item.Key()))
 				copy(key1, item.Key())
 
-				value1 := make([]byte, len(valCopy))
-				copy(value1, valCopy)
-				items = append(items, dbpak.KVData{Key: key1, Value: value1})
+				items = append(items, dbpak.KVData{Key: key1, Value: bytes.NewReader(valCopy)})
 			}
 
 			for i := 0; i < len(items)/2; i++ {
@@ -138,9 +136,7 @@ func (c *badgerDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVD
 				key1 := make([]byte, len(item.Key()))
 				copy(key1, item.Key())
 
-				value1 := make([]byte, len(valCopy))
-				copy(value1, valCopy)
-				items = append(items, dbpak.KVData{Key: key1, Value: value1})
+				items = append(items, dbpak.KVData{Key: key1, Value: bytes.NewReader(valCopy)})
 			}
 		}
 		return nil

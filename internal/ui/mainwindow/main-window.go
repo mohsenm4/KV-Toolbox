@@ -9,6 +9,7 @@ import (
 	FilterLeveldb "DatabaseDB/internal/filterdatabase/leveldb"
 	Filterpebbledb "DatabaseDB/internal/filterdatabase/pebble"
 	"DatabaseDB/internal/pref"
+	"DatabaseDB/internal/ui/ids"
 	"DatabaseDB/internal/utils"
 
 	"fyne.io/fyne/v2"
@@ -52,7 +53,7 @@ func NewMainWindow(name string) *MainWindow2 {
 		previousRefreshButton:  widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), nil),
 		toggleButtonsContainer: container.NewVBox(),
 		darkLight:              container.NewVBox(),
-		pluss:                  widget.NewButton("+", nil),
+		pluss:                  widget.NewButton(ids.Plass, nil),
 		leveldbButton:          widget.NewButton("", nil), // dinamic name of database
 		bottomDatabase:         []*widget.Button{},
 	}
@@ -60,11 +61,11 @@ func NewMainWindow(name string) *MainWindow2 {
 	rightColumn := &RightColumn{
 		container:            container.NewVBox(),
 		nameButtonProject:    widget.NewLabel(""), // dinamic name of project
-		buttonDelete:         widget.NewButton("Delete", nil),
-		searchButton:         widget.NewButton("Search", nil),
-		buttonAdd:            widget.NewButton("Add", nil),
-		keyRightColunm:       widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		valueRightColunm:     widget.NewLabelWithStyle("value", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		buttonDelete:         widget.NewButton(ids.DeleteButtonMain, nil),
+		searchButton:         widget.NewButton(ids.SearchButtonMain, nil),
+		buttonAdd:            widget.NewButton(ids.AddButtonMain, nil),
+		keyRightColunm:       widget.NewLabelWithStyle(ids.KeyRightColunm, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		valueRightColunm:     widget.NewLabelWithStyle(ids.ValueRightColunm, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		lastLableKeyAndValue: utils.NewTappableLabel("", nil), // dinamic last label key and value
 		lastStart:            &[]byte{},
 		lastEnd:              &[]byte{},

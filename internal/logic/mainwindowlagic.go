@@ -5,8 +5,10 @@ import (
 	dbpak "DatabaseDB/internal/Databaces"
 	"DatabaseDB/internal/dberr"
 	"DatabaseDB/internal/utils"
+	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/gabriel-vasile/mimetype"
@@ -186,12 +188,16 @@ func FetchPageData(lastStart *[]byte, lastEnd *[]byte, lastPage int, Orgdata []d
 func FormatKeyValue(item dbpak.KVData) (string, string) {
 	truncatedKey := utils.TruncateString(string(item.Key), 20)
 
-	typeValue := mimetype.Detect(item.Value)
+	var buf bytes.Buffer
+	io.Copy(&buf, item.Value)
+	valueStr := buf.Bytes()
+
+	typeValue := mimetype.Detect(valueStr)
 	var truncatedValue string
 	if typeValue.Extension() != ".txt" {
 		truncatedValue = fmt.Sprintf("* %s . . .", typeValue.Extension())
 	} else {
-		truncatedValue = utils.TruncateString(string(item.Value), 30)
+		truncatedValue = utils.TruncateString(string(valueStr), 30)
 	}
 
 	return truncatedKey, truncatedValue

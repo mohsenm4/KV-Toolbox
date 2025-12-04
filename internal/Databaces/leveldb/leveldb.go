@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
@@ -32,7 +33,11 @@ func (l *LeveldbDatabase) Delete(key []byte) error {
 
 func (l *LeveldbDatabase) Open() error {
 	var err error
-	l.DB, err = leveldb.OpenFile(l.Address, nil)
+	opts := &opt.Options{
+		BlockCacheCapacity: 0,
+		WriteBuffer:        0,
+	}
+	l.DB, err = leveldb.OpenFile(l.Address, opts)
 	return err
 }
 
@@ -77,9 +82,7 @@ func (c *LeveldbDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KV
 		key1 := make([]byte, len(iter.Key()))
 		copy(key1, iter.Key())
 
-		value1 := make([]byte, len(iter.Value()))
-		copy(value1, iter.Value())
-		Item = append(Item, dbpak.KVData{Key: key1, Value: value1})
+		Item = append(Item, dbpak.KVData{Key: key1, Value: bytes.NewReader(iter.Value())})
 		cnt++
 
 		for iter.Prev() {
@@ -89,10 +92,7 @@ func (c *LeveldbDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KV
 			}
 			key1 := make([]byte, len(iter.Key()))
 			copy(key1, iter.Key())
-
-			value1 := make([]byte, len(iter.Value()))
-			copy(value1, iter.Value())
-			Item = append(Item, dbpak.KVData{Key: key1, Value: value1})
+			Item = append(Item, dbpak.KVData{Key: key1, Value: bytes.NewReader(iter.Value())})
 		}
 		//reverse items
 		for i := 0; i < len(Item)/2; i++ {
@@ -114,11 +114,7 @@ func (c *LeveldbDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KV
 
 			key1 := make([]byte, len(iter.Key()))
 			copy(key1, iter.Key())
-
-			value1 := make([]byte, len(iter.Value()))
-			copy(value1, iter.Value())
-
-			Item = append(Item, dbpak.KVData{Key: key1, Value: value1})
+			Item = append(Item, dbpak.KVData{Key: key1, Value: bytes.NewReader(iter.Value())})
 		}
 	}
 
@@ -129,9 +125,10 @@ func (l *LeveldbDatabase) Search(valueEntry []byte) (error, [][]byte) {
 	var data [][]byte
 
 	Iterator := l.DB.NewIterator(nil, nil)
-	if Iterator == nil {
+	defer Iterator.Release()
 
-		return fmt.Errorf("Iterator is nil"), data
+	if Iterator == nil {
+		return fmt.Errorf("iterator is nil"), data
 	}
 
 	if !Iterator.First() {

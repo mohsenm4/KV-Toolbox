@@ -5,6 +5,8 @@ import (
 	"DatabaseDB/internal/pref"
 	"DatabaseDB/internal/utils"
 	"log"
+	"runtime"
+	"runtime/debug"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -98,6 +100,9 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 	})
 
 	refreshButton = widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
+
+		runtime.GC()
+		debug.FreeOSMemory()
 
 		if l.RightColumn.nameButtonProject.Text == inputText+" - "+l.TypeDB {
 
