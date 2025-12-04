@@ -7,6 +7,7 @@ import (
 	"DatabaseDB/internal/utils"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/gabriel-vasile/mimetype"
 )
@@ -121,7 +122,50 @@ func (l *Logic) UpdateKey(oldKey, newKey []byte) (string, error) {
 	return string(newKey), nil
 }
 
-func (l *Logic) FormatKeyValue(item dbpak.KVData) (string, string) {
+func FetchPageData(lastStart *[]byte, lastEnd *[]byte, lastPage int, Orgdata []dbpak.KVData) ([]dbpak.KVData, error) {
+
+	var data = make([]dbpak.KVData, 0)
+	var err error
+
+	if lastEnd == nil && lastStart == nil {
+		Orgdata = nil
+	}
+	if lastPage < variable.CurrentPage {
+
+		//next page
+
+		//The reason why "variable.ItemsPerPage" is added by one is that we want to see if the next pages have a value to enable or disable the next or prev key.
+		data, err = RangeCursorRead(lastEnd, nil, variable.ItemsPerPage+1)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		if len(data) == variable.ItemsPerPage+1 {
+			data = data[:variable.ItemsPerPage]
+		}
+		if len(data) == 0 {
+			return data, err
+		}
+	} else {
+
+		//The reason why "variable.ItemsPerPage" is added by one is that we want to see if the next pages have a value to enable or disable the next or prev key.
+		data, err = RangeCursorRead(nil, lastStart, variable.ItemsPerPage+1)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		if len(data) == variable.ItemsPerPage+1 {
+			data = data[1:]
+		}
+		if len(data) == 0 {
+			return data, err
+		}
+
+	}
+	return data, nil
+}
+
+func FormatKeyValue(item dbpak.KVData) (string, string) {
 	truncatedKey := utils.TruncateString(string(item.Key), 20)
 
 	typeValue := mimetype.Detect(item.Value)
@@ -134,26 +178,41 @@ func (l *Logic) FormatKeyValue(item dbpak.KVData) (string, string) {
 
 	return truncatedKey, truncatedValue
 }
-func (l *Logic) GetAllKeys() ([]dbpak.KVData, error) {
-	var result []dbpak.KVData
-	var startKey, endKey *[]byte
 
-	for {
-		// Read the next batch of records (20 items per batch)
-		err, batch := variable.CurrentDBClient.Read(startKey, endKey, 200)
+func RangeCursorRead(start, end *[]byte, count int) ([]dbpak.KVData, error) {
+
+	var iterms []dbpak.KVData
+	for i := 0; i < count; i++ {
+
+		err, data := variable.CurrentDBClient.Read(start, end, 1)
 		if err != nil {
 			return nil, err
 		}
-		if len(batch) == 0 {
-			break
+		if len(data) == 0 {
+			return iterms, nil
 		}
+		item := dbpak.KVData{
+			Key:   data[0].Key,
+			Value: data[0].Value,
+		}
+		_, truncatedValue := FormatKeyValue(item)
 
-		// Append this batch to the final result
-		result = append(result, batch...)
-
-		// Set the start key for the next iteration (continue from the last key)
-		startKey = &batch[len(batch)-1].Key
+		if end != nil && start == nil {
+			end = &item.Key
+		} else {
+			start = &item.Key
+		}
+		iterms = append(iterms, dbpak.KVData{Key: item.Key, Value: []byte(truncatedValue)})
 	}
 
-	return result, nil
+	if end != nil && start == nil {
+
+		for i := 0; i < len(iterms)/2; i++ {
+			j := len(iterms) - i - 1
+			temp := iterms[i]
+			iterms[i] = iterms[j]
+			iterms[j] = temp
+		}
+	}
+	return iterms, nil
 }

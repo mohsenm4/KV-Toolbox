@@ -7,6 +7,8 @@ import (
 
 var (
 	CurrentDBClient dbpak.DBClient
+	CurrentPage     int
+	ItemsPerPage    = 20
 	FolderPath      string
 	NameData        filterdatabase.FilterData
 	CreatDatabase   bool

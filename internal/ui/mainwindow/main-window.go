@@ -56,7 +56,7 @@ func NewMainWindow(name string) *MainWindow2 {
 		previousRefreshButton:  widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), nil),
 		toggleButtonsContainer: container.NewVBox(),
 		darkLight:              container.NewVBox(),
-		pluss:                  widget.NewButton("+", nil),
+		pluss:                  widget.NewButton(ids.Plass, nil),
 		leveldbButton:          widget.NewButton("", nil), // dinamic name of database
 		bottomDatabase:         []*widget.Button{},
 	}

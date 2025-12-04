@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
+	"runtime"
+	"runtime/debug"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -168,6 +170,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		}
 		r.Window.Canvas().Focus(r.EditColumn.valueEntry)
 	})
+	value = nil
 	return label
 }
 
@@ -198,11 +201,17 @@ func (r *MainWindow2) UpdatePage() {
 	var err error
 	done := make(chan struct{})
 
-	go func() {
-		all, err = r.Logic.GetAllKeys()
-		if err != nil {
-			fmt.Println("error update page right column")
-			return
+	data, err := logic.FetchPageData(r.RightColumn.lastStart, r.RightColumn.lastEnd, r.RightColumn.lastPage, r.RightColumn.orgdata)
+	if err != nil {
+		return
+	}
+
+	if r.RightColumn.lastPage < variable.CurrentPage {
+
+		if len(r.RightColumn.orgdata) >= variable.ItemsPerPage*3 {
+			tmp := make([]dbpak.KVData, len(r.RightColumn.orgdata)-len(data))
+			copy(tmp, r.RightColumn.orgdata[len(data):])
+			r.RightColumn.orgdata = tmp
 		}
 		done <- struct{}{}
 	}()
@@ -210,12 +219,57 @@ func (r *MainWindow2) UpdatePage() {
 	loadingDialog := dialog.NewProgressInfinite("Loading", "Please wait...", r.Window)
 	loadingDialog.Show()
 
-	go func() {
-		<-done
-		fyne.Do(func() {
-			loadingDialog.Hide()
-			r.UpdateRightList(all)
-		})
-	}()
+		tmp := make([]dbpak.KVData, len(r.RightColumn.orgdata)+len(data))
+		copy(tmp, r.RightColumn.orgdata)
+		copy(tmp[len(r.RightColumn.orgdata):], data)
+		r.RightColumn.orgdata = tmp
 
+	} else {
+
+		tmp := make([]dbpak.KVData, len(r.RightColumn.orgdata)-len(data))
+		copy(tmp, r.RightColumn.orgdata[:len(r.RightColumn.orgdata)-len(data)])
+		r.RightColumn.orgdata = tmp
+
+		tmp2 := make([]dbpak.KVData, len(data)+len(r.RightColumn.orgdata))
+		copy(tmp2, data)
+		copy(tmp2[len(data):], r.RightColumn.orgdata)
+		r.RightColumn.orgdata = tmp2
+	}
+
+	if len(r.RightColumn.orgdata) != 0 {
+		r.RightColumn.lastStart = &r.RightColumn.orgdata[0].Key
+		r.RightColumn.lastEnd = &r.RightColumn.orgdata[len(r.RightColumn.orgdata)-1].Key
+	}
+
+	var truncatedValue string
+	var truncatedKey string
+
+	var arrayContainer []fyne.CanvasObject
+	for _, item := range data {
+
+		truncatedKey, truncatedValue = logic.FormatKeyValue(item)
+
+		valueLabel := r.BuildLabelKeyAndValue("value", item.Key, item.Value, truncatedValue)
+		keyLabel := r.BuildLabelKeyAndValue("key", item.Key, item.Value, truncatedKey)
+
+		buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
+		arrayContainer = append(arrayContainer, buttonRow)
+	}
+	if r.RightColumn.lastPage > variable.CurrentPage {
+
+		arrayContainer = append(arrayContainer, r.RightColumn.container.Objects...)
+		r.RightColumn.container.Objects = arrayContainer
+
+	} else {
+
+		n := append(r.RightColumn.container.Objects, arrayContainer...)
+		r.RightColumn.container.Objects = n
+
+	}
+	arrayContainer = nil
+	data = nil
+	runtime.GC()
+	debug.FreeOSMemory()
+	r.RightColumn.container.Refresh()
+	r.RightColumn.lastPage = variable.CurrentPage
 }

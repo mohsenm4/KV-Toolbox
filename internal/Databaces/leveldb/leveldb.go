@@ -6,8 +6,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
@@ -32,7 +35,11 @@ func (l *LeveldbDatabase) Delete(key []byte) error {
 
 func (l *LeveldbDatabase) Open() error {
 	var err error
-	l.DB, err = leveldb.OpenFile(l.Address, nil)
+	opts := &opt.Options{
+		BlockCacheCapacity: 0,
+		WriteBuffer:        0,
+	}
+	l.DB, err = leveldb.OpenFile(l.Address, opts)
 	return err
 }
 
@@ -74,12 +81,13 @@ func (c *LeveldbDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KV
 	if end != nil && start == nil {
 		iter.Last()
 
-		key1 := make([]byte, len(iter.Key()))
-		copy(key1, iter.Key())
+		key := make([]byte, len(iter.Key()))
+		copy(key, iter.Key())
 
-		value1 := make([]byte, len(iter.Value()))
-		copy(value1, iter.Value())
-		Item = append(Item, dbpak.KVData{Key: key1, Value: value1})
+		value := make([]byte, len(iter.Value()))
+		copy(value, iter.Value())
+		Item = append(Item, dbpak.KVData{Key: key, Value: value})
+		value = nil
 		cnt++
 
 		for iter.Prev() {
@@ -87,12 +95,13 @@ func (c *LeveldbDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KV
 			if cnt > count {
 				break
 			}
-			key1 := make([]byte, len(iter.Key()))
-			copy(key1, iter.Key())
+			key := make([]byte, len(iter.Key()))
+			copy(key, iter.Key())
 
-			value1 := make([]byte, len(iter.Value()))
-			copy(value1, iter.Value())
-			Item = append(Item, dbpak.KVData{Key: key1, Value: value1})
+			value := make([]byte, len(iter.Value()))
+			copy(value, iter.Value())
+			Item = append(Item, dbpak.KVData{Key: key, Value: value})
+			value = nil
 		}
 		//reverse items
 		for i := 0; i < len(Item)/2; i++ {
@@ -112,13 +121,13 @@ func (c *LeveldbDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KV
 				break
 			}
 
-			key1 := make([]byte, len(iter.Key()))
-			copy(key1, iter.Key())
+			key := make([]byte, len(iter.Key()))
+			copy(key, iter.Key())
 
-			value1 := make([]byte, len(iter.Value()))
-			copy(value1, iter.Value())
+			value := make([]byte, len(iter.Value()))
+			copy(value, iter.Value())
 
-			Item = append(Item, dbpak.KVData{Key: key1, Value: value1})
+			Item = append(Item, dbpak.KVData{Key: key, Value: value})
 		}
 	}
 
@@ -129,9 +138,10 @@ func (l *LeveldbDatabase) Search(valueEntry []byte) (error, [][]byte) {
 	var data [][]byte
 
 	Iterator := l.DB.NewIterator(nil, nil)
-	if Iterator == nil {
+	defer Iterator.Release()
 
-		return fmt.Errorf("Iterator is nil"), data
+	if Iterator == nil {
+		return fmt.Errorf("iterator is nil"), data
 	}
 
 	if !Iterator.First() {
@@ -154,4 +164,32 @@ func (l *LeveldbDatabase) Search(valueEntry []byte) (error, [][]byte) {
 	}
 
 	return nil, data
+}
+
+func FormatKeyValue(item dbpak.KVData) (string, string) {
+	truncatedKey := TruncateString(string(item.Key), 20)
+
+	typeValue := mimetype.Detect(item.Value)
+	var truncatedValue string
+	if typeValue.Extension() != ".txt" {
+		truncatedValue = fmt.Sprintf("* %s . . .", typeValue.Extension())
+	} else {
+		truncatedValue = TruncateString(string(item.Value), 30)
+	}
+
+	return truncatedKey, truncatedValue
+}
+
+func TruncateString(input string, length int) string {
+	nameData := input
+	if len(nameData) > length {
+		nameData = nameData[:length] + ". . ."
+	}
+	parts := strings.Split(nameData, "\n")
+	if len(parts) > 1 {
+
+		nameData = parts[0] + " . . ."
+	}
+
+	return nameData
 }
