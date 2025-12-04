@@ -206,6 +206,9 @@ func RangeCursorRead(start, end *[]byte, count int) ([]dbpak.KVData, error) {
 		if err != nil {
 			return nil, err
 		}
+		if len(data) == 0 {
+			return iterms, nil
+		}
 		item := dbpak.KVData{
 			Key:   data[0].Key,
 			Value: data[0].Value,
