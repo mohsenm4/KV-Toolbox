@@ -85,9 +85,13 @@ func (p *PebbleDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVD
 	if end != nil && start == nil {
 		iter.Last()
 
-		key1 := make([]byte, len(iter.Key()))
-		copy(key1, iter.Key())
-		Item = append(Item, dbpak.KVData{Key: key1, Value: bytes.NewReader(iter.Value())})
+		key := make([]byte, len(iter.Key()))
+		copy(key, iter.Key())
+
+		value := make([]byte, len(iter.Value()))
+		copy(value, iter.Value())
+
+		Item = append(Item, dbpak.KVData{Key: key, Value: value})
 		cnt++
 
 		for iter.Prev() {
@@ -95,10 +99,13 @@ func (p *PebbleDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVD
 			if cnt > count {
 				break
 			}
-			key1 := make([]byte, len(iter.Key()))
-			copy(key1, iter.Key())
+			key := make([]byte, len(iter.Key()))
+			copy(key, iter.Key())
 
-			Item = append(Item, dbpak.KVData{Key: key1, Value: bytes.NewReader(iter.Value())})
+			value := make([]byte, len(iter.Value()))
+			copy(value, iter.Value())
+
+			Item = append(Item, dbpak.KVData{Key: key, Value: value})
 		}
 
 		for i := 0; i < len(Item)/2; i++ {
@@ -120,10 +127,13 @@ func (p *PebbleDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVD
 			if cnt > count {
 				break
 			}
-			key1 := make([]byte, len(iter.Key()))
-			copy(key1, iter.Key())
+			key := make([]byte, len(iter.Key()))
+			copy(key, iter.Key())
 
-			Item = append(Item, dbpak.KVData{Key: key1, Value: bytes.NewReader(iter.Value())})
+			value := make([]byte, len(iter.Value()))
+			copy(value, iter.Value())
+
+			Item = append(Item, dbpak.KVData{Key: key, Value: value})
 			iter.Next()
 		}
 	}

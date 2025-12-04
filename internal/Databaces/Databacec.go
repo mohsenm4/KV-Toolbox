@@ -1,10 +1,8 @@
 package dbpak
 
-import "io"
-
 type KVData struct {
 	Key   []byte
-	Value io.ReadSeeker
+	Value []byte
 }
 
 type DBClient interface {

@@ -6,12 +6,10 @@ import (
 	"DatabaseDB/internal/dberr"
 	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/utils"
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"image/color"
-	"io"
 	"runtime"
 	"runtime/debug"
 	"strings"
@@ -178,6 +176,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		}
 		r.Window.Canvas().Focus(r.EditColumn.valueEntry)
 	})
+	value = nil
 	return label
 }
 
@@ -248,13 +247,8 @@ func (r *MainWindow2) UpdatePage() {
 
 		truncatedKey, truncatedValue = logic.FormatKeyValue(item)
 
-		var buf bytes.Buffer
-		item.Value.Seek(0, io.SeekStart)
-		io.Copy(&buf, item.Value)
-		valueStr := buf.Bytes()
-
-		valueLabel := r.BuildLabelKeyAndValue("value", item.Key, valueStr, truncatedValue)
-		keyLabel := r.BuildLabelKeyAndValue("key", item.Key, valueStr, truncatedKey)
+		valueLabel := r.BuildLabelKeyAndValue("value", item.Key, item.Value, truncatedValue)
+		keyLabel := r.BuildLabelKeyAndValue("key", item.Key, item.Value, truncatedKey)
 
 		buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
 		arrayContainer = append(arrayContainer, buttonRow)

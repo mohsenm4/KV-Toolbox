@@ -98,10 +98,12 @@ func (c *badgerDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVD
 					return err
 				}
 
-				key1 := make([]byte, len(item.Key()))
-				copy(key1, item.Key())
+				key := make([]byte, len(item.Key()))
+				copy(key, item.Key())
 
-				items = append(items, dbpak.KVData{Key: key1, Value: bytes.NewReader(valCopy)})
+				value := make([]byte, len(valCopy))
+				copy(value, valCopy)
+				items = append(items, dbpak.KVData{Key: key, Value: value})
 			}
 
 			for i := 0; i < len(items)/2; i++ {
@@ -133,10 +135,12 @@ func (c *badgerDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVD
 					return err
 				}
 
-				key1 := make([]byte, len(item.Key()))
-				copy(key1, item.Key())
+				key := make([]byte, len(item.Key()))
+				copy(key, item.Key())
 
-				items = append(items, dbpak.KVData{Key: key1, Value: bytes.NewReader(valCopy)})
+				value := make([]byte, len(valCopy))
+				copy(value, valCopy)
+				items = append(items, dbpak.KVData{Key: key, Value: value})
 			}
 		}
 		return nil
@@ -161,10 +165,10 @@ func (l *badgerDatabase) Search(valueEntry []byte) (error, [][]byte) {
 
 			if bytes.Contains(Iterator.Item().Key(), valueEntry) {
 
-				key1 := make([]byte, len(Iterator.Item().Key()))
-				copy(key1, Iterator.Item().Key())
+				key := make([]byte, len(Iterator.Item().Key()))
+				copy(key, Iterator.Item().Key())
 
-				data = append(data, key1)
+				data = append(data, key)
 
 			}
 			Iterator.Next()
