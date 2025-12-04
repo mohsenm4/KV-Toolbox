@@ -2,7 +2,6 @@ package mainwindow
 
 import (
 	variable "DatabaseDB"
-	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/pref"
 	"DatabaseDB/internal/utils"
 	"fmt"
@@ -38,7 +37,7 @@ func (mi *MainWindow2) FormPasteDatabase(title string) {
 
 	testConnectionButton := widget.NewButton("Test Connection", func() {
 
-		err := logic.HandleButtonClick(pathEntry.Text, title)
+		err := utils.HandleButtonClick(pathEntry.Text, title)
 		if err != nil {
 			dialog.ShowError(err, mi.Window)
 		} else {
@@ -148,7 +147,7 @@ func (mi *MainWindow2) FormPasteDatabase(title string) {
 		}
 
 		var addButton bool
-		err := logic.HandleButtonClick(pathEntry.Text, title)
+		err := utils.HandleButtonClick(pathEntry.Text, title)
 		if err == nil {
 
 			mi.Pref.ListDB = append(mi.Pref.ListDB, data)
@@ -169,6 +168,9 @@ func (mi *MainWindow2) FormPasteDatabase(title string) {
 
 				variable.CreatDatabase = false
 				ded.Hide()
+				mi.RightColumn.buttonAdd.Disable()
+				mi.RightColumn.searchButton.Disable()
+				mi.RightColumn.buttonDelete.Disable()
 			}
 		}
 	})

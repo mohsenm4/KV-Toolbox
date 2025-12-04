@@ -11,9 +11,6 @@ var (
 	ItemsPerPage    = 20
 	FolderPath      string
 	NameData        filterdatabase.FilterData
-	ItemsAdded      bool
-	PreviousOffsetY float32
-	ResultSearch    bool
 	CreatDatabase   bool
 )
 

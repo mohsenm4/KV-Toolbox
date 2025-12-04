@@ -10,27 +10,15 @@ import (
 	"log"
 
 	"github.com/gabriel-vasile/mimetype"
-	// "DatabaseDB/internal/logic/mainwindowlagic"
 )
 
-func HandleButtonClick(path string, nameDatabace string) error {
-	err := utils.Checkdatabace(path, nameDatabace)
-	if err != nil {
-		return err
-	}
+type Logic struct{}
 
-	if !variable.CreatDatabase {
-
-		nun := variable.NameData.FilterFile(path)
-		if !nun {
-			return fmt.Errorf("error for no found files database")
-		}
-	}
-
-	return nil
+func NewLogic() *Logic {
+	return &Logic{}
 }
 
-func SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
+func (l *Logic) SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
 
 	var values [][]byte
 
@@ -58,7 +46,7 @@ func SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
 	return keys, values, nil
 }
 
-func DeleteKeyLogic(valueEntry string) error {
+func (l *Logic) DeleteKeyLogic(valueEntry string) error {
 
 	key := utils.CleanInput(valueEntry)
 
@@ -79,7 +67,7 @@ func DeleteKeyLogic(valueEntry string) error {
 	}
 }
 
-func AddKeyLogic(inputKey string, valueFinish []byte) error {
+func (l *Logic) AddKeyLogic(inputKey string, valueFinish []byte) error {
 	key := utils.CleanInput(inputKey)
 
 	value, err := variable.CurrentDBClient.Get([]byte(key))
@@ -98,7 +86,7 @@ func AddKeyLogic(inputKey string, valueFinish []byte) error {
 	return nil
 }
 
-func QueryKey(inputKey string) ([]byte, error) {
+func (l *Logic) QueryKey(inputKey string) ([]byte, error) {
 
 	key := utils.CleanInput(inputKey)
 
@@ -110,12 +98,12 @@ func QueryKey(inputKey string) ([]byte, error) {
 	return value, nil
 }
 
-func SaveValue(key, value []byte) error {
+func (l *Logic) SaveValue(key, value []byte) error {
 
 	return variable.CurrentDBClient.Add(key, value)
 }
 
-func UpdateKey(oldKey, newKey []byte) (string, error) {
+func (l *Logic) UpdateKey(oldKey, newKey []byte) (string, error) {
 
 	valueBefore, err := variable.CurrentDBClient.Get(oldKey)
 	if err != nil {
@@ -154,11 +142,6 @@ func FetchPageData(lastStart *[]byte, lastEnd *[]byte, lastPage int, Orgdata []d
 
 		if len(data) == variable.ItemsPerPage+1 {
 			data = data[:variable.ItemsPerPage]
-			variable.ItemsAdded = true
-
-		} else {
-			variable.ItemsAdded = false
-
 		}
 		if len(data) == 0 {
 			return data, err
@@ -173,7 +156,6 @@ func FetchPageData(lastStart *[]byte, lastEnd *[]byte, lastPage int, Orgdata []d
 
 		if len(data) == variable.ItemsPerPage+1 {
 			data = data[1:]
-			variable.ItemsAdded = true
 		}
 		if len(data) == 0 {
 			return data, err

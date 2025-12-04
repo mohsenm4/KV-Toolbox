@@ -8,6 +8,7 @@ import (
 	Filterbadger "DatabaseDB/internal/filterdatabase/badger"
 	FilterLeveldb "DatabaseDB/internal/filterdatabase/leveldb"
 	Filterpebbledb "DatabaseDB/internal/filterdatabase/pebble"
+	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/pref"
 	"DatabaseDB/internal/ui/ids"
 	"DatabaseDB/internal/utils"
@@ -18,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/gabriel-vasile/mimetype"
 )
 
 const (
@@ -38,6 +40,7 @@ type MainWindow2 struct {
 	EditColumn  *EditColumn
 	Objects     *ObjectsMainWindow
 	Pref        *pref.Pref
+	Logic       *logic.Logic
 }
 
 type ObjectsMainWindow struct {
@@ -67,17 +70,13 @@ func NewMainWindow(name string) *MainWindow2 {
 		keyRightColunm:       widget.NewLabelWithStyle(ids.KeyRightColunm, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		valueRightColunm:     widget.NewLabelWithStyle(ids.ValueRightColunm, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		lastLableKeyAndValue: utils.NewTappableLabel("", nil), // dinamic last label key and value
-		lastStart:            &[]byte{},
-		lastEnd:              &[]byte{},
-		lastPage:             0,
-		orgdata:              []dbpak.KVData{},
 	}
 
 	editColumn := &EditColumn{
 		container:     container.NewVBox(),
 		edit2:         container.NewVBox(),
-		cancelEditKey: widget.NewButton("Cancel", nil),
-		saveEditKey:   widget.NewButton("Save", nil),
+		cancelEditKey: widget.NewButton(ids.CancelButtonEdit, nil),
+		saveEditKey:   widget.NewButton(ids.SaveButtonEdit, nil),
 		valueEntry:    widget.NewEntry(),
 	}
 
@@ -86,16 +85,15 @@ func NewMainWindow(name string) *MainWindow2 {
 		spacer: widget.NewLabel(""),
 	}
 
-	mw := &MainWindow2{
+	return &MainWindow2{
 		NameWindow:  name,
 		TypeDB:      "", // default or placeholder DB type
 		LeftColumn:  leftColumn,
 		RightColumn: rightColumn,
 		EditColumn:  editColumn,
 		Objects:     object,
+		Logic:       logic.NewLogic(),
 	}
-
-	return mw
 }
 
 func (m *MainWindow2) MainWindow(myApp fyne.App) {
@@ -224,64 +222,26 @@ func (m *MainWindow2) LeftColumn2() fyne.CanvasObject {
 }
 
 func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
-	if mi.RightColumn.container == nil {
-		mi.RightColumn.container = container.NewVBox()
-	}
-	if mi.TopRightColumn() == nil {
-		fmt.Println("")
-	}
-	rightColumnScrollable := container.NewVScroll(mi.RightColumn.container)
-
-	up := false
-
-	rightColumnScrollable.OnScrolled = func(p fyne.Position) {
-		maxScroll := mi.RightColumn.container.MinSize().Height - rightColumnScrollable.Size().Height
-
-		if up && p.Y == 0 && !variable.ResultSearch {
-			variable.CurrentPage--
-			if variable.CurrentPage < 3 {
-				up = false
-				variable.CurrentPage = 3
-				return
-			}
-			numberLast := len(mi.RightColumn.container.Objects)
-			mi.UpdatePage()
-
-			mi.RightColumn.container.Objects = mi.RightColumn.container.Objects[:numberLast]
-
-			rightColumnScrollable.Offset.Y = maxScroll / 2
-			rightColumnScrollable.Refresh()
-
-		} else if p.Y == maxScroll && !variable.ItemsAdded && !variable.ResultSearch {
-			return
-		} else if p.Y == maxScroll && variable.ItemsAdded && !variable.ResultSearch {
-
-			variable.CurrentPage++
-			numberLast := len(mi.RightColumn.container.Objects)
-			mi.UpdatePage()
-			rightColumnScrollable.Offset.Y = maxScroll / 2
-
-			if len(mi.RightColumn.container.Objects) > (variable.ItemsPerPage)*3 {
-				mi.RightColumn.container.Objects = mi.RightColumn.container.Objects[len(mi.RightColumn.container.Objects)-numberLast:]
-				up = true
-			}
-
-		}
-
-	}
-
+	// Create the "Edit" section (bottom-right panel)
 	m := container.NewVScroll(mi.EditColumn.edit2)
 	mi.EditColumn.container = container.NewBorder(
 		widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		mi.SaveAndCancle(),
 		nil, nil, m,
 	)
-	mi.EditColumn.container.Refresh()
 
-	columns := container.NewHSplit(rightColumnScrollable, mi.EditColumn.container)
+	// Create an empty container for the right list (initially blank)
+	mi.RightColumn.container = container.NewMax()
+
+	// In the future, you can initialize it with default data, e.g.:
+	// mi.UpdateRightList(defaultItems)
+
+	// Combine the list and edit sections into a horizontal split
+	columns := container.NewHSplit(mi.RightColumn.container, mi.EditColumn.container)
 	columns.SetOffset(0.80)
-	mainContent := container.NewBorder(mi.TopRightColumn(), nil, nil, nil, columns)
 
+	// Wrap everything into the main content container
+	mainContent := container.NewBorder(mi.TopRightColumn(), nil, nil, nil, columns)
 	return mainContent
 }
 
@@ -311,4 +271,44 @@ func getThemeKey(app fyne.App) string {
 	default:
 		return ThemeCustom
 	}
+}
+
+func (mi *MainWindow2) UpdateRightList(all []dbpak.KVData) {
+
+	newList := widget.NewList(
+		func() int {
+			return len(all)
+		},
+		func() fyne.CanvasObject {
+			keyLabel := widget.NewLabel("key")
+			valueLabel := widget.NewLabel("value")
+			buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
+			return buttonRow
+		},
+		func(i widget.ListItemID, obj fyne.CanvasObject) {
+
+			item := all[i]
+
+			typeValue := mimetype.Detect(item.Value)
+			var truncatedValue string
+			if typeValue.Extension() != ".txt" {
+				truncatedValue = fmt.Sprintf("* %s . . .", typeValue.Extension())
+			} else {
+				truncatedValue = utils.TruncateString(string(item.Value), 20)
+			}
+			truncatedKey := utils.TruncateString(string(item.Key), 20)
+
+			keyLabel := mi.BuildLabelKeyAndValue("key", item.Key, item.Value, truncatedKey)
+			valueLabel := mi.BuildLabelKeyAndValue("value", item.Key, item.Value, truncatedValue)
+
+			row := obj.(*fyne.Container)
+			row.Objects[0] = keyLabel
+			row.Objects[1] = valueLabel
+
+		},
+	)
+
+	mi.RightColumn.container.Objects = nil
+	mi.RightColumn.container.Add(newList)
+	mi.RightColumn.container.Refresh()
 }

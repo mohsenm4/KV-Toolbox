@@ -1,10 +1,8 @@
 package mainwindow
 
 import (
-	variable "DatabaseDB"
 	dbpak "DatabaseDB/internal/Databaces"
 	"DatabaseDB/internal/dberr"
-	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/utils"
 	"encoding/json"
 	"errors"
@@ -31,10 +29,6 @@ type RightColumn struct {
 	keyRightColunm       *widget.Label
 	valueRightColunm     *widget.Label
 	lastLableKeyAndValue *utils.TappableLabel
-	lastStart            *[]byte
-	lastEnd              *[]byte
-	lastPage             int
-	orgdata              []dbpak.KVData
 }
 
 func NewRightColumn() *RightColumn {
@@ -106,7 +100,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		labelEdit.SetText(fmt.Sprintf("Edit %s - %s", editType, utils.TruncateString(NameLabel, 10)))
 		r.EditColumn.saveEditKey.OnTapped = func() {
 			if editType == "value" {
-				err = logic.SaveValue(key, []byte(r.EditColumn.finishValue))
+				err = r.Logic.SaveValue(key, []byte(r.EditColumn.finishValue))
 				if err != nil {
 					fmt.Println(err.Error())
 				}
@@ -115,7 +109,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 				//value = []byte(truncatedKey2)
 
 			} else {
-				_, err := logic.QueryKey(r.EditColumn.valueEntry.Text)
+				_, err := r.Logic.QueryKey(r.EditColumn.valueEntry.Text)
 				if !errors.Is(err, dberr.ErrKeyNotFound) {
 					dialog.NewConfirm(
 						"⚠️ Duplicate Key",
@@ -123,7 +117,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 						func(confirmed bool) {
 							if confirmed {
 								r.EditColumn.saveEditKey.Disable()
-								Base, err = logic.UpdateKey(key, []byte(r.EditColumn.valueEntry.Text))
+								Base, err = r.Logic.UpdateKey(key, []byte(r.EditColumn.valueEntry.Text))
 								if err != nil {
 									dialog.ShowInformation("Error", err.Error(), r.Window)
 									return
@@ -141,7 +135,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 					return
 				} else if errors.Is(err, dberr.ErrKeyNotFound) {
 
-					Base, err = logic.UpdateKey([]byte(Base), []byte(r.EditColumn.valueEntry.Text))
+					Base, err = r.Logic.UpdateKey([]byte(Base), []byte(r.EditColumn.valueEntry.Text))
 					if err != nil {
 						dialog.ShowInformation("Error", err.Error(), r.Window)
 						return
@@ -203,6 +197,9 @@ func (r *RightColumn) KeyAndValue() *fyne.Container {
 }
 
 func (r *MainWindow2) UpdatePage() {
+	var all []dbpak.KVData
+	var err error
+	done := make(chan struct{})
 
 	data, err := logic.FetchPageData(r.RightColumn.lastStart, r.RightColumn.lastEnd, r.RightColumn.lastPage, r.RightColumn.orgdata)
 	if err != nil {
@@ -216,6 +213,11 @@ func (r *MainWindow2) UpdatePage() {
 			copy(tmp, r.RightColumn.orgdata[len(data):])
 			r.RightColumn.orgdata = tmp
 		}
+		done <- struct{}{}
+	}()
+	// creat dialog for loading
+	loadingDialog := dialog.NewProgressInfinite("Loading", "Please wait...", r.Window)
+	loadingDialog.Show()
 
 		tmp := make([]dbpak.KVData, len(r.RightColumn.orgdata)+len(data))
 		copy(tmp, r.RightColumn.orgdata)

@@ -33,6 +33,11 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 	var projectButton *widget.Button
 	var closeButton *widget.Button
 
+	if l.LeftColumn.previousProject != nil {
+		l.LeftColumn.previousProject.Importance = widget.MediumImportance
+		l.LeftColumn.previousClose.Importance = widget.MediumImportance
+		l.LeftColumn.previousRefreshButton.Importance = widget.MediumImportance
+	}
 	projectButton = widget.NewButton(inputText+" - "+l.TypeDB, func() {
 
 		typeDB := strings.Split(projectButton.Text, " - ")
@@ -51,18 +56,11 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 		l.LeftColumn.previousClose = closeButton
 		l.LeftColumn.previousRefreshButton = refreshButton
 
-		variable.ItemsAdded = true
 		utils.Checkdatabace(path, l.TypeDB)
 		l.RightColumn.buttonAdd.Enable()
 		l.RightColumn.searchButton.Enable()
 		l.RightColumn.buttonDelete.Enable()
 		variable.FolderPath = path
-		l.RightColumn.lastEnd = nil
-		variable.ResultSearch = false
-		variable.CurrentPage = 1
-		l.RightColumn.lastPage = 0
-		variable.PreviousOffsetY = 0
-		l.RightColumn.lastStart = nil
 		utils.CheckCondition(l.RightColumn.container)
 		utils.CheckCondition(l.EditColumn.edit2)
 		l.UpdatePage()
@@ -95,6 +93,7 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 				l.Pref.ListDB = append(l.Pref.ListDB[:i], l.Pref.ListDB[i+1:]...)
 				lastColumnContent.Remove(buttonContainer)
 				lastColumnContent.Refresh()
+				break
 			}
 		}
 	})
@@ -106,18 +105,11 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 
 		if l.RightColumn.nameButtonProject.Text == inputText+" - "+l.TypeDB {
 
-			variable.ItemsAdded = true
 			utils.Checkdatabace(path, l.TypeDB)
 			l.RightColumn.buttonAdd.Enable()
 			l.RightColumn.searchButton.Enable()
 			l.RightColumn.buttonDelete.Enable()
 			variable.FolderPath = path
-			l.RightColumn.lastEnd = nil
-			variable.ResultSearch = false
-			variable.CurrentPage = 1
-			l.RightColumn.lastPage = 0
-			variable.PreviousOffsetY = 0
-			l.RightColumn.lastStart = nil
 			utils.CheckCondition(l.RightColumn.container)
 			utils.CheckCondition(l.EditColumn.edit2)
 			l.UpdatePage()
