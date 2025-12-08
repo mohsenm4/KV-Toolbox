@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+
 	myApp := app.NewWithID("com.DatabaseDB.KV-Toolbox")
 
 	window := mainwindow.NewMainWindow("ManageDB")
@@ -15,4 +16,5 @@ func main() {
 	window.Pref = pref.NewPref(myApp)
 
 	window.MainWindow(myApp)
+
 }

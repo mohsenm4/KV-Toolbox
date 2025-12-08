@@ -64,6 +64,11 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		r.EditColumn.edit2.Add(labelEdit)
 
 		if editType == "value" {
+			value, err = variable.CurrentDBClient.Get(key)
+			if err != nil {
+				dialog.ShowInformation("Error", err.Error(), r.Window)
+				return
+			}
 			typeValue := mimetype.Detect([]byte(value))
 			Base = string(value)
 
@@ -93,6 +98,10 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 				value = []byte(r.EditColumn.valueEntry.Text)
 				r.EditColumn.finishValue = string(value)
 				NameLabel = string(value)
+			default:
+				// dialog for binary file
+				// i cont show your value because it's a binary file
+				dialog.ShowInformation("Binary File", "The value appears to be a binary file ("+typeValue.String()+").\nEditing binary files is not supported.", r.Window)
 			}
 
 		} else {
