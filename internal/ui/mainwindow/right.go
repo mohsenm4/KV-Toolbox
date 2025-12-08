@@ -64,6 +64,11 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		r.EditColumn.edit2.Add(labelEdit)
 
 		if editType == "value" {
+			value, err = variable.CurrentDBClient.Get(key)
+			if err != nil {
+				dialog.ShowInformation("Error", err.Error(), r.Window)
+				return
+			}
 			typeValue := mimetype.Detect([]byte(value))
 			Base = string(value)
 
