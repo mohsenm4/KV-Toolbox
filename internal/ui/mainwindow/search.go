@@ -85,6 +85,7 @@ func (r *MainWindow2) SearchKeyUi() {
 			valueLabel := r.NewLabelKV(labelkv.EditValue, keys[i], values[i], truncatedValue)
 			keyLabel := r.NewLabelKV(labelkv.EditKey, keys[i], values[i], truncatedKey)
 
+			valueLabel.SetKeyLabel(keyLabel)
 			buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
 			r.RightColumn.container.Add(buttonRow)
 			r.RightColumn.container.Refresh()

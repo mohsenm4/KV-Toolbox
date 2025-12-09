@@ -2,7 +2,6 @@ package mainwindow
 
 import (
 	variable "DatabaseDB"
-	"fmt"
 
 	dbpak "DatabaseDB/internal/Databaces"
 	Filterbadger "DatabaseDB/internal/filterdatabase/badger"
@@ -215,9 +214,6 @@ func (m *MainWindow2) LeftColumn2() fyne.CanvasObject {
 func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
 	if mi.RightColumn.container == nil {
 		mi.RightColumn.container = container.NewVBox()
-	}
-	if mi.TopRightColumn() == nil {
-		fmt.Println("")
 	}
 	rightColumnScrollable := container.NewVScroll(mi.RightColumn.container)
 

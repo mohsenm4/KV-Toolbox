@@ -18,15 +18,21 @@ var Base string
 var NameLabel string
 
 func (r *MainWindow2) NewLabelKV(editType labelkv.EditType, key, value []byte, nameLabel string) *labelkv.TappableLabel {
-	keyLabel := labelkv.NewTappableLabel(nameLabel)
-	keyLabel.SetTopped(func() {
-		r.handleLabelClick(keyLabel, labelkv.EditKey, key, value)
+	Label := labelkv.NewTappableLabel(nameLabel)
+	Label.SetTopped(func() {
+		r.handleLabelClick(Label, editType, key, value)
 	})
-	keyLabel.SetOnHovered(func() {
-		keyLabel.Importance = widget.HighImportance
-		keyLabel.Refresh()
+	Label.SetOnHovered(func() {
+		Label.Importance = widget.HighImportance
+		Label.Refresh()
 	})
-	return keyLabel
+	if editType == labelkv.EditValue {
+		Label.SetEditType(labelkv.EditValue)
+	} else {
+		Label.SetKey(key)
+		Label.SetEditType(labelkv.EditKey)
+	}
+	return Label
 }
 
 func (r *MainWindow2) handleLabelClick(label *labelkv.TappableLabel, editType labelkv.EditType, key, value []byte) {
@@ -42,8 +48,10 @@ func (r *MainWindow2) handleLabelClick(label *labelkv.TappableLabel, editType la
 		err         error
 	)
 
-	if editType == "value" {
+	if editType == labelkv.EditValue {
 
+		keylable := label.GetKeyLabel()
+		key = keylable.GetKey()
 		finalValue, displayText, err = r.processValue(key)
 		r.EditColumn.finishValue = displayText
 	} else {
@@ -177,7 +185,7 @@ func (r *MainWindow2) setupSaveButton(label *labelkv.TappableLabel, editType lab
 
 		var err error
 
-		if editType == "value" {
+		if editType == labelkv.EditValue {
 			err = logic.SaveValue(key, []byte(r.EditColumn.finishValue))
 			if err != nil {
 				fmt.Println(err.Error())
@@ -193,12 +201,7 @@ func (r *MainWindow2) setupSaveButton(label *labelkv.TappableLabel, editType lab
 				fmt.Println(err.Error())
 				return
 			}
-			for _, v := range r.RightColumn.orgdata {
-				if string(v.Key) == string(key) {
-					v.Key = []byte(r.EditColumn.valueEntry.Text)
-					break
-				}
-			}
+			label.SetKey([]byte(r.EditColumn.valueEntry.Text))
 		}
 
 		label.Text = utils.TruncateString(r.EditColumn.finishValue, 10)

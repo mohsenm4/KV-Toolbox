@@ -18,23 +18,32 @@ type TappableLabel struct {
 	onTapped  func()
 	onHovered func()
 	hover     bool
+	editType  EditType
+	keyLabel  *TappableLabel
 	key       []byte
-	editType  string
 }
 
-func (t *TappableLabel) SetKey(key []byte) {
-	t.key = key
+func (t *TappableLabel) SetKeyLabel(key *TappableLabel) {
+	t.keyLabel = key
+}
+
+func (t *TappableLabel) GetKeyLabel() *TappableLabel {
+	return t.keyLabel
 }
 
 func (t *TappableLabel) GetKey() []byte {
 	return t.key
 }
 
-func (t *TappableLabel) SetEditType(editType string) {
+func (t *TappableLabel) SetKey(key []byte) {
+	t.key = key
+}
+
+func (t *TappableLabel) SetEditType(editType EditType) {
 	t.editType = editType
 }
 
-func (t *TappableLabel) GetEditType() string {
+func (t *TappableLabel) GetEditType() EditType {
 	return t.editType
 }
 
