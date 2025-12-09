@@ -10,6 +10,7 @@ import (
 	Filterpebbledb "DatabaseDB/internal/filterdatabase/pebble"
 	"DatabaseDB/internal/pref"
 	"DatabaseDB/internal/ui/ids"
+	"DatabaseDB/internal/ui/them"
 	"DatabaseDB/internal/utils"
 
 	"fyne.io/fyne/v2"
@@ -17,13 +18,8 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
-)
 
-const (
-	ThemeDark   = "dark"
-	ThemeLight  = "light"
-	ThemeCustom = "custom"
+	"fyne.io/fyne/v2/widget"
 )
 
 type MainWindow2 struct {
@@ -102,14 +98,6 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 
 	m.Window = myApp.NewWindow(m.NameWindow)
 	m.Window.SetMaster()
-
-	mytheme := m.Pref.LoadTheme(pref.KeyTheme)
-
-	if mytheme == ThemeDark {
-		myApp.Settings().SetTheme(theme.DarkTheme())
-	} else if mytheme == ThemeLight {
-		myApp.Settings().SetTheme(theme.LightTheme())
-	}
 
 	m.Objects.spacer = widget.NewLabel("")
 
@@ -199,7 +187,7 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 			if confirm {
 				m.Pref.SaveDatabase(m.Pref.ListDB, pref.KeyListDB)
 
-				keyTheme := getThemeKey(myApp)
+				keyTheme := them.GetThemeKey(myApp)
 				m.Pref.SaveTheme(keyTheme, pref.KeyTheme)
 				m.Window.Close()
 			}
@@ -295,20 +283,4 @@ func (m *MainWindow2) ColumnContent() fyne.CanvasObject {
 	columns.SetOffset(0.10)
 
 	return columns
-}
-
-func getThemeKey(app fyne.App) string {
-	t := app.Settings().Theme()
-	currentBG := t.Color(theme.ColorNameBackground, app.Settings().ThemeVariant())
-	darkBG := theme.DarkTheme().Color(theme.ColorNameBackground, app.Settings().ThemeVariant())
-	lightBG := theme.LightTheme().Color(theme.ColorNameBackground, app.Settings().ThemeVariant())
-
-	switch {
-	case currentBG == darkBG:
-		return ThemeDark
-	case currentBG == lightBG:
-		return ThemeLight
-	default:
-		return ThemeCustom
-	}
 }
