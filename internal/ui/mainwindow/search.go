@@ -3,6 +3,7 @@ package mainwindow
 import (
 	variable "DatabaseDB"
 	"DatabaseDB/internal/logic"
+	"DatabaseDB/internal/ui/labelkv"
 	"DatabaseDB/internal/utils"
 	"fmt"
 
@@ -81,8 +82,8 @@ func (r *MainWindow2) SearchKeyUi() {
 				truncatedValue = utils.TruncateString(string(values[i]), 20)
 			}
 
-			valueLabel := r.BuildLabelKeyAndValue("value", keys[i], values[i], truncatedValue)
-			keyLabel := r.BuildLabelKeyAndValue("key", keys[i], values[i], truncatedKey)
+			valueLabel := r.NewLabelKV(labelkv.EditValue, keys[i], values[i], truncatedValue)
+			keyLabel := r.NewLabelKV(labelkv.EditKey, keys[i], values[i], truncatedKey)
 
 			buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
 			r.RightColumn.container.Add(buttonRow)

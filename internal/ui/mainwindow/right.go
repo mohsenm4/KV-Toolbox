@@ -3,23 +3,16 @@ package mainwindow
 import (
 	variable "DatabaseDB"
 	dbpak "DatabaseDB/internal/Databaces"
-	"DatabaseDB/internal/dberr"
 	"DatabaseDB/internal/logic"
-	"DatabaseDB/internal/utils"
-	"encoding/json"
-	"errors"
-	"fmt"
+	"DatabaseDB/internal/ui/labelkv"
 	"image/color"
 	"runtime"
 	"runtime/debug"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	"github.com/gabriel-vasile/mimetype"
 )
 
 type RightColumn struct {
@@ -30,7 +23,7 @@ type RightColumn struct {
 	buttonAdd            *widget.Button
 	keyRightColunm       *widget.Label
 	valueRightColunm     *widget.Label
-	lastLableKeyAndValue *utils.TappableLabel
+	lastLableKeyAndValue *labelkv.TappableLabel
 	lastStart            *[]byte
 	lastEnd              *[]byte
 	lastPage             int
@@ -41,10 +34,8 @@ func NewRightColumn() *RightColumn {
 	return &RightColumn{}
 }
 
-var Base string
-var NameLabel string
-
-func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value []byte, nameLabel string) *utils.TappableLabel {
+/*
+func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key, value []byte, nameLabel string) *utils.TappableLabel {
 	var label *utils.TappableLabel
 	var err error
 	// Determine the base value based on the edit type
@@ -64,6 +55,13 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		r.EditColumn.edit2.Add(labelEdit)
 
 		if editType == "value" {
+
+			value, err = variable.CurrentDBClient.Get(key)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+
 			typeValue := mimetype.Detect([]byte(value))
 			Base = string(value)
 
@@ -90,7 +88,6 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 				}
 
 				r.EditColumn.valueEntry = r.ConfigureEntry(string(value))
-				value = []byte(r.EditColumn.valueEntry.Text)
 				r.EditColumn.finishValue = string(value)
 				NameLabel = string(value)
 			}
@@ -165,7 +162,7 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		}
 
 		r.EditColumn.valueEntry.OnChanged = func(s string) {
-
+			//TODO: you can use FinishValue instead of Base
 			if s == Base {
 				r.EditColumn.saveEditKey.Disable()
 			} else {
@@ -176,9 +173,9 @@ func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key []byte, value [
 		}
 		r.Window.Canvas().Focus(r.EditColumn.valueEntry)
 	})
-	value = nil
 	return label
 }
+*/
 
 func (r *MainWindow2) TopRightColumn() *fyne.Container {
 	r.Objects.line = canvas.NewLine(color.Black)
@@ -224,14 +221,8 @@ func (r *MainWindow2) UpdatePage() {
 
 	} else {
 
-		tmp := make([]dbpak.KVData, len(r.RightColumn.orgdata)-len(data))
-		copy(tmp, r.RightColumn.orgdata[:len(r.RightColumn.orgdata)-len(data)])
-		r.RightColumn.orgdata = tmp
-
-		tmp2 := make([]dbpak.KVData, len(data)+len(r.RightColumn.orgdata))
-		copy(tmp2, data)
-		copy(tmp2[len(data):], r.RightColumn.orgdata)
-		r.RightColumn.orgdata = tmp2
+		r.RightColumn.orgdata = r.RightColumn.orgdata[:len(r.RightColumn.orgdata)-len(data)]
+		r.RightColumn.orgdata = append(data, r.RightColumn.orgdata...)
 	}
 
 	if len(r.RightColumn.orgdata) != 0 {
@@ -247,8 +238,24 @@ func (r *MainWindow2) UpdatePage() {
 
 		truncatedKey, truncatedValue = logic.FormatKeyValue(item)
 
-		valueLabel := r.BuildLabelKeyAndValue("value", item.Key, item.Value, truncatedValue)
-		keyLabel := r.BuildLabelKeyAndValue("key", item.Key, item.Value, truncatedKey)
+		/*
+			value, err := variable.CurrentDBClient.Get(item.Key)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+
+			typeValue := mimetype.Detect([]byte(value))
+
+			keyLable := render.NewLable(render.KeyLable, typeValue.String())
+			valueLable := render.NewLable(render.ValueLable, typeValue.String())
+
+			keyLable.SetText(truncatedKey)
+			valueLable.SetText(truncatedValue)
+		*/
+
+		valueLabel := r.NewLabelKV(labelkv.EditValue, item.Key, item.Value, truncatedValue)
+		keyLabel := r.NewLabelKV(labelkv.EditKey, item.Key, item.Value, truncatedKey)
 
 		buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
 		arrayContainer = append(arrayContainer, buttonRow)

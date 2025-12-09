@@ -10,6 +10,7 @@ import (
 	Filterpebbledb "DatabaseDB/internal/filterdatabase/pebble"
 	"DatabaseDB/internal/pref"
 	"DatabaseDB/internal/ui/ids"
+	"DatabaseDB/internal/ui/labelkv"
 	"DatabaseDB/internal/ui/them"
 	"DatabaseDB/internal/utils"
 
@@ -62,7 +63,7 @@ func NewMainWindow(name string) *MainWindow2 {
 		buttonAdd:            widget.NewButton(ids.AddButtonMain, nil),
 		keyRightColunm:       widget.NewLabelWithStyle(ids.KeyRightColunm, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		valueRightColunm:     widget.NewLabelWithStyle(ids.ValueRightColunm, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
-		lastLableKeyAndValue: utils.NewTappableLabel(""), // dinamic last label key and value
+		lastLableKeyAndValue: labelkv.NewTappableLabel(""), // dinamic last label key and value
 		lastStart:            &[]byte{},
 		lastEnd:              &[]byte{},
 		lastPage:             0,

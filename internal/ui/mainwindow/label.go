@@ -4,6 +4,7 @@ import (
 	variable "DatabaseDB"
 	"DatabaseDB/internal/dberr"
 	"DatabaseDB/internal/logic"
+	"DatabaseDB/internal/ui/labelkv"
 	"DatabaseDB/internal/utils"
 	"encoding/json"
 	"fmt"
@@ -16,24 +17,19 @@ import (
 var Base string
 var NameLabel string
 
-func (r *MainWindow2) BuildLabelKeyAndValue(editType string, key, value []byte, nameLabel string) *utils.TappableLabel {
-
-	var label *utils.TappableLabel
-
-	label = utils.NewTappableLabel(nameLabel)
-
-	label.SetTopped(func() {
-		r.handleLabelClick(label, editType, key, value)
+func (r *MainWindow2) NewLabelKV(editType labelkv.EditType, key, value []byte, nameLabel string) *labelkv.TappableLabel {
+	keyLabel := labelkv.NewTappableLabel(nameLabel)
+	keyLabel.SetTopped(func() {
+		r.handleLabelClick(keyLabel, labelkv.EditKey, key, value)
 	})
-	label.SetOnHovered(func() {
-		label.Importance = widget.HighImportance
-		label.Refresh()
+	keyLabel.SetOnHovered(func() {
+		keyLabel.Importance = widget.HighImportance
+		keyLabel.Refresh()
 	})
-
-	return label
+	return keyLabel
 }
 
-func (r *MainWindow2) handleLabelClick(label *utils.TappableLabel, editType string, key, value []byte) {
+func (r *MainWindow2) handleLabelClick(label *labelkv.TappableLabel, editType labelkv.EditType, key, value []byte) {
 
 	// Reset UI
 	r.resetLastSelectedLabel(label)
@@ -47,7 +43,8 @@ func (r *MainWindow2) handleLabelClick(label *utils.TappableLabel, editType stri
 	)
 
 	if editType == "value" {
-		finalValue, displayText, err = r.processValue(key, value)
+
+		finalValue, displayText, err = r.processValue(key)
 		r.EditColumn.finishValue = displayText
 	} else {
 		finalValue, displayText = r.processKey(key)
@@ -86,9 +83,9 @@ func (r *MainWindow2) handleLabelClick(label *utils.TappableLabel, editType stri
 
 }
 
-func (r *MainWindow2) AddObjectEdit(editType string, key, value []byte) error {
+func (r *MainWindow2) AddObjectEdit(editType labelkv.EditType, key, value []byte) error {
 
-	if editType == "value" {
+	if editType == labelkv.EditValue {
 		typeValue := mimetype.Detect(value)
 
 		switch {
@@ -122,7 +119,7 @@ func (r *MainWindow2) AddObjectEdit(editType string, key, value []byte) error {
 	return nil
 }
 
-func (r *MainWindow2) resetLastSelectedLabel(current *utils.TappableLabel) {
+func (r *MainWindow2) resetLastSelectedLabel(current *labelkv.TappableLabel) {
 	if r.RightColumn.lastLableKeyAndValue != nil {
 		r.RightColumn.lastLableKeyAndValue.Importance = widget.MediumImportance
 		r.RightColumn.lastLableKeyAndValue.Refresh()
@@ -143,10 +140,9 @@ func (r *MainWindow2) prepareEditArea() {
 	utils.CheckCondition(r.EditColumn.edit2)
 }
 
-func (r *MainWindow2) processValue(key, value []byte) ([]byte, string, error) {
-	var err error
+func (r *MainWindow2) processValue(key []byte) ([]byte, string, error) {
 
-	value, err = variable.CurrentDBClient.Get(key)
+	value, err := variable.CurrentDBClient.Get(key)
 	if err != nil && err != dberr.ErrKeyNotFound {
 		return nil, "", err
 	}
@@ -175,7 +171,7 @@ func (r *MainWindow2) processKey(key []byte) ([]byte, string) {
 	return key, string(key)
 }
 
-func (r *MainWindow2) setupSaveButton(label *utils.TappableLabel, editType string, key []byte, value []byte) {
+func (r *MainWindow2) setupSaveButton(label *labelkv.TappableLabel, editType labelkv.EditType, key []byte, value []byte) {
 
 	r.EditColumn.saveEditKey.OnTapped = func() {
 
@@ -191,10 +187,17 @@ func (r *MainWindow2) setupSaveButton(label *utils.TappableLabel, editType strin
 				r.EditColumn.finishValue = fmt.Sprintf("* %s ...", mimetype.Detect([]byte(r.EditColumn.finishValue)).Extension())
 			}
 		} else {
+			// firt Item is new key and second is old key
 			_, err := logic.UpdateKey(key, []byte(r.EditColumn.valueEntry.Text))
 			if err != nil {
 				fmt.Println(err.Error())
 				return
+			}
+			for _, v := range r.RightColumn.orgdata {
+				if string(v.Key) == string(key) {
+					v.Key = []byte(r.EditColumn.valueEntry.Text)
+					break
+				}
 			}
 		}
 
