@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 )
@@ -22,7 +23,9 @@ var ValueImage []byte
 
 type TappableLabel struct {
 	widget.Label
-	onTapped func()
+	onTapped  func()
+	onHovered func()
+	hover     bool
 }
 
 func NewTappableLabel(text string, tapped func()) *TappableLabel {
@@ -34,6 +37,38 @@ func NewTappableLabel(text string, tapped func()) *TappableLabel {
 	}
 	labelee.ExtendBaseWidget(labelee)
 	return labelee
+}
+
+func (t *TappableLabel) MouseIn(_ *desktop.MouseEvent) {
+	if t.onHovered != nil {
+		t.hover = true
+		t.onHovered()
+	}
+}
+
+func (t *TappableLabel) MouseMoved(_ *desktop.MouseEvent) {}
+func (t *TappableLabel) MouseOut() {
+	t.hover = false
+	t.Refresh()
+}
+
+func (t *TappableLabel) Refresh() {
+	if t.hover {
+		t.Label.TextStyle = fyne.TextStyle{Bold: true}
+		t.Label.Importance = widget.HighImportance
+	} else {
+		t.Label.TextStyle = fyne.TextStyle{Bold: false}
+		t.Label.Importance = widget.MediumImportance
+	}
+	t.Label.Refresh()
+}
+
+func (t *TappableLabel) SetOnHovered(f func()) {
+	t.onHovered = f
+}
+
+func (t *TappableLabel) SetMouseOut(f func()) {
+
 }
 
 func (t *TappableLabel) Tapped(_ *fyne.PointEvent) {
