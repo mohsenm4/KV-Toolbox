@@ -62,7 +62,7 @@ func NewMainWindow(name string) *MainWindow2 {
 		buttonAdd:            widget.NewButton(ids.AddButtonMain, nil),
 		keyRightColunm:       widget.NewLabelWithStyle(ids.KeyRightColunm, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		valueRightColunm:     widget.NewLabelWithStyle(ids.ValueRightColunm, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
-		lastLableKeyAndValue: utils.NewTappableLabel("", nil), // dinamic last label key and value
+		lastLableKeyAndValue: utils.NewTappableLabel(""), // dinamic last label key and value
 		lastStart:            &[]byte{},
 		lastEnd:              &[]byte{},
 		lastPage:             0,

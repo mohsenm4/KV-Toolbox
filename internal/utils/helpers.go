@@ -28,15 +28,18 @@ type TappableLabel struct {
 	hover     bool
 }
 
-func NewTappableLabel(text string, tapped func()) *TappableLabel {
+func NewTappableLabel(text string) *TappableLabel {
 	labelee := &TappableLabel{
 		Label: widget.Label{
 			Text: text,
 		},
-		onTapped: tapped,
 	}
 	labelee.ExtendBaseWidget(labelee)
 	return labelee
+}
+
+func (t *TappableLabel) SetTopped(f func()) {
+	t.onTapped = f
 }
 
 func (t *TappableLabel) MouseIn(_ *desktop.MouseEvent) {
