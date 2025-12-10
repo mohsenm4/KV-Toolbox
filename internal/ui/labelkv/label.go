@@ -61,6 +61,10 @@ func (t *TappableLabel) SetTopped(f func()) {
 	t.onTapped = f
 }
 
+func (t *TappableLabel) Tapped(_ *fyne.PointEvent) {
+	t.onTapped()
+}
+
 func (t *TappableLabel) MouseIn(_ *desktop.MouseEvent) {
 	if t.onHovered != nil {
 		t.hover = true
@@ -74,6 +78,12 @@ func (t *TappableLabel) MouseOut() {
 	t.Refresh()
 }
 
+func (t *TappableLabel) SetOnHovered(f func()) {
+	t.onHovered = f
+}
+
+func (t *TappableLabel) SetMouseOut(f func()) {}
+
 func (t *TappableLabel) Refresh() {
 	if t.hover {
 		t.Label.TextStyle = fyne.TextStyle{Bold: true}
@@ -83,16 +93,4 @@ func (t *TappableLabel) Refresh() {
 		t.Label.Importance = widget.MediumImportance
 	}
 	t.Label.Refresh()
-}
-
-func (t *TappableLabel) SetOnHovered(f func()) {
-	t.onHovered = f
-}
-
-func (t *TappableLabel) SetMouseOut(f func()) {
-
-}
-
-func (t *TappableLabel) Tapped(_ *fyne.PointEvent) {
-	t.onTapped()
 }

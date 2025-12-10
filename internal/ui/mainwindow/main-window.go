@@ -72,8 +72,8 @@ func NewMainWindow(name string) *MainWindow2 {
 	editColumn := &EditColumn{
 		container:     container.NewVBox(),
 		edit2:         container.NewVBox(),
-		cancelEditKey: widget.NewButton("Cancel", nil),
-		saveEditKey:   widget.NewButton("Save", nil),
+		cancelEditKey: widget.NewButton(ids.CancelButtonEdit, nil),
+		saveEditKey:   widget.NewButton(ids.SaveButtonEdit, nil),
 		valueEntry:    widget.NewEntry(),
 	}
 
@@ -101,12 +101,6 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 
 	m.Objects.spacer = widget.NewLabel("")
 
-	// key top window for colunm keys
-	m.RightColumn.keyRightColunm = widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-
-	// value top window for colunm values
-	m.RightColumn.valueRightColunm = widget.NewLabelWithStyle("value", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
-
 	// name bottom project in colunm right
 	m.RightColumn.nameButtonProject = widget.NewLabelWithStyle(
 		"",
@@ -114,28 +108,27 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		fyne.TextStyle{Bold: true},
 	)
 
-	m.EditColumn.saveEditKey = widget.NewButton("Save", func() {})
 	m.EditColumn.saveEditKey.Disable()
 
-	m.EditColumn.cancelEditKey = widget.NewButton("Cancle", func() {
+	m.EditColumn.cancelEditKey.OnTapped = func() {
 		utils.CheckCondition(m.EditColumn.edit2)
-	})
+	}
 
-	m.RightColumn.searchButton = widget.NewButton("Search", func() {
+	m.RightColumn.searchButton.OnTapped = func() {
 		m.SearchKeyUi()
-	})
+	}
 
 	m.EditColumn.container = container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), m.SaveAndCancle(), nil, nil, m.EditColumn.edit2)
 
-	m.RightColumn.buttonAdd = widget.NewButton("Add", func() {
+	m.RightColumn.buttonAdd.OnTapped = func() {
 		m.OpenAddDialog()
-	})
+	}
 	m.RightColumn.buttonAdd.Disable()
 	m.RightColumn.searchButton.Disable()
 
-	m.RightColumn.buttonDelete = widget.NewButton("Delete", func() {
+	m.RightColumn.buttonDelete.OnTapped = func() {
 		m.DeleteKeyUi()
-	})
+	}
 
 	buttonsVisible := false
 
@@ -167,20 +160,17 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		m.LeftColumn.bottomDatabase = append(m.LeftColumn.bottomDatabase, m.LeftColumn.leveldbButton)
 	}
 
-	m.LeftColumn.pluss = widget.NewButton("+", func() {
+	m.LeftColumn.pluss.OnTapped = func() {
 		if buttonsVisible {
-
 			m.LeftColumn.toggleButtonsContainer.Objects = nil
 		} else {
-
 			for _, m2 := range m.LeftColumn.bottomDatabase {
-
 				m.LeftColumn.toggleButtonsContainer.Add(m2)
 			}
 		}
 		buttonsVisible = !buttonsVisible
 		m.LeftColumn.toggleButtonsContainer.Refresh()
-	})
+	}
 
 	m.Window.SetCloseIntercept(func() {
 		dialog.ShowConfirm("close?", "Do you want to go out?", func(confirm bool) {
