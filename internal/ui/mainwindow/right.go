@@ -6,8 +6,6 @@ import (
 	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/ui/labelkv"
 	"image/color"
-	"runtime"
-	"runtime/debug"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -66,15 +64,10 @@ func (r *MainWindow2) UpdatePage() {
 	if r.RightColumn.lastPage < variable.CurrentPage {
 
 		if len(r.RightColumn.orgdata) >= variable.ItemsPerPage*3 {
-			tmp := make([]dbpak.KVData, len(r.RightColumn.orgdata)-len(data))
-			copy(tmp, r.RightColumn.orgdata[len(data):])
-			r.RightColumn.orgdata = tmp
+			r.RightColumn.orgdata = r.RightColumn.orgdata[len(data):]
 		}
 
-		tmp := make([]dbpak.KVData, len(r.RightColumn.orgdata)+len(data))
-		copy(tmp, r.RightColumn.orgdata)
-		copy(tmp[len(r.RightColumn.orgdata):], data)
-		r.RightColumn.orgdata = tmp
+		r.RightColumn.orgdata = append(r.RightColumn.orgdata, data...)
 
 	} else {
 
@@ -113,10 +106,6 @@ func (r *MainWindow2) UpdatePage() {
 		r.RightColumn.container.Objects = n
 
 	}
-	arrayContainer = nil
-	data = nil
-	runtime.GC()
-	debug.FreeOSMemory()
 	r.RightColumn.container.Refresh()
 	r.RightColumn.lastPage = variable.CurrentPage
 }
