@@ -134,5 +134,8 @@ func applyPageShift(objects []fyne.CanvasObject, arrayContainer []fyne.CanvasObj
 		}
 	}
 
+	arrayContainer = nil
+	runtime.GC()
+	debug.FreeOSMemory()
 	return objects
 }
