@@ -232,12 +232,10 @@ func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
 		} else if p.Y == maxScroll && variable.ItemsAdded && !variable.ResultSearch {
 
 			variable.CurrentPage++
-			numberLast := len(mi.RightColumn.container.Objects)
 			mi.UpdatePage()
 			rightColumnScrollable.Offset.Y = maxScroll / 2
 
-			if len(mi.RightColumn.container.Objects) > (variable.ItemsPerPage)*3 {
-				mi.RightColumn.container.Objects = mi.RightColumn.container.Objects[len(mi.RightColumn.container.Objects)-numberLast:]
+			if len(mi.RightColumn.container.Objects) == (variable.ItemsPerPage)*3 {
 				up = true
 			}
 

@@ -97,21 +97,42 @@ func (r *MainWindow2) UpdatePage() {
 		buttonRow := container.NewGridWithColumns(2, keyLabel, valueLabel)
 		arrayContainer = append(arrayContainer, buttonRow)
 	}
+
 	if r.RightColumn.lastPage > variable.CurrentPage {
-
-		arrayContainer = append(arrayContainer, r.RightColumn.container.Objects...)
-		r.RightColumn.container.Objects = arrayContainer
-
+		r.RightColumn.container.Objects = applyPageShift(r.RightColumn.container.Objects, arrayContainer, true, variable.ItemsPerPage*3)
 	} else {
-
-		n := append(r.RightColumn.container.Objects, arrayContainer...)
-		r.RightColumn.container.Objects = n
-
+		r.RightColumn.container.Objects = applyPageShift(r.RightColumn.container.Objects, arrayContainer, false, variable.ItemsPerPage*3)
 	}
+
 	arrayContainer = nil
 	data = nil
 	runtime.GC()
 	debug.FreeOSMemory()
 	r.RightColumn.container.Refresh()
 	r.RightColumn.lastPage = variable.CurrentPage
+}
+
+// ApplyPageShift adds or removes items from the objects slice based on the goUp flag.
+// If goUp is true, it prepends and if goUp false, it appends the arrayContainer to objects,
+func applyPageShift(objects []fyne.CanvasObject, arrayContainer []fyne.CanvasObject, goUp bool, maxItems int) []fyne.CanvasObject {
+	isFull := len(objects) == maxItems
+	cnt := len(arrayContainer)
+
+	if goUp {
+		if isFull {
+			copy(objects[cnt:], objects[:len(objects)-cnt])
+			copy(objects[:cnt], arrayContainer)
+		} else {
+			objects = append(arrayContainer, objects...)
+		}
+	} else {
+		if isFull {
+			copy(objects[:len(objects)-cnt], objects[cnt:])
+			copy(objects[len(objects)-cnt:], arrayContainer)
+		} else {
+			objects = append(objects, arrayContainer...)
+		}
+	}
+
+	return objects
 }
