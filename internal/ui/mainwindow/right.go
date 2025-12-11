@@ -6,6 +6,8 @@ import (
 	"DatabaseDB/internal/logic"
 	"DatabaseDB/internal/ui/labelkv"
 	"image/color"
+	"runtime"
+	"runtime/debug"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -106,6 +108,10 @@ func (r *MainWindow2) UpdatePage() {
 		r.RightColumn.container.Objects = n
 
 	}
+	arrayContainer = nil
+	data = nil
+	runtime.GC()
+	debug.FreeOSMemory()
 	r.RightColumn.container.Refresh()
 	r.RightColumn.lastPage = variable.CurrentPage
 }
