@@ -20,26 +20,6 @@ import (
 
 var ValueImage []byte
 
-type TappableLabel struct {
-	widget.Label
-	onTapped func()
-}
-
-func NewTappableLabel(text string, tapped func()) *TappableLabel {
-	labelee := &TappableLabel{
-		Label: widget.Label{
-			Text: text,
-		},
-		onTapped: tapped,
-	}
-	labelee.ExtendBaseWidget(labelee)
-	return labelee
-}
-
-func (t *TappableLabel) Tapped(_ *fyne.PointEvent) {
-	t.onTapped()
-}
-
 func TruncateString(input string, length int) string {
 	nameData := input
 	if len(nameData) > length {

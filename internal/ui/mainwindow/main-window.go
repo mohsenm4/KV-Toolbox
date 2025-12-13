@@ -2,7 +2,6 @@ package mainwindow
 
 import (
 	variable "DatabaseDB"
-	"fmt"
 
 	dbpak "DatabaseDB/internal/Databaces"
 	Filterbadger "DatabaseDB/internal/filterdatabase/badger"
@@ -10,6 +9,8 @@ import (
 	Filterpebbledb "DatabaseDB/internal/filterdatabase/pebble"
 	"DatabaseDB/internal/pref"
 	"DatabaseDB/internal/ui/ids"
+	"DatabaseDB/internal/ui/labelkv"
+	"DatabaseDB/internal/ui/them"
 	"DatabaseDB/internal/utils"
 
 	"fyne.io/fyne/v2"
@@ -17,13 +18,8 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
-)
 
-const (
-	ThemeDark   = "dark"
-	ThemeLight  = "light"
-	ThemeCustom = "custom"
+	"fyne.io/fyne/v2/widget"
 )
 
 type MainWindow2 struct {
@@ -66,7 +62,7 @@ func NewMainWindow(name string) *MainWindow2 {
 		buttonAdd:            widget.NewButton(ids.AddButtonMain, nil),
 		keyRightColunm:       widget.NewLabelWithStyle(ids.KeyRightColunm, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		valueRightColunm:     widget.NewLabelWithStyle(ids.ValueRightColunm, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
-		lastLableKeyAndValue: utils.NewTappableLabel("", nil), // dinamic last label key and value
+		lastLableKeyAndValue: labelkv.NewTappableLabel(""), // dinamic last label key and value
 		lastStart:            &[]byte{},
 		lastEnd:              &[]byte{},
 		lastPage:             0,
@@ -76,8 +72,8 @@ func NewMainWindow(name string) *MainWindow2 {
 	editColumn := &EditColumn{
 		container:     container.NewVBox(),
 		edit2:         container.NewVBox(),
-		cancelEditKey: widget.NewButton("Cancel", nil),
-		saveEditKey:   widget.NewButton("Save", nil),
+		cancelEditKey: widget.NewButton(ids.CancelButtonEdit, nil),
+		saveEditKey:   widget.NewButton(ids.SaveButtonEdit, nil),
 		valueEntry:    widget.NewEntry(),
 	}
 
@@ -103,21 +99,7 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 	m.Window = myApp.NewWindow(m.NameWindow)
 	m.Window.SetMaster()
 
-	mytheme := m.Pref.LoadTheme(pref.KeyTheme)
-
-	if mytheme == ThemeDark {
-		myApp.Settings().SetTheme(theme.DarkTheme())
-	} else if mytheme == ThemeLight {
-		myApp.Settings().SetTheme(theme.LightTheme())
-	}
-
 	m.Objects.spacer = widget.NewLabel("")
-
-	// key top window for colunm keys
-	m.RightColumn.keyRightColunm = widget.NewLabelWithStyle("key", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-
-	// value top window for colunm values
-	m.RightColumn.valueRightColunm = widget.NewLabelWithStyle("value", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 
 	// name bottom project in colunm right
 	m.RightColumn.nameButtonProject = widget.NewLabelWithStyle(
@@ -126,28 +108,27 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		fyne.TextStyle{Bold: true},
 	)
 
-	m.EditColumn.saveEditKey = widget.NewButton("Save", func() {})
 	m.EditColumn.saveEditKey.Disable()
 
-	m.EditColumn.cancelEditKey = widget.NewButton("Cancle", func() {
+	m.EditColumn.cancelEditKey.OnTapped = func() {
 		utils.CheckCondition(m.EditColumn.edit2)
-	})
+	}
 
-	m.RightColumn.searchButton = widget.NewButton("Search", func() {
+	m.RightColumn.searchButton.OnTapped = func() {
 		m.SearchKeyUi()
-	})
+	}
 
 	m.EditColumn.container = container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), m.SaveAndCancle(), nil, nil, m.EditColumn.edit2)
 
-	m.RightColumn.buttonAdd = widget.NewButton("Add", func() {
+	m.RightColumn.buttonAdd.OnTapped = func() {
 		m.OpenAddDialog()
-	})
+	}
 	m.RightColumn.buttonAdd.Disable()
 	m.RightColumn.searchButton.Disable()
 
-	m.RightColumn.buttonDelete = widget.NewButton("Delete", func() {
+	m.RightColumn.buttonDelete.OnTapped = func() {
 		m.DeleteKeyUi()
-	})
+	}
 
 	buttonsVisible := false
 
@@ -179,27 +160,24 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 		m.LeftColumn.bottomDatabase = append(m.LeftColumn.bottomDatabase, m.LeftColumn.leveldbButton)
 	}
 
-	m.LeftColumn.pluss = widget.NewButton("+", func() {
+	m.LeftColumn.pluss.OnTapped = func() {
 		if buttonsVisible {
-
 			m.LeftColumn.toggleButtonsContainer.Objects = nil
 		} else {
-
 			for _, m2 := range m.LeftColumn.bottomDatabase {
-
 				m.LeftColumn.toggleButtonsContainer.Add(m2)
 			}
 		}
 		buttonsVisible = !buttonsVisible
 		m.LeftColumn.toggleButtonsContainer.Refresh()
-	})
+	}
 
 	m.Window.SetCloseIntercept(func() {
 		dialog.ShowConfirm("close?", "Do you want to go out?", func(confirm bool) {
 			if confirm {
 				m.Pref.SaveDatabase(m.Pref.ListDB, pref.KeyListDB)
 
-				keyTheme := getThemeKey(myApp)
+				keyTheme := them.GetThemeKey(myApp)
 				m.Pref.SaveTheme(keyTheme, pref.KeyTheme)
 				m.Window.Close()
 			}
@@ -226,9 +204,6 @@ func (m *MainWindow2) LeftColumn2() fyne.CanvasObject {
 func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
 	if mi.RightColumn.container == nil {
 		mi.RightColumn.container = container.NewVBox()
-	}
-	if mi.TopRightColumn() == nil {
-		fmt.Println("")
 	}
 	rightColumnScrollable := container.NewVScroll(mi.RightColumn.container)
 
@@ -257,12 +232,10 @@ func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
 		} else if p.Y == maxScroll && variable.ItemsAdded && !variable.ResultSearch {
 
 			variable.CurrentPage++
-			numberLast := len(mi.RightColumn.container.Objects)
 			mi.UpdatePage()
 			rightColumnScrollable.Offset.Y = maxScroll / 2
 
-			if len(mi.RightColumn.container.Objects) > (variable.ItemsPerPage)*3 {
-				mi.RightColumn.container.Objects = mi.RightColumn.container.Objects[len(mi.RightColumn.container.Objects)-numberLast:]
+			if len(mi.RightColumn.container.Objects) == (variable.ItemsPerPage)*3 {
 				up = true
 			}
 
@@ -295,20 +268,4 @@ func (m *MainWindow2) ColumnContent() fyne.CanvasObject {
 	columns.SetOffset(0.10)
 
 	return columns
-}
-
-func getThemeKey(app fyne.App) string {
-	t := app.Settings().Theme()
-	currentBG := t.Color(theme.ColorNameBackground, app.Settings().ThemeVariant())
-	darkBG := theme.DarkTheme().Color(theme.ColorNameBackground, app.Settings().ThemeVariant())
-	lightBG := theme.LightTheme().Color(theme.ColorNameBackground, app.Settings().ThemeVariant())
-
-	switch {
-	case currentBG == darkBG:
-		return ThemeDark
-	case currentBG == lightBG:
-		return ThemeLight
-	default:
-		return ThemeCustom
-	}
 }

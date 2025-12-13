@@ -16,3 +16,6 @@ services
 *.exe
 .codegpt
 *.app
+cmd/t
+cmd/KV-Toolbox/s/
+/cmd/KV-Toolbox/data1GIG
