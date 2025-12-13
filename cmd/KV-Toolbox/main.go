@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+
 	myApp := app.NewWithID("com.DatabaseDB.KV-Toolbox")
 
 	window := mainwindow.NewMainWindow("ManageDB")
@@ -19,4 +20,5 @@ func main() {
 
 	them.SetThemeByKey(myApp, mytheme)
 	window.MainWindow(myApp)
+
 }
