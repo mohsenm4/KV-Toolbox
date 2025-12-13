@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
 	"github.com/gabriel-vasile/mimetype"
 )
@@ -57,6 +58,7 @@ func (r *MainWindow2) handleLabelClick(label *labelkv.TappableLabel, editType la
 	} else {
 		finalValue, displayText = r.processKey(key)
 	}
+	displayText = utils.TruncateString(displayText, 10)
 	Base = string(finalValue)
 
 	if err != nil {
@@ -64,6 +66,7 @@ func (r *MainWindow2) handleLabelClick(label *labelkv.TappableLabel, editType la
 		return
 	}
 
+	r.EditColumn.SetLabelEdit(displayText, editType)
 	err = r.AddObjectEdit(editType, key, finalValue)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -130,9 +133,11 @@ func (r *MainWindow2) AddObjectEdit(editType labelkv.EditType, key, value []byte
 func (r *MainWindow2) resetLastSelectedLabel(current *labelkv.TappableLabel) {
 	if r.RightColumn.lastLableKeyAndValue != nil {
 		r.RightColumn.lastLableKeyAndValue.Importance = widget.MediumImportance
+		r.RightColumn.lastLableKeyAndValue.Label.TextStyle = fyne.TextStyle{Bold: false}
 		r.RightColumn.lastLableKeyAndValue.Refresh()
 	}
 	current.Importance = widget.HighImportance
+	current.Label.TextStyle = fyne.TextStyle{Bold: true}
 	current.Refresh()
 	r.RightColumn.lastLableKeyAndValue = current
 }

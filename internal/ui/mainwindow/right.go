@@ -120,15 +120,23 @@ func applyPageShift(objects []fyne.CanvasObject, arrayContainer []fyne.CanvasObj
 
 	if goUp {
 		if isFull {
-			copy(objects[cnt:], objects[:len(objects)-cnt])
-			copy(objects[:cnt], arrayContainer)
+			for i := len(objects) - 1; i >= cnt; i-- {
+				objects[i] = objects[i-cnt]
+			}
+			for i := 0; i < cnt; i++ {
+				objects[i] = arrayContainer[i]
+			}
 		} else {
 			objects = append(arrayContainer, objects...)
 		}
 	} else {
 		if isFull {
-			copy(objects[:len(objects)-cnt], objects[cnt:])
-			copy(objects[len(objects)-cnt:], arrayContainer)
+			for i := 0; i < len(objects)-cnt; i++ {
+				objects[i] = objects[i+cnt]
+			}
+			for i := 0; i < cnt; i++ {
+				objects[len(objects)-cnt+i] = arrayContainer[i]
+			}
 		} else {
 			objects = append(objects, arrayContainer...)
 		}
