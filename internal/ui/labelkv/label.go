@@ -21,6 +21,7 @@ type TappableLabel struct {
 	editType  EditType
 	keyLabel  *TappableLabel
 	key       []byte
+	selected  bool
 }
 
 func (t *TappableLabel) SetKeyLabel(key *TappableLabel) {
@@ -62,6 +63,10 @@ func (t *TappableLabel) SetTopped(f func()) {
 }
 
 func (t *TappableLabel) Tapped(_ *fyne.PointEvent) {
+	if t.selected {
+		return
+	}
+	t.selected = true
 	t.onTapped()
 }
 
@@ -75,6 +80,10 @@ func (t *TappableLabel) MouseIn(_ *desktop.MouseEvent) {
 func (t *TappableLabel) MouseMoved(_ *desktop.MouseEvent) {}
 func (t *TappableLabel) MouseOut() {
 	t.hover = false
+	if t.selected {
+		t.selected = false
+		return
+	}
 	t.Refresh()
 }
 
