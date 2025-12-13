@@ -9,4 +9,5 @@ const (
 	ValueRightColunm = "Value"
 	CancelButtonEdit = "Cancle"
 	SaveButtonEdit   = "Save"
+	EditLabel        = "Edit"
 )

@@ -57,6 +57,7 @@ func (r *MainWindow2) handleLabelClick(label *labelkv.TappableLabel, editType la
 	} else {
 		finalValue, displayText = r.processKey(key)
 	}
+	displayText = utils.TruncateString(displayText, 10)
 	Base = string(finalValue)
 
 	if err != nil {
@@ -64,6 +65,7 @@ func (r *MainWindow2) handleLabelClick(label *labelkv.TappableLabel, editType la
 		return
 	}
 
+	r.EditColumn.SetLabelEdit(displayText, editType)
 	err = r.AddObjectEdit(editType, key, finalValue)
 	if err != nil {
 		fmt.Println(err.Error())

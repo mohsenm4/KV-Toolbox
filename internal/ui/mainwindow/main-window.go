@@ -75,6 +75,7 @@ func NewMainWindow(name string) *MainWindow2 {
 		cancelEditKey: widget.NewButton(ids.CancelButtonEdit, nil),
 		saveEditKey:   widget.NewButton(ids.SaveButtonEdit, nil),
 		valueEntry:    widget.NewEntry(),
+		editLabel:     widget.NewLabelWithStyle(ids.EditLabel, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 	}
 
 	object := &ObjectsMainWindow{
@@ -117,8 +118,6 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 	m.RightColumn.searchButton.OnTapped = func() {
 		m.SearchKeyUi()
 	}
-
-	m.EditColumn.container = container.NewBorder(widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), m.SaveAndCancle(), nil, nil, m.EditColumn.edit2)
 
 	m.RightColumn.buttonAdd.OnTapped = func() {
 		m.OpenAddDialog()
@@ -245,7 +244,7 @@ func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
 
 	m := container.NewVScroll(mi.EditColumn.edit2)
 	mi.EditColumn.container = container.NewBorder(
-		widget.NewLabelWithStyle("Edit", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		mi.EditColumn.editLabel,
 		mi.SaveAndCancle(),
 		nil, nil, m,
 	)

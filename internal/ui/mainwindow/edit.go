@@ -1,6 +1,8 @@
 package mainwindow
 
 import (
+	"DatabaseDB/internal/ui/ids"
+	"DatabaseDB/internal/ui/labelkv"
 	"bytes"
 	"fmt"
 	"io/ioutil"
@@ -20,6 +22,7 @@ type EditColumn struct {
 	saveEditKey   *widget.Button
 	valueEntry    *widget.Entry
 	finishValue   string
+	editLabel     *widget.Label
 }
 
 func (e *MainWindow2) SaveAndCancle() *fyne.Container {
@@ -34,6 +37,12 @@ func (e *MainWindow2) ConfigureEntry(content string) *widget.Entry {
 	scrollableEntry.SetMinSize(fyne.NewSize(200, 300))
 	e.EditColumn.edit2.Add(scrollableEntry)
 	return entry
+}
+
+func (m *EditColumn) SetLabelEdit(value string, editType labelkv.EditType) {
+	label := fmt.Sprintf("%s %s : %s", ids.EditLabel, editType, value)
+	m.editLabel.SetText(label)
+	return
 }
 
 var BaseImage []byte
