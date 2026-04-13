@@ -92,7 +92,7 @@ func (r *MainWindow2) SearchKeyUi() {
 		}
 
 		d.Hide()
-		variable.ResultSearch = true
+		variable.SetResultSearch(true)
 	}
 
 	d.Show()

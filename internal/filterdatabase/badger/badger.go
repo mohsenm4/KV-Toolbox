@@ -2,8 +2,8 @@ package Filterbadger
 
 import (
 	"DatabaseDB/internal/filterdatabase"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 
 	"fyne.io/fyne/v2/dialog"
@@ -17,7 +17,7 @@ func NewFileterBadger() filterdatabase.FilterData {
 }
 
 func (l *NameDatabaseBadger) FilterFile(path string) bool {
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		log.Println("Error reading folder:", err)
 		return false

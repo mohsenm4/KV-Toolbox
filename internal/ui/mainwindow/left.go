@@ -51,15 +51,15 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 		l.LeftColumn.previousClose = closeButton
 		l.LeftColumn.previousRefreshButton = refreshButton
 
-		variable.ItemsAdded = true
+		variable.SetItemsAdded(true)
 		utils.Checkdatabace(path, l.TypeDB)
 		l.RightColumn.buttonAdd.Enable()
 		l.RightColumn.searchButton.Enable()
 		l.RightColumn.buttonDelete.Enable()
 		variable.FolderPath = path
 		l.RightColumn.lastEnd = nil
-		variable.ResultSearch = false
-		variable.CurrentPage = 1
+		variable.SetResultSearch(false)
+		variable.SetCurrentPage(1)
 		l.RightColumn.lastPage = 0
 		variable.PreviousOffsetY = 0
 		l.RightColumn.lastStart = nil
@@ -106,15 +106,15 @@ func (l *MainWindow2) ProjectButton(inputText string, lastColumnContent *fyne.Co
 
 		if l.RightColumn.nameButtonProject.Text == inputText+" - "+l.TypeDB {
 
-			variable.ItemsAdded = true
+			variable.SetItemsAdded(true)
 			utils.Checkdatabace(path, l.TypeDB)
 			l.RightColumn.buttonAdd.Enable()
 			l.RightColumn.searchButton.Enable()
 			l.RightColumn.buttonDelete.Enable()
 			variable.FolderPath = path
 			l.RightColumn.lastEnd = nil
-			variable.ResultSearch = false
-			variable.CurrentPage = 1
+			variable.SetResultSearch(false)
+			variable.SetCurrentPage(1)
 			l.RightColumn.lastPage = 0
 			variable.PreviousOffsetY = 0
 			l.RightColumn.lastStart = nil
@@ -137,15 +137,15 @@ func (l *MainWindow2) SetupLastColumn() *fyne.Container {
 
 	dataJson, err := l.Pref.LoadDatabase(pref.KeyListDB)
 	if err != nil {
-		log.Fatal("Error loading JSON data:", err)
+		log.Println("Error loading JSON data:", err)
 	} else {
 		for _, project := range dataJson {
 			l.TypeDB = project.Databace
 			buttonContainer := l.ProjectButton(project.Name, lastColumnContent, project.FileAddress)
 			lastColumnContent.Add(buttonContainer)
 		}
+		l.Pref.ListDB = dataJson
 	}
-	l.Pref.ListDB = dataJson
 	return lastColumnContent
 }
 
