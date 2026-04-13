@@ -2,13 +2,13 @@ package sharedfunc
 
 import (
 	"fmt"
-	"os"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 )
 
 func FormatFilesDatabase(path string) bool {
-	files, err := os.ReadDir(path)
+	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		fmt.Println("Error opening folder:", err)
 		return false

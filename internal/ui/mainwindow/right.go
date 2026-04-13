@@ -63,7 +63,7 @@ func (r *MainWindow2) UpdatePage() {
 		return
 	}
 
-	if r.RightColumn.lastPage < variable.GetCurrentPage() {
+	if r.RightColumn.lastPage < variable.CurrentPage {
 
 		if len(r.RightColumn.orgdata) >= variable.ItemsPerPage*3 {
 			r.RightColumn.orgdata = r.RightColumn.orgdata[len(data):]
@@ -98,7 +98,7 @@ func (r *MainWindow2) UpdatePage() {
 		arrayContainer = append(arrayContainer, buttonRow)
 	}
 
-	if r.RightColumn.lastPage > variable.GetCurrentPage() {
+	if r.RightColumn.lastPage > variable.CurrentPage {
 		r.RightColumn.container.Objects = applyPageShift(r.RightColumn.container.Objects, arrayContainer, true, variable.ItemsPerPage*3)
 	} else {
 		r.RightColumn.container.Objects = applyPageShift(r.RightColumn.container.Objects, arrayContainer, false, variable.ItemsPerPage*3)
@@ -109,7 +109,7 @@ func (r *MainWindow2) UpdatePage() {
 	runtime.GC()
 	debug.FreeOSMemory()
 	r.RightColumn.container.Refresh()
-	r.RightColumn.lastPage = variable.GetCurrentPage()
+	r.RightColumn.lastPage = variable.CurrentPage
 }
 
 // ApplyPageShift adds or removes items from the objects slice based on the goUp flag.

@@ -35,7 +35,7 @@ func SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
 	var values [][]byte
 
 	key := utils.CleanInput(valueEntry)
-	keys, err := variable.GetCurrentDBClient().Search([]byte(key))
+	err, keys := variable.CurrentDBClient.Search([]byte(key))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -45,7 +45,7 @@ func SearchDatabase(valueEntry string) ([][]byte, [][]byte, error) {
 	}
 
 	for _, item := range keys {
-		value, err := variable.GetCurrentDBClient().Get(item)
+		value, err := variable.CurrentDBClient.Get(item)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -62,21 +62,27 @@ func DeleteKeyLogic(valueEntry string) error {
 
 	key := utils.CleanInput(valueEntry)
 
-	value, err := variable.GetCurrentDBClient().Get([]byte(key))
+	value, err := variable.CurrentDBClient.Get([]byte(key))
 	if err != nil {
-		return fmt.Errorf("failed to get key from database: %w", err)
+		fmt.Println("error : delete func logic for get key in databace")
 	}
-	if value == nil {
-		return fmt.Errorf("this key does not exist in the database")
-	}
+	if value != nil {
 
-	return variable.GetCurrentDBClient().Delete([]byte(key))
+		err = variable.CurrentDBClient.Delete([]byte(key))
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		return fmt.Errorf("this key does not exist in the database")
+		//dialog.ShowInformation("Error", "This key does not exist in the database", editWindow)
+	}
 }
 
 func AddKeyLogic(inputKey string, valueFinish []byte) error {
 	key := utils.CleanInput(inputKey)
 
-	value, err := variable.GetCurrentDBClient().Get([]byte(key))
+	value, err := variable.CurrentDBClient.Get([]byte(key))
 	if err != nil && !errors.Is(err, dberr.ErrKeyNotFound) {
 		return fmt.Errorf("failed to get key from database: %w", err)
 	}
@@ -85,7 +91,7 @@ func AddKeyLogic(inputKey string, valueFinish []byte) error {
 		return fmt.Errorf("key '%s' already exists in the database", key)
 	}
 
-	if err := variable.GetCurrentDBClient().Add([]byte(key), valueFinish); err != nil {
+	if err := variable.CurrentDBClient.Add([]byte(key), valueFinish); err != nil {
 		return fmt.Errorf("failed to add key '%s': %w", key, err)
 	}
 
@@ -96,7 +102,7 @@ func QueryKey(inputKey string) ([]byte, error) {
 
 	key := utils.CleanInput(inputKey)
 
-	value, err := variable.GetCurrentDBClient().Get([]byte(key))
+	value, err := variable.CurrentDBClient.Get([]byte(key))
 	if err != nil {
 		return nil, err
 	}
@@ -106,32 +112,23 @@ func QueryKey(inputKey string) ([]byte, error) {
 
 func SaveValue(key, value []byte) error {
 
-	_, err := variable.GetCurrentDBClient().Get(key)
-	if err != nil {
-		return fmt.Errorf("key not found, cannot update value: %w", err)
-	}
-	return variable.GetCurrentDBClient().Add(key, value)
+	return variable.CurrentDBClient.Add(key, value)
 }
 
 func UpdateKey(oldKey, newKey []byte) (string, error) {
 
-	valueBefore, err := variable.GetCurrentDBClient().Get(oldKey)
+	valueBefore, err := variable.CurrentDBClient.Get(oldKey)
 	if err != nil {
-		return "", fmt.Errorf("failed to get old key: %w", err)
+		return "", err
+	}
+
+	if err := variable.CurrentDBClient.Delete(oldKey); err != nil {
+		return "", err
 	}
 
 	newKey = []byte(utils.CleanInput(string(newKey)))
-
-	// Add new key first — if this fails, old key is still intact
-	if err := variable.GetCurrentDBClient().Add(newKey, valueBefore); err != nil {
-		return "", fmt.Errorf("failed to add new key: %w", err)
-	}
-
-	// Delete old key only after new key is safely written
-	if err := variable.GetCurrentDBClient().Delete(oldKey); err != nil {
-		// Rollback: remove the new key we just added
-		_ = variable.GetCurrentDBClient().Delete(newKey)
-		return "", fmt.Errorf("failed to delete old key: %w", err)
+	if err := variable.CurrentDBClient.Add(newKey, valueBefore); err != nil {
+		return "", err
 	}
 
 	return string(newKey), nil
@@ -145,7 +142,7 @@ func FetchPageData(lastStart *[]byte, lastEnd *[]byte, lastPage int, Orgdata []d
 	if lastEnd == nil && lastStart == nil {
 		Orgdata = nil
 	}
-	if lastPage < variable.GetCurrentPage() {
+	if lastPage < variable.CurrentPage {
 
 		//next page
 
@@ -157,10 +154,10 @@ func FetchPageData(lastStart *[]byte, lastEnd *[]byte, lastPage int, Orgdata []d
 
 		if len(data) == variable.ItemsPerPage+1 {
 			data = data[:variable.ItemsPerPage]
-			variable.SetItemsAdded(true)
+			variable.ItemsAdded = true
 
 		} else {
-			variable.SetItemsAdded(false)
+			variable.ItemsAdded = false
 
 		}
 		if len(data) == 0 {
@@ -176,7 +173,7 @@ func FetchPageData(lastStart *[]byte, lastEnd *[]byte, lastPage int, Orgdata []d
 
 		if len(data) == variable.ItemsPerPage+1 {
 			data = data[1:]
-			variable.SetItemsAdded(true)
+			variable.ItemsAdded = true
 		}
 		if len(data) == 0 {
 			return data, err
@@ -205,7 +202,7 @@ func RangeCursorRead(start, end *[]byte, count int) ([]dbpak.KVData, error) {
 	var iterms []dbpak.KVData
 	for i := 0; i < count; i++ {
 
-		data, err := variable.GetCurrentDBClient().Read(start, end, 1)
+		err, data := variable.CurrentDBClient.Read(start, end, 1)
 		if err != nil {
 			return nil, err
 		}

@@ -3,12 +3,11 @@ package utils
 
 import (
 	variable "DatabaseDB"
-	dbpak "DatabaseDB/internal/Databaces"
 	"DatabaseDB/internal/Databaces/PebbleDB"
 	badgerDB "DatabaseDB/internal/Databaces/badger"
 	leveldbb "DatabaseDB/internal/Databaces/leveldb"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -43,27 +42,29 @@ func CheckCondition(rightColumnContent *fyne.Container) {
 }
 
 func Checkdatabace(test string, nameDatabace string) error {
-	var newClient dbpak.DBClient
+	//parts := strings.Split(test, "|-|")
+
+	if variable.CurrentDBClient != nil {
+		variable.CurrentDBClient.Close()
+	}
 
 	switch nameDatabace {
 	case "levelDB":
-		newClient = leveldbb.NewDataBaseLeveldb(test)
+		variable.CurrentDBClient = leveldbb.NewDataBaseLeveldb(test)
 	case "Pebble":
-		newClient = PebbleDB.NewDataBasePebble(test)
+		variable.CurrentDBClient = PebbleDB.NewDataBasePebble(test)
 	case "Badger":
-		newClient = badgerDB.NewDataBaseBadger(test)
+		variable.CurrentDBClient = badgerDB.NewDataBaseBadger(test)
 	case "Redis":
-		//newClient = Redisdb.NewDataBaseRedis(parts[0], parts[1], parts[2])
-	}
 
-	variable.CloseAndSetCurrentDBClient(newClient)
-
-	if err := variable.GetCurrentDBClient().Open(); err != nil {
-		return fmt.Errorf("failed to open database: %w", err)
+		//variable.CurrentDBClient = Redisdb.NewDataBaseRedis(parts[0], parts[1], parts[2])
 	}
+	variable.CurrentDBClient.Open()
 
 	if nameDatabace != "Redis" {
+
 		if _, err := os.Stat(test); os.IsNotExist(err) && !variable.CreatDatabase {
+
 			return err
 		}
 	}
@@ -91,7 +92,7 @@ func ImageShow(key []byte, value []byte, mainContainer *fyne.Container, editWind
 				fmt.Println("Error opening folder or no folder selected")
 				return
 			}
-			valueFinish, err := io.ReadAll(dir)
+			valueFinish, err := ioutil.ReadAll(dir)
 			if err != nil {
 				fmt.Print("Error reading file:", err)
 				return

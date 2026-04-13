@@ -137,13 +137,12 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 	m.Objects.spacer.Resize(fyne.NewSize(0, 30))
 
 	for _, name := range variable.NameDatabase {
-		dbName := name // کپی محلی برای capture صحیح در closure
 
-		m.LeftColumn.leveldbButton = widget.NewButton(dbName, func() {
+		m.LeftColumn.leveldbButton = widget.NewButton(name, func() {
 			m.LeftColumn.toggleButtonsContainer.Objects = nil
 			buttonsVisible = false
-			m.TypeDB = dbName
-			switch dbName {
+			m.TypeDB = name
+			switch name {
 			case "levelDB":
 				variable.NameData = FilterLeveldb.NewFileterLeveldb()
 			case "Pebble":
@@ -152,9 +151,10 @@ func (m *MainWindow2) MainWindow(myApp fyne.App) {
 				variable.NameData = Filterbadger.NewFileterBadger()
 				//case "Redis":
 				//	variable.NameData = Filterredis.NewFileterRedis()
+
 			}
 
-			m.FormPasteDatabase(dbName)
+			m.FormPasteDatabase(name)
 		})
 		m.LeftColumn.bottomDatabase = append(m.LeftColumn.bottomDatabase, m.LeftColumn.leveldbButton)
 	}
@@ -211,11 +211,11 @@ func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
 	rightColumnScrollable.OnScrolled = func(p fyne.Position) {
 		maxScroll := mi.RightColumn.container.MinSize().Height - rightColumnScrollable.Size().Height
 
-		if up && p.Y == 0 && !variable.GetResultSearch() {
-			newPage := variable.DecrementCurrentPage()
-			if newPage < 3 {
+		if up && p.Y == 0 && !variable.ResultSearch {
+			variable.CurrentPage--
+			if variable.CurrentPage < 3 {
 				up = false
-				variable.SetCurrentPage(3)
+				variable.CurrentPage = 3
 				return
 			}
 			numberLast := len(mi.RightColumn.container.Objects)
@@ -226,11 +226,11 @@ func (mi *MainWindow2) RightColumn2() fyne.CanvasObject {
 			rightColumnScrollable.Offset.Y = maxScroll / 2
 			rightColumnScrollable.Refresh()
 
-		} else if p.Y == maxScroll && !variable.GetItemsAdded() && !variable.GetResultSearch() {
+		} else if p.Y == maxScroll && !variable.ItemsAdded && !variable.ResultSearch {
 			return
-		} else if p.Y == maxScroll && variable.GetItemsAdded() && !variable.GetResultSearch() {
+		} else if p.Y == maxScroll && variable.ItemsAdded && !variable.ResultSearch {
 
-			variable.IncrementCurrentPage()
+			variable.CurrentPage++
 			mi.UpdatePage()
 			rightColumnScrollable.Offset.Y = maxScroll / 2
 
