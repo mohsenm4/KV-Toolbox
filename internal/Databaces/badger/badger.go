@@ -56,17 +56,12 @@ func (b *badgerDatabase) Get(key []byte) ([]byte, error) {
 }
 
 func (b *badgerDatabase) Delete(key []byte) error {
-	b.db.Update(func(txn *badger.Txn) error {
-		err := txn.Delete(key)
-		if err != nil {
-			return err
-		}
-		return nil
+	return b.db.Update(func(txn *badger.Txn) error {
+		return txn.Delete(key)
 	})
-	return nil
 }
 
-func (c *badgerDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVData) {
+func (c *badgerDatabase) Read(start, end *[]byte, count int) ([]dbpak.KVData, error) {
 	var items []dbpak.KVData
 	var opts badger.IteratorOptions
 	opts.PrefetchSize = count
@@ -84,6 +79,9 @@ func (c *badgerDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVD
 		if end != nil && start == nil {
 			iter.Seek(*end)
 			iter.Next()
+			if !iter.Valid() {
+				return nil
+			}
 			item := iter.Item()
 			key := item.Key()
 			for iter.Seek(key); iter.Valid(); iter.Next() {
@@ -146,13 +144,13 @@ func (c *badgerDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVD
 		return nil
 	})
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
-	return nil, items
+	return items, nil
 }
 
-func (l *badgerDatabase) Search(valueEntry []byte) (error, [][]byte) {
+func (l *badgerDatabase) Search(valueEntry []byte) ([][]byte, error) {
 	var data [][]byte
 	var opts badger.IteratorOptions
 
@@ -176,7 +174,7 @@ func (l *badgerDatabase) Search(valueEntry []byte) (error, [][]byte) {
 		return nil
 	})
 	if err != nil {
-		return err, data
+		return data, err
 	}
-	return nil, data
+	return data, nil
 }

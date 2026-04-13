@@ -5,7 +5,7 @@ import (
 	"DatabaseDB/internal/ui/labelkv"
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -64,7 +64,7 @@ func (m *MainWindow2) ImageShow(key []byte, value []byte, types string) {
 				fmt.Println("Error opening folder or no folder selected")
 				return
 			}
-			valueFinish, err := ioutil.ReadAll(dir)
+			valueFinish, err := io.ReadAll(dir)
 			if err != nil {
 				fmt.Print("Error reading file:", err)
 				return

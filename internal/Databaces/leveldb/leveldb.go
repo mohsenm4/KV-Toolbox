@@ -53,7 +53,7 @@ func (l *LeveldbDatabase) Add(key, value []byte) error {
 
 func (l *LeveldbDatabase) Get(key []byte) ([]byte, error) {
 	if l.DB == nil {
-		return nil, nil
+		return nil, dberr.ErrDBNil
 	}
 	data, err := l.DB.Get(key, nil)
 	if err != nil {
@@ -65,7 +65,7 @@ func (l *LeveldbDatabase) Get(key []byte) ([]byte, error) {
 	return data, err
 }
 
-func (c *LeveldbDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVData) {
+func (c *LeveldbDatabase) Read(start, end *[]byte, count int) ([]dbpak.KVData, error) {
 	var Item []dbpak.KVData
 
 	readRange := &util.Range{}
@@ -131,21 +131,21 @@ func (c *LeveldbDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KV
 		}
 	}
 
-	return nil, Item
+	return Item, nil
 }
 
-func (l *LeveldbDatabase) Search(valueEntry []byte) (error, [][]byte) {
+func (l *LeveldbDatabase) Search(valueEntry []byte) ([][]byte, error) {
 	var data [][]byte
 
 	Iterator := l.DB.NewIterator(nil, nil)
 	defer Iterator.Release()
 
 	if Iterator == nil {
-		return fmt.Errorf("iterator is nil"), data
+		return data, fmt.Errorf("iterator is nil")
 	}
 
 	if !Iterator.First() {
-		return fmt.Errorf("iterator is empty"), data
+		return data, fmt.Errorf("iterator is empty")
 	}
 
 	for Iterator.Valid() {
@@ -163,7 +163,7 @@ func (l *LeveldbDatabase) Search(valueEntry []byte) (error, [][]byte) {
 		}
 	}
 
-	return nil, data
+	return data, nil
 }
 
 func FormatKeyValue(item dbpak.KVData) (string, string) {
