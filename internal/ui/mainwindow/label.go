@@ -155,7 +155,7 @@ func (r *MainWindow2) prepareEditArea() {
 
 func (r *MainWindow2) processValue(key []byte) ([]byte, string, error) {
 
-	value, err := variable.GetCurrentDBClient().Get(key)
+	value, err := variable.CurrentDBClient.Get(key)
 	if err != nil && err != dberr.ErrKeyNotFound {
 		return nil, "", err
 	}

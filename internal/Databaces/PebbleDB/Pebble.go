@@ -45,7 +45,7 @@ func (p *PebbleDatabase) Add(key, value []byte) error {
 
 func (p *PebbleDatabase) Get(key []byte) ([]byte, error) {
 	if p.DB == nil {
-		return nil, dberr.ErrDBNil
+		return nil, nil
 	}
 
 	value, closer, err := p.DB.Get([]byte(key))
@@ -63,7 +63,7 @@ func (p *PebbleDatabase) Get(key []byte) ([]byte, error) {
 	return data, nil
 }
 
-func (p *PebbleDatabase) Read(start, end *[]byte, count int) ([]dbpak.KVData, error) {
+func (p *PebbleDatabase) Read(start, end *[]byte, count int) (error, []dbpak.KVData) {
 	var Item []dbpak.KVData
 
 	iterOptions := &pebble.IterOptions{}
@@ -77,7 +77,7 @@ func (p *PebbleDatabase) Read(start, end *[]byte, count int) ([]dbpak.KVData, er
 
 	iter, err := p.DB.NewIter(iterOptions)
 	if err != nil {
-		return Item, err
+		return err, Item
 	}
 	defer iter.Close()
 
@@ -138,20 +138,20 @@ func (p *PebbleDatabase) Read(start, end *[]byte, count int) ([]dbpak.KVData, er
 		}
 	}
 
-	return Item, nil
+	return nil, Item
 }
 
-func (l *PebbleDatabase) Search(valueEntry []byte) ([][]byte, error) {
+func (l *PebbleDatabase) Search(valueEntry []byte) (error, [][]byte) {
 	var data [][]byte
 
 	Iterator, err := l.DB.NewIter(nil)
 	if err != nil {
-		return data, err
+		return err, data
 	}
 
 	defer Iterator.Close()
 	if !Iterator.First() {
-		return data, fmt.Errorf("iterator is empty")
+		return fmt.Errorf("iterator is empty"), data
 	}
 
 	for Iterator.Valid() {
@@ -169,5 +169,5 @@ func (l *PebbleDatabase) Search(valueEntry []byte) ([][]byte, error) {
 		}
 	}
 
-	return data, nil
+	return nil, data
 }

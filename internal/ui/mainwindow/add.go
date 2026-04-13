@@ -2,7 +2,7 @@ package mainwindow
 
 import (
 	"DatabaseDB/internal/logic"
-	"io"
+	"io/ioutil"
 	"log"
 
 	"fyne.io/fyne/v2"
@@ -39,7 +39,7 @@ func (mw *MainWindow2) OpenAddDialog() {
 
 			filename := reader.URI().Name()
 
-			fileData, err = io.ReadAll(reader)
+			fileData, err = ioutil.ReadAll(reader)
 			if err != nil {
 				log.Println("Error reading file:", err)
 				return
